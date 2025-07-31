@@ -27,10 +27,10 @@ namespace Team1.VitalBridge.BackStage.Models.Services
         {
             var entity = _repositary.GetAll()
                 .OrderBy(pair => pair.ContentType.DisplayOrder)
-                .OrderBy(pair => pair.ContentCategory.ParentCategory != null
+                .ThenBy(pair => pair.ContentCategory.ParentCategory != null
                      ? pair.ContentCategory.ParentCategory.DisplayOrder
                      : int.MinValue)
-                    .ThenBy(pair => pair.ContentCategory.DisplayOrder);
+                .ThenBy(pair => pair.ContentCategory.DisplayOrder);
 
             return entity.Select(pair => new ContentTypeCategoryPairDisplayDTO
             {

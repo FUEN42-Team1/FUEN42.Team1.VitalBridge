@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.BackStage.Models.ViewModels;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
@@ -976,4 +977,6 @@ public partial class AppDbContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+public DbSet<Team1.VitalBridge.BackStage.Models.ViewModels.ContentTypeCategoryPairDisplayViewModel> ContentTypeCategoryPairDisplayViewModel { get; set; } = default!;
 }

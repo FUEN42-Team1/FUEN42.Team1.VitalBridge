@@ -26,6 +26,13 @@
 
     public class ContentTypeCategoryPairCreateDTO
     {
+        public int ContentTypeId { get; set; }
+        public int? ContentCategoryId { get; set; } // Nullable, as a new category might be created
+        public string? NewCategoryName { get; set; } // Nullable, as a new category might be created
+        public int? NewCategoryParentCategoryId { get; set; } // Nullable, as a new category might not have a parent
+        public bool IsNewCategoryEnabled { get; set; } = true; // Default to true
+        public int NewCategoryDisplayOrder { get; set; } = 0; // Default to 0
+        public bool IsEnabled { get; set; } = true; // Default to true
     }
 
     public class ContentTypeCategoryPairEditDTO
