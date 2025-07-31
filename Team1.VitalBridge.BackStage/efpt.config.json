@@ -1,0 +1,357 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "AppDbContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": null,
+   "OutputPath": "Models\\EFModels",
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "Team1.VitalBridge.BackStage",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[dbo].[AdminPermissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AdminRolePermissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AdminRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AdminUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[AdminUsersRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CareRecipientHealthConditions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CareRecipients]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CartItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Carts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Categories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Citys]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Comments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ContentCategories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Contents]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ContentTypeCategoryPairs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ContentTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CouponRecord]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Coupons]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EmergencyContacts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EventImages]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EventParticipants]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Events]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EventStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ExternalLogins]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Favorites]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FeatureServices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FileStream]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[HealthConditions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionImages]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionPermissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionRolePermissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Institutions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionUserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InstitutionUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Logs]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[LogTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Medias]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MediaTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MyFileTable]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Notifys]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[NotifysCategory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[NotifyUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderRecipents]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Orders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderShipMethod]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrederStatusItem]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationCertificationRequests]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationFeatureServices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationRooms]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Organizations]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationServiceTargets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationSubsidyInfos]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrganizationTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Payment]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PaymentMethods]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Permissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Plate]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PlateImage]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductCategories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductImages]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductNote]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Products]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ProductShips]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RolePermissions]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Roles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RoomTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ServiceTargets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ShippingRules]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Ships]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ShopHomePageBanners]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SubsidyInfos]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Townships]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserCareRecipients]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Users]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": false,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false
+}
