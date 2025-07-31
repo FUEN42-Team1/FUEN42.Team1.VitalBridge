@@ -1,0 +1,129 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.AdminPlateViewModel>
+
+@{
+    ViewBag.Title = "廣告板塊管理";
+}
+
+<h2 class="text-center fw-bold mb-4">📋 廣告板塊管理</h2>
+
+<table class="table table-hover align-middle text-center">
+    <thead class="table-success">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Id)</th>
+            <th>@Html.DisplayNameFor(model => model.Name)</th>
+            <th>@Html.DisplayNameFor(model => model.Route)</th>
+            <th>@Html.DisplayNameFor(model => model.Enable)</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td class="fw-semibold">@item.Name</td>
+                <td class="text-muted"><a href="@item.Route">@item.Route</a></td>
+                <td>
+                    <div class="form-check form-switch justify-content-center d-flex">
+                        <input type="checkbox"
+                               class="form-check-input toggle-enable"
+                               data-id="@item.Id"
+                        @(item.Enable ? "checked" : "") />
+                    </div>
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("EditPlate", new { id = item.Id })" class="btn btn-outline-warning btn-sm">編輯</a>
+                        <button type="button" class="btn btn-outline-info btn-sm preview-btn btn-show" data-id="@item.Id" data-route="@item.Route">預覽</button>
+                        <a href="#" class="btn btn-outline-danger btn-sm delete-btn" data-id="@item.Id">刪除</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="text-center mb-3">
+    <a href="@Url.Action("CreatePlate")" class="btn btn-outline-success btn-lg fw-bold">
+        <i class="bi bi-plus-circle me-2"></i> 新增廣告板塊
+    </a>
+</div>
+<div id="preview-container" style="border: 2px dashed #ff6600;  padding: 10px; display: none;">
+    <div style="font-weight: bold; margin-bottom: 8px; color: #333;">預覽畫面</div>
+    <hr />
+    <iframe id="Show" width="100%" height="1000px" style="border: none;"></iframe>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            $(".toggle-enable").change(function () {
+                var plateId = $(this).data("id");
+                var newEnable = $(this).is(":checked");
+
+                $.ajax({
+                    url: '/Api/Adv',
+                    type: 'PUT',
+                    data: { id: plateId, enable: newEnable },
+                    success: function () {
+                        console.log("更新成功");
+                    },
+                    error: function () {
+                        alert("更新失敗，請重試");
+                    }
+                });
+            });
+
+            $('.delete-btn').click(function (e) {
+                e.preventDefault();
+                Swal.fire({
+                  title: "確定要刪除嗎?",
+                  text: "刪除後將無法復原!",
+                  icon: "warning",
+                  showCancelButton: true,
+                  cancelButtonText: "取消",
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "確定"
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                      const plateId = $(this).data('id');
+                      $.ajax({
+                      url: '/Api/Adv',
+                      type: 'DELETE',
+                      data: { id: plateId },
+                      success: function (response) {
+                        Swal.fire({
+                          title: "刪除!",
+                          text: "刪除成功",
+                          icon: "success"
+                        }).then(() => {
+                          location.reload();
+                        });
+                      },
+                      error: function (xhr) {
+                          Swal.fire({
+                          icon: "error",
+                          title: "錯誤",
+                          text: "刪除失敗",
+                        });
+                      }
+                    });
+                  }
+                });
+          });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".btn-show").on('click', function () {
+                const route = $(this).data('route');
+                const show = $("#Show")[0];
+
+                if (route !== "") {
+                    $("#preview-container").show();
+                    show.src = route+"?isIframe=true";
+                }
+            });
+        });
+    </script>
+}

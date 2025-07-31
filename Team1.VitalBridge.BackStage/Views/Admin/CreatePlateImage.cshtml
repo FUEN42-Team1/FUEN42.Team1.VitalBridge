@@ -1,0 +1,83 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.CreatePlateImageViewModel
+
+@{
+    ViewData["Title"] = "新增廣告";
+}
+
+<h1>新增廣告</h1>
+
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form asp-action="CreatePlateImage" class="p-4 border rounded shadow-sm bg-light">
+            <h4 class="mb-4 text-center">新增圖片資訊</h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" name="PlateId" value="@ViewBag.PlateId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Introduct" class="form-label fw-bold"></label>
+                <input asp-for="Introduct" class="form-control" placeholder="輸入介紹內容" />
+                <span asp-validation-for="Introduct" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageUrl" class="form-label fw-bold"></label>
+                <input asp-for="ImageUrl" class="form-control" id="image" readonly />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StartDate" class="form-label fw-bold"></label>
+                    <input asp-for="StartDate" class="form-control" type="date" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="EndDate" class="form-label fw-bold"></label>
+                    <input asp-for="EndDate" class="form-control" type="date" />
+                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ClickUrl" class="form-label fw-bold"></label>
+                <input asp-for="ClickUrl" class="form-control" placeholder="點擊導向的 URL" />
+                <span asp-validation-for="ClickUrl" class="text-danger"></span>
+            </div>
+            <div class="input-group mb-3">
+                <input type="file" class="form-control" id="fileInput">
+                <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+            </div>
+
+            <div class="text-end">
+                <button type="button" class="btn btn-danger px-4" onclick="window.history.back()">取消</button>
+                <input type="submit" value="確認" class="btn btn-success px-4" />
+            </div>
+        </form>
+        <div id="result"></div>
+    </div>
+    <div class="col-md-6">
+        <div>
+            <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+		$(document).ready(function () {
+			var fileInput = $("#fileInput");
+			var showImage = $("#showimage");
+			var resultDiv = $("#result");
+			var image = $("#image");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+		});
+    </script>
+}

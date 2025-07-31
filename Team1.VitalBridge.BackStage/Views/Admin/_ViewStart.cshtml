@@ -1,5 +1,6 @@
 ﻿@{
     Layout = "_Layout";
+    // 判斷是否是 iframe 請求（用 QueryString 或 Header）
     var isIframe = Context.Request.Query["isIframe"].ToString().ToLower() == "true";
     if (isIframe)
     {

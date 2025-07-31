@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 樂齡橋</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/adv.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <div class="d-flex justify-content-center align-items-center gap-3 my-4">
+            <button id="prevDay" class="btn btn-primary">&larr;</button>
+            <input type="date" id="publishDate" class="form-control w-auto" />
+            <button id="nextDay" class="btn btn-primary">&rarr;</button>
+        </div>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - FUEN42.Shopping.FrontEnd - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/LoadPlate.js"></script>
+    <script>
+        function adjustDate(days) {
+          let dateInput = $('#publishDate');
+          let currentDate = dateInput.val() ? new Date(dateInput.val()) : new Date();
+          currentDate.setDate(currentDate.getDate() + days);
+
+          let yyyy = currentDate.getFullYear();
+          let mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+          let dd = String(currentDate.getDate()).padStart(2, '0');
+          dateInput.val(`${yyyy}-${mm}-${dd}`).trigger('change');
+        }
+
+        // 左右箭頭事件
+        $('#prevDay').click(() => adjustDate(-1));
+        $('#nextDay').click(() => adjustDate(1));
+    </script>
+    <script>
+             $(document).ready(function () {
+
+            let today = new Date().toISOString().slice(0, 10);
+            $('#publishDate').val(today);
+            loadAdsByDate(today);
+
+            $('#publishDate').on('change', function () {
+                const selectedDate = $(this).val();
+                loadAdsByDate(selectedDate);
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

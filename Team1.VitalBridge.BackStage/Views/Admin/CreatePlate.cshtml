@@ -1,0 +1,187 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.AddBoxViewModel
+
+@{
+    ViewData["Title"] = "新增廣告位置";
+}
+
+<h1>新增廣告輪播板塊</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="createPlate" class="p-4 bg-light rounded shadow-sm">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Name" class="form-label fw-bold"></label>
+                        <input asp-for="Name" class="form-control" placeholder="請輸入名稱" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Location" class="form-label fw-bold"></label>
+                        <input asp-for="Location" class="form-control" readonly />
+                        <span asp-validation-for="Location" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Route" class="form-label fw-bold"></label>
+                        <input asp-for="Route" class="form-control" id="routeInput"/>
+                        <span asp-validation-for="Route" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="DefualImageUrl" class="form-label fw-bold"></label>
+                        <input asp-for="DefualImageUrl" class="form-control" id="image" readonly />
+                        <span asp-validation-for="DefualImageUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="DefualImageClickUrl" class="form-label fw-bold"></label>
+                        <input asp-for="DefualImageClickUrl" class="form-control" placeholder="點擊後導向網址" />
+                        <span asp-validation-for="DefualImageClickUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="DefualImageIntroduct" class="form-label fw-bold"></label>
+                        <input asp-for="DefualImageIntroduct" class="form-control" placeholder="圖片介紹文字" />
+                        <span asp-validation-for="DefualImageIntroduct" class="text-danger small"></span>
+                    </div>
+
+                </div>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" id="fileInput">
+                    <button type="button" class="btn btn-outline-primary" id="upload">上傳圖片</button>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="button" class="btn btn-danger px-4" onclick="window.history.back()">取消</button>
+                <input type="submit" value="確認" class="btn btn-success px-4" />
+            </div>
+        </form>
+        <div id="result"></div>
+    </div>
+    <div class="col-md-4">
+        <div>
+            <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+        </div>
+    </div>
+</div>
+<div style="border: 2px dashed #ff6600;  padding: 10px;">
+    <div style="font-weight: bold; margin-bottom: 8px; color: #333;">預覽畫面</div>
+    <hr />
+    <iframe id="Show" width="100%" height="500px" style="border: none;"></iframe>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#routeInput").on('blur', function () {
+                const route = this.value.trim();
+                const show = $("#Show")[0];
+
+                if (route !== "") {
+                    show.onload = function () {
+                        const iframeDoc = show.contentDocument || show.contentWindow.document;
+
+                        // 注入 getUniqueSelector 與 click 事件
+                        
+                        const script = iframeDoc.createElement("script");
+                        //if (classList) selector += "." + classList; 取消這段
+                        script.text = `
+                            function getUniqueSelector(el) {
+                                if (!el) return "";
+                                let path = [];
+                                while (el && el.nodeType === Node.ELEMENT_NODE) {
+                                    let selector = el.nodeName.toLowerCase();
+                                    if (el.id) {
+                                        selector += "#" + el.id;
+                                        path.unshift(selector);
+                                        break;
+                                    }
+                                    if (el.className && typeof el.className === "string") {
+                                        const classList = el.className.trim().split(/\\s+/).join(".");
+                                    }
+                                    const siblings = Array.from(el.parentNode.children).filter(e => e.nodeName === el.nodeName);
+                                    if (siblings.length > 1) {
+                                        const index = siblings.indexOf(el) + 1;
+                                        selector += \`:nth-of-type(\${index})\`;
+                                    }
+                                    path.unshift(selector);
+                                    el = el.parentNode;
+                                }
+                                return path.join(" > ");
+                            }
+
+                            document.addEventListener("click", function (e) {
+                                e.preventDefault();
+                                const element = e.target;
+                                if (element.id === "Preview" || element.closest("#Preview")) return;
+                                const selector = getUniqueSelector(element);
+                                console.log("Element:", element);
+                                console.log("選擇器路徑：", selector);
+                                    // 找出目標元素
+                            const target = document.querySelector(selector);
+                            if (!target) return;
+                                const existingBlock = document.getElementById("Preview");
+                                if (existingBlock) {
+                                existingBlock.remove();
+                                }
+
+                                const block = document.createElement("div");
+                                block.id = "Preview";
+                                block.textContent = "廣告位置";
+                                block.style.width = "100%";
+                                block.style.height = "50px"; // 可調整高度
+                                block.style.marginTop = "5px";
+                                block.style.border = "2px dashed #ff6600"; // 橘色虛線邊框
+                                block.style.backgroundColor = "#fffbe6"; // 淡黃色底讓文字清楚
+                                block.style.color = "#333";
+                                block.style.display = "flex";
+                                block.style.alignItems = "center";
+                                block.style.justifyContent = "center";
+                                block.style.fontWeight = "bold";
+                                block.style.fontSize = "16px";
+
+                                target.insertAdjacentElement("afterend", block);
+
+
+                            // 插入在目標元素後方
+                            target.insertAdjacentElement("afterend", block);
+                                // 🧠 將 selector 填入主頁 Location 欄位
+                        // 使用 window.parent 取到外層 DOM
+                        const locationInput = window.parent.document.querySelector('input[name="Location"]');
+                        if (locationInput) {
+                            locationInput.value = selector;
+                        }
+
+
+                            });
+                        `;
+                        iframeDoc.head.appendChild(script);
+                    };
+
+                    show.src = route;
+                }
+            });
+        });
+    </script>
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileInput = $("#fileInput");
+            var showImage = $("#showimage");
+            var resultDiv = $("#result");
+            var image = $("#image");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+        });
+    </script>
+
+}

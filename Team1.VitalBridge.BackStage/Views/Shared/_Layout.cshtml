@@ -297,6 +297,21 @@
 
                             </ul>
                         </li>
+                        <!--廣告輪播-->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
+                               aria-expanded="false"><i class="mdi mdi-receipt"></i><span class="hide-menu">廣告輪播管理 </span></a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a class="sidebar-link" asp-area="" asp-controller="Admin" asp-action="AdminPlate">
+                                        <i class="mdi mdi-note-outline"></i><span class="hide-menu">
+                                            廣告輪播板塊管理
+                                        </span>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
 
 
                         @* 這是沒有折疊 *@
@@ -352,6 +367,15 @@
     <script src="~/matrix-admin/dist/js/sidebarmenu.js"></script>
     <!--Custom JavaScript -->
     <script src="~/matrix-admin/dist/js/custom.min.js"></script>
+
+    <!-- 廣告 後台管理不看廣告可刪除 -->
+    <script src="~/js/LoadPlate.js"></script>
+    <script>
+        $(document).ready(function () {
+            LoadPlateByNow();
+        });
+    </script>
+    <!-- 廣告 後台管理不看廣告可刪除 -->
 
     <!-- 這邊在mvc 的layout 要用Render語法 -->
     @RenderSection("Scripts", required: false)
