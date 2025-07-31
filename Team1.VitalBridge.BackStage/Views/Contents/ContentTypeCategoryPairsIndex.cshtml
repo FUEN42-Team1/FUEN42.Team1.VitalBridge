@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ContentTypeCategoryPairDisplayViewModel>
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+@{
+    ViewData["Title"] = "ContentTypeCategoryPairsIndex";
+}
+<div class="container">
+    <h1>ContentTypeCategoryPairsIndex</h1>
+
+    <p>
+        <a href="/Contents/CreateContentTypeCategoryPair">Create New</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContentTypeName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContentTypeDisplayOrder)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ParentContentCategoryName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ParentContentCategoryDisplayOrder)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContentCategoryName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ContentCategoryDisplayOrder)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsEnabledStatus)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContentTypeName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContentTypeDisplayOrder)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ParentContentCategoryName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ParentContentCategoryDisplayOrder)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContentCategoryName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ContentCategoryDisplayOrder)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsEnabledStatus)
+                    </td>
+                    <td>
+                        <a href="/Contents/TestingEditContentTypeCategoryPairs/@item.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@* 
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>@Html.DisplayNameFor(m => m[0].ContentTypeName)</th>
+            <th>@Html.DisplayNameFor(m => m[0].ContentTypeDisplayOrder)</th>
+            <th>@Html.DisplayNameFor(m => m[0].ParentContentCategoryName)</th>
+            <th>@Html.DisplayNameFor(m => m[0].ParentContentCategoryDisplayOrder)</th>
+            <th>@Html.DisplayNameFor(m => m[0].ContentCategoryName)</th>
+            <th>@Html.DisplayNameFor(m => m[0].ContentCategoryDisplayOrder)</th>
+            <th>@Html.DisplayNameFor(m => m[0].IsEnabledStatus)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.ContentTypeName</td>
+                <td>@item.ContentTypeDisplayOrder</td>
+                <td>@item.ParentContentCategoryName</td>
+                <td>@item.ParentContentCategoryDisplayOrder</td>
+                <td>@item.ContentCategoryName</td>
+                <td>@item.ContentCategoryDisplayOrder</td>
+                <td>@item.IsEnabledStatus</td>
+            </tr>
+        }
+    </tbody>
+</table> *@
+

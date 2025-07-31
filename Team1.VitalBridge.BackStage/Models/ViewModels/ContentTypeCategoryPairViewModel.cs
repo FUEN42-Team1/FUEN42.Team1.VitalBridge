@@ -19,8 +19,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Display(Name = "Parent Content Category Name")]
         public string ParentContentCategoryName { get; set; }
 
-        [Display(Name = "PCC Order")]
-        public int ParentContentCategoryDisplayOrder { get; set; }
+        [Display(Name = "Parent CC Order")]
+        public int? ParentContentCategoryDisplayOrder { get; set; }
 
         [Display(Name = "Content Category Name")]
         public string ContentCategoryName { get; set; }
@@ -28,7 +28,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Display(Name = "CC Order")]
         public int ContentCategoryDisplayOrder { get; set; }
 
-        [Display(Name = "IsEnabled")]
+        [Display(Name = "Status")]
         public string IsEnabledStatus { get; set; }
     }
 
