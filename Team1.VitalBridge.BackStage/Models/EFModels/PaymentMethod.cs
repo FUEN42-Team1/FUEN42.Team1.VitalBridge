@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Name", Name = "UQ__PaymentM__72E12F1B404C33D8", IsUnique = true)]
+[Index("Name", Name = "UQ__PaymentM__72E12F1B5A28B5E3", IsUnique = true)]
 public partial class PaymentMethod
 {
     [Key]

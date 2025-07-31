@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("EventId", Name = "UQ__Events__2DC7BD08256DBE5D", IsUnique = true)]
+[Index("EventId", Name = "UQ__Events__2DC7BD08E8EA9CA8", IsUnique = true)]
 public partial class Event
 {
     [Key]

@@ -171,7 +171,7 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.Entity<AdminPermission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AdminPer__3213E83F946C5399");
+            entity.HasKey(e => e.Id).HasName("PK__AdminPer__3213E83F30156EC4");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -179,7 +179,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AdminRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AdminRol__3213E83FDA5752C5");
+            entity.HasKey(e => e.Id).HasName("PK__AdminRol__3213E83F8C6DD647");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -187,7 +187,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AdminRolePermission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AdminRol__3213E83F605B7653");
+            entity.HasKey(e => e.Id).HasName("PK__AdminRol__3213E83F2AE96880");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -199,7 +199,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AdminUser>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AdminUse__3213E83F4932F7A6");
+            entity.HasKey(e => e.Id).HasName("PK__AdminUse__3213E83FD6AAA0BC");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -207,7 +207,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<AdminUsersRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__AdminUse__3213E83F9161417B");
+            entity.HasKey(e => e.Id).HasName("PK__AdminUse__3213E83FDF547F99");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -219,7 +219,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CareRecipient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareReci__3213E83F5CB7F1EA");
+            entity.HasKey(e => e.Id).HasName("PK__CareReci__3213E83FE6F288B9");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -233,7 +233,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CareRecipientHealthCondition>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CareReci__3213E83F2F4EF1FA");
+            entity.HasKey(e => e.Id).HasName("PK__CareReci__3213E83FD7FE9574");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -244,7 +244,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Carts__3213E83F6E344068");
+            entity.HasKey(e => e.Id).HasName("PK__Carts__3213E83F243DCBC0");
 
             entity.Property(e => e.CreateAt).HasDefaultValueSql("(getdate())");
 
@@ -255,7 +255,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CartItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CartItem__3213E83F767DB780");
+            entity.HasKey(e => e.Id).HasName("PK__CartItem__3213E83F3709E441");
 
             entity.Property(e => e.AddAt).HasDefaultValueSql("(getdate())");
 
@@ -270,7 +270,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83F1F959294");
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3213E83FBF28C199");
 
             entity.ToTable(tb => tb.HasTrigger("TR_Categories_ParentChildActiveSync"));
 
@@ -279,12 +279,12 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<City>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Citys__3213E83F6B1868CC");
+            entity.HasKey(e => e.Id).HasName("PK__Citys__3213E83F73792AD6");
         });
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comments__3213E83F7F401740");
+            entity.HasKey(e => e.Id).HasName("PK__Comments__3213E83FCCD2F9CD");
 
             entity.HasOne(d => d.ContentNavigation).WithMany(p => p.Comments)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -295,7 +295,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Content>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Contents__3213E83F24B1732B");
+            entity.HasKey(e => e.Id).HasName("PK__Contents__3213E83F19E909C1");
 
             entity.HasOne(d => d.ContentCategory).WithMany(p => p.Contents)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -308,19 +308,19 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ContentCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ContentC__3213E83F8D7FEA72");
+            entity.HasKey(e => e.Id).HasName("PK__ContentC__3213E83F6C8F78BA");
 
             entity.HasOne(d => d.ParentCategory).WithMany(p => p.InverseParentCategory).HasConstraintName("FK__ContentCa__paren__73BA3083");
         });
 
         modelBuilder.Entity<ContentType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ContentT__3213E83F66747698");
+            entity.HasKey(e => e.Id).HasName("PK__ContentT__3213E83FF24F7494");
         });
 
         modelBuilder.Entity<ContentTypeCategoryPair>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ContentT__3213E83F5BB23F4B");
+            entity.HasKey(e => e.Id).HasName("PK__ContentT__3213E83F5F5539D0");
 
             entity.HasOne(d => d.ContentCategory).WithMany(p => p.ContentTypeCategoryPairs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -333,7 +333,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Coupon>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Coupons__3213E83F156D9804");
+            entity.HasKey(e => e.Id).HasName("PK__Coupons__3213E83F8873E240");
 
             entity.Property(e => e.CanUseCount).HasDefaultValue(1);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -342,7 +342,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<CouponRecord>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__CouponRe__3213E83FB25652CE");
+            entity.HasKey(e => e.Id).HasName("PK__CouponRe__3213E83FB7445F7B");
 
             entity.Property(e => e.CeatedAt).HasDefaultValueSql("(getdate())");
 
@@ -361,7 +361,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EmergencyContact>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Emergenc__3213E83F36A0BE68");
+            entity.HasKey(e => e.Id).HasName("PK__Emergenc__3213E83F85B28EF2");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -381,7 +381,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Event>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Events__3213E83F6741F48A");
+            entity.HasKey(e => e.Id).HasName("PK__Events__3213E83F55C12760");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -397,7 +397,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EventImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EventIma__3213E83F9474E4AF");
+            entity.HasKey(e => e.Id).HasName("PK__EventIma__3213E83FD4CDD023");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -406,7 +406,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EventParticipant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EventPar__3213E83FC31929D7");
+            entity.HasKey(e => e.Id).HasName("PK__EventPar__3213E83FCD783100");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -418,12 +418,12 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<EventStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__EventSta__3213E83FAE636961");
+            entity.HasKey(e => e.Id).HasName("PK__EventSta__3213E83F1BFB64AD");
         });
 
         modelBuilder.Entity<ExternalLogin>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__External__3213E83FAC148369");
+            entity.HasKey(e => e.Id).HasName("PK__External__3213E83F6EB6EB9C");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -433,7 +433,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Favorite>(entity =>
         {
-            entity.HasKey(e => new { e.CustomerId, e.ProductId }).HasName("PK__Favorite__04C0C66BB89510E6");
+            entity.HasKey(e => new { e.CustomerId, e.ProductId }).HasName("PK__Favorite__04C0C66BDBF18C6F");
 
             entity.Property(e => e.FavoritedAt).HasDefaultValueSql("(getdate())");
 
@@ -448,19 +448,19 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<FeatureService>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FeatureS__3213E83FF393139A");
+            entity.HasKey(e => e.Id).HasName("PK__FeatureS__3213E83F83DD3FA2");
 
             entity.HasOne(d => d.File).WithMany(p => p.FeatureServices).HasConstraintName("FK__FeatureSe__FileI__06CD04F7");
         });
 
         modelBuilder.Entity<FileStream>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FileStre__3213E83FA4D16EE1");
+            entity.HasKey(e => e.Id).HasName("PK__FileStre__3213E83F8A3799CB");
         });
 
         modelBuilder.Entity<HealthCondition>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__HealthCo__3213E83F6DC56AA1");
+            entity.HasKey(e => e.Id).HasName("PK__HealthCo__3213E83F7B0AD3B4");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -468,7 +468,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Institution>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FAB6566CE");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F180450B6");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -484,7 +484,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F92800D2F");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FD5369928");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -493,7 +493,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionPermission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FAC0B2725");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FD749457D");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -501,7 +501,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FA6BDDED5");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F11659245");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -509,7 +509,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionRolePermission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F6D311E03");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FD748C395");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -521,7 +521,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionUser>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FAB6F537C");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F3C0BBC0B");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -531,7 +531,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<InstitutionUserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83F2BDB99D7");
+            entity.HasKey(e => e.Id).HasName("PK__Institut__3213E83FB449C5FA");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -543,7 +543,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Log>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Logs__3213E83F67C96122");
+            entity.HasKey(e => e.Id).HasName("PK__Logs__3213E83F26EA3C8C");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -554,7 +554,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<LogType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__LogTypes__3213E83FD52202B1");
+            entity.HasKey(e => e.Id).HasName("PK__LogTypes__3213E83F1D941599");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -562,7 +562,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Media>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Medias__3213E83F9B907FC5");
+            entity.HasKey(e => e.Id).HasName("PK__Medias__3213E83F004B3572");
 
             entity.HasOne(d => d.Content).WithMany(p => p.Media).HasConstraintName("FK__Medias__contentI__7A672E12");
 
@@ -577,12 +577,12 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<MediaType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MediaTyp__3213E83F735CD1B6");
+            entity.HasKey(e => e.Id).HasName("PK__MediaTyp__3213E83FA62ED093");
         });
 
         modelBuilder.Entity<Notify>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Notifys__3213E83FBC8CE929");
+            entity.HasKey(e => e.Id).HasName("PK__Notifys__3213E83F31C5BCEC");
 
             entity.HasOne(d => d.Categories).WithMany(p => p.Notifies)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -591,7 +591,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<NotifyUser>(entity =>
         {
-            entity.HasKey(e => new { e.NotifyId, e.UserId }).HasName("PK__NotifyUs__56C7540923DA0F00");
+            entity.HasKey(e => new { e.NotifyId, e.UserId }).HasName("PK__NotifyUs__56C754094C15ACB6");
 
             entity.HasOne(d => d.Notify).WithMany(p => p.NotifyUsers).HasConstraintName("FK__NotifyUse__notif__656C112C");
 
@@ -600,14 +600,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<NotifysCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__NotifysC__3213E83F8C4675AD");
+            entity.HasKey(e => e.Id).HasName("PK__NotifysC__3213E83F30FDCDE6");
 
             entity.Property(e => e.Enable).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Orders__3213E83F19C138BF");
+            entity.HasKey(e => e.Id).HasName("PK__Orders__3213E83FB8E1B2A9");
 
             entity.ToTable(tb => tb.HasTrigger("TR_Orders_UpdateAt"));
 
@@ -624,7 +624,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderIte__3213E83F900DDB9D");
+            entity.HasKey(e => e.Id).HasName("PK__OrderIte__3213E83FD1EA2FF5");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -637,7 +637,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrderRecipent>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderRec__3213E83F38FFF7F8");
+            entity.HasKey(e => e.Id).HasName("PK__OrderRec__3213E83F46EB9898");
 
             entity.HasOne(d => d.Order).WithOne(p => p.OrderRecipent)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -646,7 +646,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrderShipMethod>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderShi__3213E83F857385EA");
+            entity.HasKey(e => e.Id).HasName("PK__OrderShi__3213E83F1F1A0463");
 
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
 
@@ -665,7 +665,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrderStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3213E83FA06350DA");
+            entity.HasKey(e => e.Id).HasName("PK__OrderSta__3213E83F3174D7F0");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -676,12 +676,12 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrederStatusItem>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__OrederSt__3213E83F87F38F9D");
+            entity.HasKey(e => e.Id).HasName("PK__OrederSt__3213E83FB3D88360");
         });
 
         modelBuilder.Entity<Organization>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FC1FE790F");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FBC1C46BD");
 
             entity.HasOne(d => d.City).WithMany(p => p.Organizations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -698,7 +698,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationCertificationRequest>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F46FA6CD9");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F17A9D1B1");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationCertificationRequests)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -707,7 +707,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationFeatureService>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F08D5A832");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FB1DE9D00");
 
             entity.HasOne(d => d.FeatureService).WithMany(p => p.OrganizationFeatureServices)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -720,7 +720,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationRoom>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F98164793");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FA66925C7");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationRooms).HasConstraintName("FK__Organizat__organ__208CD6FA");
 
@@ -729,7 +729,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationServiceTarget>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FD831ECC3");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FD65FD26B");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationServiceTargets)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -742,7 +742,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationSubsidyInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83FC5E8A399");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F09A12BF3");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.OrganizationSubsidyInfos)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -755,12 +755,12 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<OrganizationType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F4697E31B");
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3213E83F01E74461");
         });
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payment__3213E83F8A4FD99C");
+            entity.HasKey(e => e.Id).HasName("PK__Payment__3213E83FF4033906");
 
             entity.ToTable("Payment", tb => tb.HasTrigger("TR_Payment_UpdateAt"));
 
@@ -778,14 +778,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3213E83F4C8F8438");
+            entity.HasKey(e => e.Id).HasName("PK__PaymentM__3213E83F79861ADB");
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Permission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Permissi__3213E83F986EA75B");
+            entity.HasKey(e => e.Id).HasName("PK__Permissi__3213E83FA45A61CF");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -793,7 +793,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Plate>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Plate__3213E83FDBD02282");
+            entity.HasKey(e => e.Id).HasName("PK__Plate__3213E83FB589359C");
 
             entity.Property(e => e.Enable).HasDefaultValue(true);
 
@@ -804,7 +804,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<PlateImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PlateIma__3213E83FF1F1FA02");
+            entity.HasKey(e => e.Id).HasName("PK__PlateIma__3213E83FC5260051");
 
             entity.HasOne(d => d.ImageFile).WithMany(p => p.PlateImages).HasConstraintName("FK__PlateImag__image__6C190EBB");
 
@@ -813,7 +813,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Products__3213E83FBAF9BFA9");
+            entity.HasKey(e => e.Id).HasName("PK__Products__3213E83F3E0645F6");
 
             entity.ToTable(tb => tb.HasTrigger("TR_products_UpdateAt"));
 
@@ -823,7 +823,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductC__3213E83F3290B9EE");
+            entity.HasKey(e => e.Id).HasName("PK__ProductC__3213E83F2ADBBEB9");
 
             entity.HasOne(d => d.Category).WithMany(p => p.ProductCategories)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -836,7 +836,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ProductImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductI__3213E83F38F1FE44");
+            entity.HasKey(e => e.Id).HasName("PK__ProductI__3213E83F325CBA26");
 
             entity.Property(e => e.SortOrder).HasDefaultValue(2);
 
@@ -847,14 +847,14 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ProductNote>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductN__3213E83F3B698380");
+            entity.HasKey(e => e.Id).HasName("PK__ProductN__3213E83F402925B3");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<ProductShip>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProductS__3213E83F18D70FBF");
+            entity.HasKey(e => e.Id).HasName("PK__ProductS__3213E83FE97AF470");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductShips)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -867,7 +867,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Roles__3213E83F64F10D53");
+            entity.HasKey(e => e.Id).HasName("PK__Roles__3213E83FADF078F0");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -875,7 +875,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<RolePermission>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RolePerm__3213E83FDF7FDD83");
+            entity.HasKey(e => e.Id).HasName("PK__RolePerm__3213E83FF1A06F3D");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -887,24 +887,24 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3213E83F0C5D0824");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3213E83FB405BD21");
         });
 
         modelBuilder.Entity<ServiceTarget>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ServiceT__3213E83F62A73E84");
+            entity.HasKey(e => e.Id).HasName("PK__ServiceT__3213E83FA594B66D");
         });
 
         modelBuilder.Entity<Ship>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Ships__3213E83F124DCB79");
+            entity.HasKey(e => e.Id).HasName("PK__Ships__3213E83F5DBAEAD9");
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<ShippingRule>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Shipping__3213E83F4B49C634");
+            entity.HasKey(e => e.Id).HasName("PK__Shipping__3213E83F94210E32");
 
             entity.ToTable(tb => tb.HasTrigger("TR_ShippingRules_UpdateAt"));
 
@@ -914,7 +914,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ShopHomePageBanner>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ShopHome__3213E83FB9B4E380");
+            entity.HasKey(e => e.Id).HasName("PK__ShopHome__3213E83F4E7F559D");
 
             entity.ToTable(tb => tb.HasTrigger("trg_ShopHomePageBanners_Updated"));
 
@@ -925,19 +925,19 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<SubsidyInfo>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__SubsidyI__3213E83FA6857B15");
+            entity.HasKey(e => e.Id).HasName("PK__SubsidyI__3213E83FBF75FAD0");
         });
 
         modelBuilder.Entity<Township>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Township__3213E83F2F339955");
+            entity.HasKey(e => e.Id).HasName("PK__Township__3213E83FEBF5813F");
 
             entity.HasOne(d => d.City).WithMany(p => p.Townships).HasConstraintName("FK__Townships__cityI__59063A47");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3213E83FDE82658B");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3213E83FC09AD4A7");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
@@ -951,7 +951,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<UserCareRecipient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserCare__3213E83F8C68C676");
+            entity.HasKey(e => e.Id).HasName("PK__UserCare__3213E83FF6C9B3A1");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
@@ -962,7 +962,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserRole__3213E83FB09A41AA");
+            entity.HasKey(e => e.Id).HasName("PK__UserRole__3213E83FC937B0DC");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");

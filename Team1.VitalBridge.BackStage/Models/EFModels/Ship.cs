@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("ShipMethodName", Name = "UQ__Ships__DC90D6A158D3B64B", IsUnique = true)]
+[Index("ShipMethodName", Name = "UQ__Ships__DC90D6A130A8BC90", IsUnique = true)]
 public partial class Ship
 {
     [Key]

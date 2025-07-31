@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
 [Table("NotifysCategory")]
-[Index("Name", Name = "UQ__NotifysC__72E12F1B5C3F01BD", IsUnique = true)]
+[Index("Name", Name = "UQ__NotifysC__72E12F1BB20E2AD3", IsUnique = true)]
 public partial class NotifysCategory
 {
     [Key]

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("CouponCode", Name = "UQ__Coupons__1D19F4DAF5131DC8", IsUnique = true)]
+[Index("CouponCode", Name = "UQ__Coupons__1D19F4DA1ACE42E9", IsUnique = true)]
 public partial class Coupon
 {
     [Key]
