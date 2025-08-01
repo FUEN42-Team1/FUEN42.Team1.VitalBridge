@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("PermissionCode", Name = "UQ__AdminPer__DF6AE8FF8CBB6B4E", IsUnique = true)]
+[Index("PermissionCode", Name = "UQ__AdminPer__DF6AE8FF692E5D57", IsUnique = true)]
 public partial class AdminPermission
 {
     [Key]
