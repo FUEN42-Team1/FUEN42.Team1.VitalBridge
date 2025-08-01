@@ -31,10 +31,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return View();
         }
 
-        public IActionResult 沒有子項目()
-        {
-            return View();
-        }
+        
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

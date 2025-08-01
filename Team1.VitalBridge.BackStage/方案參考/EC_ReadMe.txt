@@ -1,0 +1,30 @@
+﻿[v] 設定EF Core
+	-建立 EfModels
+	-設定連接字串
+	-註冊 AppDbContext 到 DI 容器
+	-設定 _Layout 的 html_lang value 為 zh-tw
+[todo] 實作 商品分類管理ProductCategory
+	[V]-add ProductCategoryFormViewModel 商品分類
+	-add ProductCategoryController
+	-add 商品全分類頁action &View Page
+	-add 新增分類 action & View Page
+	-add Service (判斷是否重複名稱、自己不能選自己、自己不能選自己子分類)
+	-add Interface,Repository 實際CRUD對資料庫操作
+
+[todo] 實作 商品照ProductImage
+	-add ProductImageViewModel
+	-add ProductImageService (排序邏輯、驗證、CRUD Repository 的業務邏輯)
+	-add Interface , Repository 實際CRUD對資料庫操作
+
+	
+[todo] 實作 商品運送方式Ships
+	-add ShipController
+	-add ShipViewModel
+	-add ShipsService (驗證、CRUD Repository 的業務邏輯)
+	-add Interface , Repository 實際CRUD對資料庫操作
+
+[todo] 實作 商品Products
+	-add ProductController
+	-add ProductCreateViewModel (製作中) / ProductListViewModel
+	-add ProductService (驗證、CRUD Repository 的業務邏輯)
+	-add Interface , Repository 實際CRUD對資料庫操作
