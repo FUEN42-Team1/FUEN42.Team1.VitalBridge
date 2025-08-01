@@ -35,6 +35,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
     public class ContentTypeCategoryPairCreateViewModel
     {
+        [ScaffoldColumn(false)]
+        public int Id { get; set; } // For editing existing pairs, or 0 for new pairs
 
         // For selecting an existing ContentType
         [Display(Name = "Content Type")]

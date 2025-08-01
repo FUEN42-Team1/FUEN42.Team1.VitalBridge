@@ -23,7 +23,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             var entity = new ContentTypeCategoryPair
             {
                 ContentTypeId = dto.ContentTypeId,
-                ContentCategoryId = dto.ContentCategoryId,
+                //ContentCategoryId = dto.ContentCategoryId,
                 IsEnabled = dto.IsEnabled
             };
         }
