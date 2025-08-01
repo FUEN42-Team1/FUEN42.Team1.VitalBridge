@@ -62,7 +62,7 @@ namespace Team1.VitalBridge.BackStage.Models.Service
             if (!string.IsNullOrEmpty(request.Search?.Value))
             {
                 string keyword = request.Search.Value.ToLower();
-                query = query.Where(n => n.Title.ToLower().Contains(keyword) || n.Text.ToLower().Contains(keyword));
+                query = query.Where(n => n.Title!=null && n.Title.ToLower().Contains(keyword) || n.Text!=null && n.Text.ToLower().Contains(keyword) || n.Categories.Name!=null && n.Categories.Name.ToLower().Contains(keyword));
             }
             var columnMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
