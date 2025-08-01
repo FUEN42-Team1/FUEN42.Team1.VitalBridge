@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("RoleCode", Name = "UQ__Roles__44FD4F90F605D5FA", IsUnique = true)]
+[Index("RoleCode", Name = "UQ__Roles__44FD4F90570466A8", IsUnique = true)]
 public partial class Role
 {
     [Key]

@@ -35,6 +35,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
     public class ContentTypeCategoryPairCreateViewModel
     {
+
         // For selecting an existing ContentType
         [Display(Name = "Content Type")]
         [Required(ErrorMessage = "Please select a Content Type.")]
@@ -69,8 +70,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         // the client-side will fetch the data and build the dropdowns.
         // However, it's good practice to have them here for potential server-side rendering
         // or for clarity on what data is expected.
-        public IEnumerable<SelectListItem> AvailableContentTypes { get; set; }
-        public IEnumerable<SelectListItem> AvailableContentCategories { get; set; }
+        //public IEnumerable<SelectListItem> AvailableContentTypes { get; set; }
+        //public IEnumerable<SelectListItem> AvailableContentCategories { get; set; }
     }
 
     public class ContentTypeCategoryPairEditViewModel

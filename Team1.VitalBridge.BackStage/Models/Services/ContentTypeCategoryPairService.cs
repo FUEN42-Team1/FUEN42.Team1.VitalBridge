@@ -1,4 +1,5 @@
 ﻿using Team1.VitalBridge.BackStage.Models.DTOs;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.Repositories;
 
@@ -13,9 +14,18 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             this._repositary = repositary;
         }
 
-        public void Create(ContentTypeCategoryPairCreateDTO contentTypeCategoryPairCreateDTO)
+        public void Create(ContentTypeCategoryPairCreateDTO dto)
         {
-            throw new NotImplementedException();
+            // 確保 ContentTypeId 是有效的
+
+
+            // Convert the DTO to the EF model entity
+            var entity = new ContentTypeCategoryPair
+            {
+                ContentTypeId = dto.ContentTypeId,
+                ContentCategoryId = dto.ContentCategoryId,
+                IsEnabled = dto.IsEnabled
+            };
         }
 
         public void Delete(int id)
@@ -25,6 +35,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
         public IEnumerable<ContentTypeCategoryPairDisplayDTO> GetAll()
         {
+            // This method retrieves all content type-category pairs and orders them by content type display order,
             var entity = _repositary.GetAll()
                 .OrderBy(pair => pair.ContentType.DisplayOrder)
                 .ThenBy(pair => pair.ContentCategory.ParentCategory != null
@@ -32,6 +43,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                      : int.MinValue)
                 .ThenBy(pair => pair.ContentCategory.DisplayOrder);
 
+            // Convert the entity to DTOs for display purposes
             return entity.Select(pair => new ContentTypeCategoryPairDisplayDTO
             {
                 Id = pair.Id,

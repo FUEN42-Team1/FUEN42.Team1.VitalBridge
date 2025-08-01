@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("EmergencyContactId", Name = "UQ__Emergenc__7394A15CC69456E0", IsUnique = true)]
+[Index("EmergencyContactId", Name = "UQ__Emergenc__7394A15CF08D0BEF", IsUnique = true)]
 public partial class EmergencyContact
 {
     [Key]

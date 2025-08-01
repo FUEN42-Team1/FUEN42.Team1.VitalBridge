@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("CustomerId", Name = "UQ__Carts__B611CB7C6850CA46", IsUnique = true)]
+[Index("CustomerId", Name = "UQ__Carts__B611CB7CAF048C0F", IsUnique = true)]
 public partial class Cart
 {
     [Key]

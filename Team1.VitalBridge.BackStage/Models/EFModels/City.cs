@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Name", Name = "UQ__Citys__72E12F1BCD46F394", IsUnique = true)]
+[Index("Name", Name = "UQ__Citys__72E12F1BE5199F37", IsUnique = true)]
 public partial class City
 {
     [Key]
