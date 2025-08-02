@@ -1,0 +1,113 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "會員清單";
+}
+
+<div class="container-fluid px-2">
+    <h2 class="mb-4">會員清單</h2>
+
+    <form method="get">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>狀態</label>
+                <select class="form-select">
+                    <option value="">全部</option>
+                    <option value="active">活躍（正常）</option>
+                    <option value="frozen">凍結（太久沒用）</option>
+                    <option value="unverified">未開通（尚未驗證）</option>
+                    <option value="banned">停權（禁止登入）</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>縣市</label>
+                <select class="form-select">
+                    <option value="">全部</option>
+                    <option value="Taipei">台北市</option>
+                    <option value="Tainan">台南市</option>
+                    <!-- 其他縣市選項 -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>鄉鎮</label>
+                <select class="form-select">
+                    <option value="">全部</option>
+                    <option value="Xinyi">信義區</option>
+                    <option value="Anping">安平區</option>
+                    <!-- 其他鄉鎮選項 -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>搜尋</label>
+                <input type="text" class="form-control" placeholder="請輸入姓名或 Email">
+            </div>
+        </div>
+
+        <div class="row mb-3 justify-content-between align-items-center">
+            <div class="col-auto">
+                <label class="me-2">每頁顯示筆數：</label>
+                <select class="form-select d-inline-block w-auto">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">篩選</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-hover table-bordered align-middle">
+        <thead class="table-primary text-center">
+            <tr>
+                @* <th>會員編號</th> *@
+                <th><a href="#" class="text-decoration-none">姓名 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">Email <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">聯絡電話 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">縣市 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">鄉鎮 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">詳細地址 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">狀態 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">註冊時間 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">最後登入 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    @* <td>@user.UserId</td> *@
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Phone</td>
+                    <td>@user.CityName</td>
+                    <td>@user.TownshipName</td>
+                    <td>@user.Address</td>
+                    <td>
+                        <span class="badge bg-@(user.Status == "active" ? "success" : user.Status == "banned" ? "danger" : user.Status == "unverified" ? "warning text-dark" : "secondary")">
+                            @user.Status
+                        </span>
+                    </td>
+                    <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                    <td class="text-center">
+                        <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-info me-1">詳細</a>
+                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-warning">編輯</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <nav class="d-flex justify-content-center">
+        <ul class="pagination">
+            <li class="page-item disabled"><a class="page-link" href="#">上一頁</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">下一頁</a></li>
+        </ul>
+    </nav>
+</div>
