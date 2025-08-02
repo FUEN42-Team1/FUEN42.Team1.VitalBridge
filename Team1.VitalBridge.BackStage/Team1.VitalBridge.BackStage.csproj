@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\matrix-admin\**" />
+    <Content Remove="wwwroot\matrix-admin\**" />
+    <EmbeddedResource Remove="wwwroot\matrix-admin\**" />
+    <None Remove="wwwroot\matrix-admin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="efpt.config.json.user" />
   </ItemGroup>
 
