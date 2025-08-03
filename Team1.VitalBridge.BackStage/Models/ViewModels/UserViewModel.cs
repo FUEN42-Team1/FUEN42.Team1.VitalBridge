@@ -11,10 +11,13 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
         [Display(Name ="姓名")]
         public string Name { get; set; }
+        [Display(Name = "電子信箱")]
         public string Email { get; set; } 
 
         [Display(Name = "聯絡電話")]
         public string Phone { get; set; }
+
+
 
         [Display(Name = "縣市")]
         public int? CityId { get; set; } // 儲存選取的縣市 ID
@@ -31,6 +34,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Display(Name = "詳細地址")]
         public string? Address { get; set; }
 
+        [Display(Name = "狀態")]
         public string Status { get; set; } // 例如：Active, Inactive, Banned 等
 
         [Display(Name ="註冊時間")]
@@ -45,7 +49,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
 
 
-
-
+        public List<int> SelectedRoleIds { get; set; } = new();
+        public List<string> Roles { get; set; } = new();
     }
 }

@@ -6,3 +6,81 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@* <!-- 進入管理員後台首頁 -->
+<a class="btn btn-primary me-2"
+   asp-controller="Admin"
+   asp-action="Index">
+    Admin Index
+</a>
+
+<!-- 進入機構後台首頁 -->
+<a class="btn btn-outline-primary"
+   asp-controller="Institution"
+   asp-action="Index">
+    Institution Index
+</a> *@
+
+@* 暫時性的東西 
+需要思考我們的首頁導向該怎處理 
+左上icon只能導向一個首頁 
+那我們要怎處理 管理員後台跟機構後台的導向? 
+還是說直接取消icon導向首頁 
+或者紀錄使用者一開始進來的路徑? 
+或者說 分成兩個_Layout 同時也處理導覽列 不用邏輯判斷來顯示項目?
+*@
+
+<!-- Centered neon-gradient buttons with subtle float effect -->
+<div class="d-flex justify-content-center gap-3 my-4">
+    <a asp-controller="Admin" asp-action="Index" class="btn neon-btn float-btn">
+        進入管理員後台
+    </a>
+    <a asp-controller="Institution" asp-action="Index" class="btn neon-btn float-btn">
+        進入機構後台
+    </a>
+</div>
+
+<style>
+    /***** Neon gradient *****/
+    .neon-btn {
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: .4px;
+        background: linear-gradient(120deg,#ff00e1,#00e3ff,#ffbe00,#ff00e1);
+        background-size: 300% 300%;
+        border: none;
+        border-radius: .5rem;
+        animation: neonShift 6s ease infinite;
+        box-shadow: 0 0 4px rgba(255,0,225,.6),0 0 8px rgba(0,227,255,.6);
+    }
+
+    /* Float + shadow enhancement */
+    .float-btn {
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+        .float-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 6px rgba(255,0,225,.7),0 0 14px rgba(0,227,255,.7);
+        }
+
+        .float-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 3px rgba(255,0,225,.5),0 0 8px rgba(0,227,255,.5);
+        }
+
+    /* Animated gradient */
+    @@keyframes neonShift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+</style>

@@ -46,6 +46,12 @@
                     <button type="submit" class="btn btn-warning">寄送重設密碼連結</button>
                 </form>
 
+                <div class="mb-3 text-end">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="quickFill()">
+                        快速填入 (Dev)
+                    </button>
+                </div>
+
 
 
                 @* <div class="text-center mt-3">
@@ -61,3 +67,11 @@
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>
+
+<script>
+    //  開發用 – 自動填入測試帳號
+    function quickFill() {
+        document.getElementById('Email').value = 'admin01@example.com';
+        document.getElementById('Password').value = '123';
+    }
+</script>

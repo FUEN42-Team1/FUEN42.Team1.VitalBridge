@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -128,7 +129,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         //登出
         [HttpPost]
-        public IActionResult Logout()
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
         {
             // 清除 JWT Cookie
             _jwtService.ClearTokenCookie(Response, "admin_auth_token", "/Admin");

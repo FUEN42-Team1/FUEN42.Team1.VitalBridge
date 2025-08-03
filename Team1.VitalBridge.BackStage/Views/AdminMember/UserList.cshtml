@@ -65,10 +65,11 @@
                 <th><a href="#" class="text-decoration-none">姓名 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">Email <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">聯絡電話 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">身分 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th><a href="#" class="text-decoration-none">狀態 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">縣市 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">鄉鎮 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">詳細地址 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">狀態 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">註冊時間 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th><a href="#" class="text-decoration-none">最後登入 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
                 <th>操作</th>
@@ -82,19 +83,37 @@
                     <td>@user.Name</td>
                     <td>@user.Email</td>
                     <td>@user.Phone</td>
+                    <td>
+                        @string.Join(", ", user.Roles)
+                    </td>
+
+                    @{
+                        // 依 status 同時決定 badge 顏色與顯示文字
+                        var (badgeCss, statusText) = user.Status switch
+                        {
+                            "active" => ("success", "活躍"),    // 綠色
+                            "frozen" => ("secondary", "凍結"),    // 灰色
+                            "unverified" => ("warning text-dark", "未開通"), // 黃底黑字
+                            "banned" => ("danger", "停權"),    // 紅色
+                            _ => ("secondary", user.Status) // 其他狀態直接顯示原值
+                        };
+                    }
+                    <td>
+                        <span class="badge bg-@badgeCss">@statusText</span>
+                    </td>
                     <td>@user.CityName</td>
                     <td>@user.TownshipName</td>
                     <td>@user.Address</td>
-                    <td>
-                        <span class="badge bg-@(user.Status == "active" ? "success" : user.Status == "banned" ? "danger" : user.Status == "unverified" ? "warning text-dark" : "secondary")">
-                            @user.Status
-                        </span>
-                    </td>
+
+
                     <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
                     <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
                     <td class="text-center">
-                        <a asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-info me-1">詳細</a>
-                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-warning">編輯</a>
+                        @* <a asp-action="Detail" asp-route-userId="@user.UserId" class="btn btn-sm btn-info me-1">詳細</a> *@
+                        <button class="btn btn-sm btn-info me-1" onclick="showUserDetail('@user.UserId')">詳細</button>
+
+
+                        <a asp-action="Edit" asp-route-userId="@user.UserId" class="btn btn-sm btn-warning">編輯</a>
                     </td>
                 </tr>
             }
@@ -111,3 +130,43 @@
         </ul>
     </nav>
 </div>
+
+
+
+@* 彈窗 *@
+<div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">會員詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div id="userDetailContainer"></div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        // 取得 Modal 實例
+        const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
+
+        function showUserDetail(userId) {
+            // 在載入新內容前，清空舊內容（可選，但建議）
+            $('#userDetailContainer').html('載入中...');
+
+            $.get('@Url.Action("Detail", "AdminMember")', { userId: userId })
+                .done(function (data) {
+                    $('#userDetailContainer').html(data);
+                    // 只顯示已經建立好的 Modal 實例
+                    userDetailModal.show();
+                })
+                .fail(function (xhr) {
+                    alert('載入失敗：' + xhr.status);
+                });
+        }
+    </script>
+}
