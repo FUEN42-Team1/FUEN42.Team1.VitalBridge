@@ -1,0 +1,14 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ProductCategoryTreeViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@foreach (var item in Model)
+{
+    <div style="margin-left: @(item.Level * 20)px;">
+        @item.name
+    </div>
+}
