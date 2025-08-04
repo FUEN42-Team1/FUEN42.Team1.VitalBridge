@@ -1,4 +1,4 @@
-﻿namespace MvcDemo.Models.Utilities
+﻿namespace Team1.VitalBridge.BackStage.Models.Utilities
 {
     using BCrypt.Net;
     public class HashUtility

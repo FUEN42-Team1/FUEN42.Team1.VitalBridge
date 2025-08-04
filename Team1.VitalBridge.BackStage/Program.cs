@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using Team1.VitalBridge.BackStage.Models.EFModels;
-using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.Repositories;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Interface;
@@ -38,6 +37,7 @@ namespace Team1.VitalBridge.BackStage
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             
+
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
             builder.Services.AddScoped<PlateService>();
             builder.Services.AddScoped<IPlateImageRepository, PlateImageRepository>();
@@ -47,6 +47,10 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<CategoryService>();
 
+
+            //KueiFu
+            //註冊生成JWT Token 服務
+            builder.Services.AddScoped<JwtService>();
 
 
 
@@ -159,17 +163,18 @@ namespace Team1.VitalBridge.BackStage
                 {
                     OnMessageReceived = context =>
                     {
-                        // 從參數傳入的 cookieName 中讀取 Token
+                        // 從參數傳入的 cookieName 中讀取 Token 並作驗證
                         context.Token = context.Request.Cookies[cookieName];
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
-                    {
+                    {   // 驗證失敗時的處理
                         Console.WriteLine($"JWT Authentication for {cookieName} failed: {context.Exception.Message}");
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
+                        // 驗證成功時的處理
                         Console.WriteLine($"JWT Token for {cookieName} successfully validated!");
                         return Task.CompletedTask;
                     },
@@ -185,11 +190,11 @@ namespace Team1.VitalBridge.BackStage
                         }
                         else if (cookieName == "institution_auth_token")
                         {
-                            loginPath = "/Institution/Login";
+                            loginPath = "/Institution/InstitutionAuth/Login";
                         }
                         else if (cookieName == "admin_auth_token")
                         {
-                            loginPath = "/Admin/Auth/Login";
+                            loginPath = "/Admin/AdminAuth/Login";
                         }
                         else
                         {

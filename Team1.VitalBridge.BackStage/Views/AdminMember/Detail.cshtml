@@ -1,0 +1,68 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+
+@model UserViewModel
+
+@{
+    ViewData["Title"] = "會員詳細資料";
+}
+
+<h2 class="mb-4">會員詳細資料</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th>使用者代碼</th>
+                <td>@Model.UserId</td>
+            </tr>
+            <tr>
+                <th>姓名</th>
+                <td>@Model.Name</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>@Model.Email</td>
+            </tr>
+            <tr>
+                <th>手機</th>
+                <td>@Model.Phone</td>
+            </tr>
+            <tr>
+                <th>城市</th>
+                <td>@Model.CityId</td> @* 可改成 CityName，如你有補導覽屬性 *@
+            </tr>
+            <tr>
+                <th>鄉鎮</th>
+                <td>@Model.TownshipId</td> @* 可改成 TownshipName *@
+            </tr>
+            <tr>
+                <th>地址</th>
+                <td>@Model.Address</td>
+            </tr>
+            <tr>
+                <th>狀態</th>
+                <td>@Model.Status</td>
+            </tr>
+            <tr>
+                <th>建立時間</th>
+                <td>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+            <tr>
+                <th>更新時間</th>
+                <td>@Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+            <tr>
+                <th>最後登入時間</th>
+                <td>@Model.LastLoginAt?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+            <tr>
+                <th>身分角色</th>
+                <td>@string.Join(", ", Model.Roles)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a asp-action="UserList" class="btn btn-secondary">返回清單</a>
+</div>

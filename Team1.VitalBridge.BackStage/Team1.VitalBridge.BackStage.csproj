@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\matrix-admin\**" />
+    <Content Remove="wwwroot\matrix-admin\**" />
+    <EmbeddedResource Remove="wwwroot\matrix-admin\**" />
+    <None Remove="wwwroot\matrix-admin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="efpt.config.json.user" />
   </ItemGroup>
 
@@ -24,6 +31,10 @@
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>

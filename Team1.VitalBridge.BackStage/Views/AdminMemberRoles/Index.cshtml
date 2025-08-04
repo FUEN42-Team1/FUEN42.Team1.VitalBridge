@@ -1,0 +1,68 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+@model IEnumerable<MemberRoleViewModel>
+@{
+    ViewData["Title"] = "會員身分清單";
+}
+
+<h2 class="mb-4">會員身分清單</h2>
+
+<div class="mb-3 d-flex justify-content-between">
+    <div>
+        共 @Model.Count() 筆身分資料
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary">➕ 新增身分</a>
+    </div>
+</div>
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>身分代碼</th>
+            <th>身分名稱</th>
+            <th>說明</th>
+            <th>啟用</th>
+            <th>建立時間</th>
+            <th>更新時間</th>
+            <th class="text-center" style="width: 150px;">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">尚無資料</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var role in Model)
+            {
+                <tr>
+                    <td>@role.RoleCode</td>
+                    <td>@role.Name</td>
+                    <td>@role.Info</td>
+                    <td>
+                        @if (role.isActive)
+                        {
+                            <span class="badge bg-success">啟用</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">停用</span>
+                        }
+                    </td>
+                    <td>@role.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@role.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td class="text-center">
+                        <a asp-action="Edit" asp-route-id="@role.RoleCode" class="btn btn-sm btn-warning me-1">編輯</a>
+                        <form asp-action="Delete" asp-route-id="@role.RoleCode" method="post" class="d-inline"
+                              onsubmit="return confirm('確定要停用這個身分嗎？');">
+                            <button type="submit" class="btn btn-sm btn-danger">停用</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
