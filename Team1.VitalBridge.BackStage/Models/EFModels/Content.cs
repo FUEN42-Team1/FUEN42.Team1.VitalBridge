@@ -17,9 +17,6 @@ public partial class Content
     [Column("memberId")]
     public int MemberId { get; set; }
 
-    [Column("contentTypeId")]
-    public int ContentTypeId { get; set; }
-
     [Column("contentCategoryId")]
     public int ContentCategoryId { get; set; }
 
@@ -53,10 +50,6 @@ public partial class Content
     [ForeignKey("ContentCategoryId")]
     [InverseProperty("Contents")]
     public virtual ContentCategory ContentCategory { get; set; }
-
-    [ForeignKey("ContentTypeId")]
-    [InverseProperty("Contents")]
-    public virtual ContentType ContentType { get; set; }
 
     [InverseProperty("Content")]
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();

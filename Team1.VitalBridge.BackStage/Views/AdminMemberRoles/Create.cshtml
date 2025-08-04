@@ -1,0 +1,55 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+@model MemberRoleViewModel
+@{
+    ViewData["Title"] = "新增會員身分";
+}
+
+<h2 class="mb-4">新增會員身分</h2>
+
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div class="row g-3">
+        <!-- RoleCode -->
+        <div class="col-md-6">
+            <label asp-for="RoleCode" class="form-label"></label>
+            <input asp-for="RoleCode" class="form-control" />
+            <span asp-validation-for="RoleCode" class="text-danger"></span>
+        </div>
+
+        <!-- Name -->
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Info -->
+        <div class="col-12">
+            <label asp-for="Info" class="form-label"></label>
+            <textarea asp-for="Info" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Info" class="text-danger"></span>
+        </div>
+
+        <!-- isActive -->
+        <div class="col-12">
+            <div class="form-check">
+                <input asp-for="isActive" class="form-check-input" />
+                <label asp-for="isActive" class="form-check-label"></label>
+            </div>
+            <span asp-validation-for="isActive" class="text-danger"></span>
+        </div>
+
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary me-2">返回列表</a>
+        <button type="submit" class="btn btn-primary">新增身分</button>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using Team1.VitalBridge.BackStage.Models.EFModels;
-using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.Repositories;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Interface;
@@ -37,12 +36,6 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //Johnny
-            // 註冊 ContentTypeCategoryPairRepository 服務
-            builder.Services.AddScoped<IContentTypeCategoryPairRepository, ContentTypeCategoryPairRepository>();
-
-            // 註冊 ContentTypeCategoryPairService 服務
-            builder.Services.AddScoped<IContentTypeCategoryPairService, ContentTypeCategoryPairService>();
 
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
             builder.Services.AddScoped<PlateService>();

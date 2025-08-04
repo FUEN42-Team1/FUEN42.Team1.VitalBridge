@@ -15,6 +15,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string Email { get; set; } 
 
         [Display(Name = "聯絡電話")]
+        [RegularExpression(@"^09\d{8}$", ErrorMessage = "手機格式錯誤")]
         public string Phone { get; set; }
 
 

@@ -68,7 +68,7 @@
         <!-- Address -->
         <div class="col-12">
             <label asp-for="Address" class="form-label"></label>
-            <input asp-for="Address" class="form-control" />
+            <input asp-for="Address" class="form-control" placeholder="範例：松山路123號5樓" />
             <span asp-validation-for="Address" class="text-danger"></span>
         </div>
 
@@ -113,7 +113,9 @@
     <!-- Buttons -->
     <div class="mt-4">
         <button type="submit" class="btn btn-primary me-2">儲存</button>
-        <a asp-action="UserList" class="btn btn-outline-secondary">取消</a>
+        @* <a asp-action="UserList" class="btn btn-outline-secondary">取消</a> *@
+        <a asp-action="Index" class="btn btn-outline-secondary">取消</a>
+
     </div>
 </form>
 

@@ -15,46 +15,67 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly JwtService _jwtService;
 
-        public AdminMemberController(AppDbContext context, IConfiguration configuration, JwtService jwtService)
+
+        public AdminMemberController(AppDbContext context, IConfiguration configuration)
         {
             this._context = context;
             this._configuration = configuration;
-            this._jwtService = jwtService;
 
         }
 
 
         public IActionResult Index()
         {
-            return View();
+            var userdata = _context.Users
+    .Select(u => new UserViewModel
+    {
+        //Id = u.Id,
+        UserId = u.UserId,
+        Name = u.Name,
+        Email = u.Email,
+        Phone = u.Phone,
+        CityId = u.CityId,
+        //CityName = u.City?.Name, // 假設有 City 導覽屬性
+        TownshipId = u.TownshipId,
+        //TownshipName = u.Township?.Name, // 假設有 Township 導覽屬性
+        Address = u.Address,
+        Status = u.Status,
+        CreatedAt = u.CreatedAt,
+        UpdatedAt = u.UpdatedAt,
+        LastLoginAt = u.LastLoginAt,
+        Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+    })
+    .ToList();
+
+            return View("UserList", userdata);
         }
 
         public IActionResult UserList()
         {
-            var userdata = _context.Users
-                .Select(u => new UserViewModel
-                {
-                    //Id = u.Id,
-                    UserId = u.UserId,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Phone = u.Phone,
-                    CityId = u.CityId,
-                    //CityName = u.City?.Name, // 假設有 City 導覽屬性
-                    TownshipId = u.TownshipId,
-                    //TownshipName = u.Township?.Name, // 假設有 Township 導覽屬性
-                    Address = u.Address,
-                    Status = u.Status,
-                    CreatedAt = u.CreatedAt,
-                    UpdatedAt = u.UpdatedAt,
-                    LastLoginAt = u.LastLoginAt,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
-                })
-                .ToList();
+            //        var userdata = _context.Users
+            //.Select(u => new UserViewModel
+            //{
+            //    //Id = u.Id,
+            //    UserId = u.UserId,
+            //    Name = u.Name,
+            //    Email = u.Email,
+            //    Phone = u.Phone,
+            //    CityId = u.CityId,
+            //    //CityName = u.City?.Name, // 假設有 City 導覽屬性
+            //    TownshipId = u.TownshipId,
+            //    //TownshipName = u.Township?.Name, // 假設有 Township 導覽屬性
+            //    Address = u.Address,
+            //    Status = u.Status,
+            //    CreatedAt = u.CreatedAt,
+            //    UpdatedAt = u.UpdatedAt,
+            //    LastLoginAt = u.LastLoginAt,
+            //    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+            //})
+            //.ToList();
 
-            return View("UserList", userdata);
+            //        return View("UserList", userdata);
+            return View();
         }
 
 
@@ -201,7 +222,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         public IActionResult Delete(int id)
         {
-                //刪除帳號 應該是不用
+            //刪除帳號 應該是不用
             return RedirectToAction("Index"); // 刪除後重定向到成員列表頁面
         }
 

@@ -4,7 +4,6 @@
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
-   "MinimumProductVersion": "2.6.0",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models\\EFModels",
@@ -69,14 +68,6 @@
       },
       {
          "Name": "[dbo].[Contents]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ContentTypeCategoryPairs]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ContentTypes]",
          "ObjectType": 0
       },
       {
