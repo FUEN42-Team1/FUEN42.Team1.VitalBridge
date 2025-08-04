@@ -2,9 +2,75 @@
 
 @{
 	ViewData["Title"] = "Index";
-	<!-- Include Font Awesome for icons -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<style>
+		body {
+			font-family: 'Arial', sans-serif;
+		}
 
+		.category-list {
+			list-style: none;
+			padding: 0;
+		}
+
+		.category-item {
+			margin-bottom: 5px;
+			padding: 8px 0;
+			display: flex;
+			align-items: center;
+		}
+
+		.category-item:hover {
+			background-color: #f0f0f0;
+		}
+
+		.category-toggle {
+			cursor: pointer;
+			margin-right: 10px;
+			color: #555;
+			transition: transform 0.2s;
+		}
+
+		.category-toggle.expanded {
+			transform: rotate(90deg);
+		}
+
+		.category-name {
+			flex-grow: 1;
+			font-weight: 500;
+		}
+
+		.category-actions {
+			margin-left: auto;
+		}
+
+		.category-actions a {
+			color: #007bff;
+			text-decoration: none;
+			margin-left: 10px;
+		}
+
+		.category-actions a:hover {
+			text-decoration: underline;
+		}
+
+		.subcategories-container {
+			list-style: none;
+			padding-left: 20px;
+			border-left: 1px solid #ccc;
+			margin-left: 10px;
+		}
+
+		.create-link-item {
+			padding: 8px 0;
+		}
+
+		.create-link-item a {
+			color: #28a745;
+			text-decoration: none;
+			font-weight: bold;
+		}
+
+	</style>
 }
 
 <h1>Index</h1>
@@ -41,8 +107,6 @@
 </div>
 
 @section Scripts {
-	<!-- Include jQuery -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script>
 		$(document).ready(function () {
 			// Handle click on the plus/minus icon
