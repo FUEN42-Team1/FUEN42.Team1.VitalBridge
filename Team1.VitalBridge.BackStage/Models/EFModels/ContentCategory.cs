@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
+[Index("Name", "ParentCategoryId", Name = "UQ__ContentC__9E071C079D3FAB3E", IsUnique = true)]
 public partial class ContentCategory
 {
     [Key]
@@ -33,9 +34,6 @@ public partial class ContentCategory
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
-
-    [InverseProperty("ContentCategory")]
-    public virtual ICollection<ContentTypeCategoryPair> ContentTypeCategoryPairs { get; set; } = new List<ContentTypeCategoryPair>();
 
     [InverseProperty("ContentCategory")]
     public virtual ICollection<Content> Contents { get; set; } = new List<Content>();

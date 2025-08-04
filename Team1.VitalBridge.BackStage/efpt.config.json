@@ -72,14 +72,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[ContentTypeCategoryPairs]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[ContentTypes]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[CouponRecord]",
          "ObjectType": 0
       },

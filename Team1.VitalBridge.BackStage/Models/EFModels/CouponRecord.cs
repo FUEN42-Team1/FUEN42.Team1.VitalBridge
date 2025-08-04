@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
 [Table("CouponRecord")]
-[Index("OrderId", Name = "UQ__CouponRe__0809335CBEAB596F", IsUnique = true)]
+[Index("OrderId", Name = "UQ__CouponRe__0809335C36EF1E6A", IsUnique = true)]
 public partial class CouponRecord
 {
     [Key]

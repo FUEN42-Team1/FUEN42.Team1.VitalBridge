@@ -37,13 +37,7 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            //Johnny
-            // 註冊 ContentTypeCategoryPairRepository 服務
-            builder.Services.AddScoped<IContentTypeCategoryPairRepository, ContentTypeCategoryPairRepository>();
-
-            // 註冊 ContentTypeCategoryPairService 服務
-            builder.Services.AddScoped<IContentTypeCategoryPairService, ContentTypeCategoryPairService>();
-
+            
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
             builder.Services.AddScoped<PlateService>();
             builder.Services.AddScoped<IPlateImageRepository, PlateImageRepository>();

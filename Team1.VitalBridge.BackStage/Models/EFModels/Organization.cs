@@ -57,6 +57,12 @@ public partial class Organization
     [StringLength(100)]
     public string AgeLimits { get; set; }
 
+    [Column("isDeleted")]
+    public bool IsDeleted { get; set; }
+
+    [Column("isActive")]
+    public bool IsActive { get; set; }
+
     [ForeignKey("CityId")]
     [InverseProperty("Organizations")]
     public virtual City City { get; set; }
