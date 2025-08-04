@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ContentCategoryViewModel>
+
+@{
+	ViewData["Title"] = "Index";
+	<!-- Include Font Awesome for icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+}
+
+<h1>Index</h1>
+
+<h2>Category Management</h2>
+<div id="category-tree">
+	@* Initial rendering of top-level categories *@
+	@if (Model != null && Model.Any())
+	{
+		<ul class="category-list">
+			@foreach (var category in Model)
+			{
+				<li class="category-item" data-id="@category.Id">
+					<span class="category-toggle fa-solid fa-plus-square" data-id="@category.Id" data-expanded="false"></span>
+					<span class="category-name">@category.Name</span>
+					<span class="category-actions">
+						<a href="@Url.Action("Edit", "ContentCategories", new { id = category.Id })">Edit</a>
+					</span>
+				</li>
+				<li class="subcategories-placeholder" id="subcategories-@category.Id" style="display:none;"></li>
+			}
+			<li class="create-link-item">
+				<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+			</li>
+		</ul>
+	}
+	else
+	{
+		<p>No categories found.</p>
+		<li class="create-link-item">
+			<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+		</li>
+	}
+</div>
+
+@section Scripts {
+	<!-- Include jQuery -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script>
+		$(document).ready(function () {
+			// Handle click on the plus/minus icon
+			$(document).on('click', '.category-toggle', function () {
+				const toggleElement = $(this);
+				const categoryId = toggleElement.data('id');
+				const isExpanded = toggleElement.data('expanded');
+				const subcategoriesContainer = $(`#subcategories-${categoryId}`);
+
+				if (isExpanded === false) {
+					// Not expanded, so fetch subcategories via AJAX
+					toggleElement.removeClass('fa-plus-square').addClass('fa-minus-square');
+					subcategoriesContainer.show();
+					toggleElement.data('expanded', true);
+
+					// Check if subcategories have already been loaded
+					if (subcategoriesContainer.children().length === 0) {
+						// AJAX call to the API endpoint
+						// This is a placeholder URL. Replace with your actual API route.
+						$.ajax({
+							url: '/api/ContentCategoriesAPI/SubCategories/' + categoryId,
+							method: 'GET',
+							success: function (subcategories) {
+								let html = '';
+								html += `<ul class="category-list subcategories-container">`;
+								if (subcategories && subcategories.length > 0) {
+									$.each(subcategories, function (index, subcategory) {
+										html += `
+											<li class="category-item" data-id="${subcategory.id}">
+												<span class="category-toggle fa-solid fa-plus-square" data-id="${subcategory.id}" data-expanded="false"></span>
+												<span class="category-name ">${subcategory.name}</span>
+												<span class="category-actions">
+													<a href="@Url.Action("Edit", "Categories")?id=${subcategory.id}">Edit</a>
+												</span>
+											</li>
+											<li class="subcategories-placeholder" id="subcategories-${subcategory.id}" style="display:none;"></li>
+										`;
+									});
+								} else {
+									html += '<li>no subcategories found</li>';
+								}
+								// Add the 'Create' link for this level
+								html += `<li class="create-link-item">
+									<a href="@Url.Action("Create", "ContentCategories")?parentId=${categoryId}">Create Subcategory</a>
+								</li>`;
+								html += `</ul>`;
+								subcategoriesContainer.append(html);
+							},
+							error: function (error) {
+								console.error('Error fetching subcategories:', error);
+								subcategoriesContainer.append(`<p style="margin-left: 20px; color: red;">Failed to load subcategories.</p>`);
+							}
+						});
+					}
+				} else {
+					// Already expanded, so collapse
+					toggleElement.removeClass('fa-minus-square').addClass('fa-plus-square');
+					subcategoriesContainer.hide();
+					toggleElement.data('expanded', false);
+				}
+			});
+		});
+	</script>
+}
