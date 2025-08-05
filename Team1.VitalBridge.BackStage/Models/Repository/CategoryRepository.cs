@@ -14,6 +14,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
 
         public void CreateCategory(string name)
         {
+            if(!checkName(name))
+            {
+                throw new Exception("名稱已存在");
+            }
             NotifysCategory Category = new NotifysCategory
             {
                 Name = name,
@@ -21,6 +25,11 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             };
             _context.NotifysCategories.Add(Category);
             _context.SaveChanges();
+        }
+        private bool checkName(string name)
+        {
+            var category = _context.NotifysCategories.FirstOrDefault(c => c.Name == name);
+            return category == null;
         }
 
         public void deleteCategoryById(int id)
@@ -44,6 +53,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
 
         public void UpdateCategory(int id,NotifysCategory newCategory)
         {
+            if (!checkName(newCategory.Name))
+            {
+                throw new Exception("名稱已存在");
+            }
             var category = _context.NotifysCategories.Find(id);
             category.Name = newCategory.Name;
             category.Enable = newCategory.Enable;

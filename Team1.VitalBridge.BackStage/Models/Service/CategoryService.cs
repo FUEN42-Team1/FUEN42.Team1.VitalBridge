@@ -14,7 +14,15 @@ namespace Team1.VitalBridge.BackStage.Models.Service
 
         public void CreateCategory(string name)
         {
-            _repository.CreateCategory(name);
+            try
+            {
+                _repository.CreateCategory(name);
+
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public void deleteCategoryById(int id)
@@ -34,21 +42,29 @@ namespace Team1.VitalBridge.BackStage.Models.Service
 
         public void UpdateCategory(int id, NotifysCategory category)
         {
-            _repository.UpdateCategory(id,category);
+            try
+            {
+                _repository.UpdateCategory(id, category);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public void setEnable(int id,bool enable)
         {
             var category = _repository.getCategoryById(id);
             category.Enable = enable;
-            _repository.UpdateCategory(id,category);
+            UpdateCategory(id,category);
         }
 
         public void setName(int id, string name)
         {
             var category = _repository.getCategoryById(id);
             category.Name = name;
-            _repository.UpdateCategory(id, category);
+            UpdateCategory(id, category);
         }
     }
 }

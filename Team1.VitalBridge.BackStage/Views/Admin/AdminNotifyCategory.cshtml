@@ -107,8 +107,12 @@
                     success: function () {
                         console.log("更新成功");
                     },
-                    error: function () {
-                        alert("更新失敗，請重試");
+                    error: function (ex) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "更新失敗",
+                            text: ex.responseText
+                        });
                     }
                 });
             });
@@ -188,11 +192,11 @@
                             location.reload();
                         });
                     },
-                    error: function () {
+                    error: function (ex) {
                         Swal.fire({
                             icon: "error",
                             title: "更新失敗",
-                            text: "請稍後再試"
+                            text: ex.responseText
                         });
                     }
                 });
@@ -217,11 +221,11 @@
                             location.reload();
                         });
                     },
-                    error: function () {
+                    error: function (ex) {
                         Swal.fire({
                             icon: "error",
                             title: "新增失敗",
-                            text: "請稍後再試"
+                            text: ex.responseText
                         });
                     }
                 });
