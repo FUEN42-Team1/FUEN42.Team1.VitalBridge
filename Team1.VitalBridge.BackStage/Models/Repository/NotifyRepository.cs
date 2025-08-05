@@ -41,7 +41,26 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
 
         public Notify GetNotifyById(int id)
         {
-            var Notify = _context.Notifys.Find(id);
+            var Notify = _context.Notifys
+                .Where(n => n.Id == id)
+                .Select(n => new Notify{
+                    Id=n.Id,
+                    Title=n.Title,
+                    Text=n.Text,
+                    NotifysUrl = n.NotifysUrl,
+                    CategoriesId = n.CategoriesId,
+                    SendDate = n.SendDate,
+                    ValidityDate = n.ValidityDate,
+                    Categories =n.Categories,
+                    NotifyUsers = n.NotifyUsers.Select(nu => new NotifyUser{
+                        NotifyId = nu.NotifyId,
+                        UserId = nu.UserId,
+                        IsRead = nu.IsRead,
+                        User = nu.User
+                    }).ToList()
+                })
+                .FirstOrDefault();
+
             return Notify;
         }
 

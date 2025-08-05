@@ -4,6 +4,7 @@ using Team1.VitalBridge.BackStage.Models.Interface;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Team1.VitalBridge.BackStage.Models.Dto;
 
 namespace Team1.VitalBridge.BackStage.Models.Service
 {
@@ -52,6 +53,18 @@ namespace Team1.VitalBridge.BackStage.Models.Service
                 Categories = n.Categories,
                 NotifyUsers = n.NotifyUsers
             };
+        }
+        public List<NotifyUserDTO> GetNotifyUserById(int id)
+        {
+            var users = _repository.GetNotifyById(id).NotifyUsers.Select(n=>new NotifyUserDTO
+            {
+                Name = n.User.Name,
+                Email = n.User.Email,
+                Id = n.User.Id,
+                IsRead = n.IsRead,
+            }).ToList();
+
+            return users;
         }
 
         public List<NotifyViewModel> GetNotifyByPage(DataTableRequest request)

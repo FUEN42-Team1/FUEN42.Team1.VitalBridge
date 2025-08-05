@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "通知管理";
 }
-
 <h1 class="mb-4 text-primary fw-bold">通知管理</h1>
 
 <p>
@@ -42,19 +41,6 @@
             </tr>
         </thead>
     </table>
-    @foreach (var item in Model)
-    {
-        <div id="users-@item.Id" class="d-none">
-            <ul class="list-group">
-                @foreach (var user in item.NotifyUsers)
-                {
-                    <li class="list-group-item">
-                         @user.User.Name
-                    </li>
-                }
-            </ul>
-        </div>
-    }
 </div>
 
 @section Scripts {
@@ -69,6 +55,9 @@
         $(document).ready(function () {
           $('#notifysTable').DataTable({
               processing: true,
+              language: {
+                url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/zh_Hant.json"
+              },
               serverSide: true,
               ajax: {
               url: '/api/notify/getByPage',
@@ -123,9 +112,53 @@
                     tr.removeClass('shown');
                 } else {
                     const id = $(this).data('id');
-                    const content = $('#users-' + id).html();
-                    row.child('<div class="p-3 bg-light">' + content + '</div>').show();
-                    tr.addClass('shown');
+                    var content = $('#users-' + id).html();
+                    if(!content)
+                    {
+                        var li = "";
+                        $.ajax({
+                          type: "GET",
+                          url: `/Api/Notify/getUser/${id}`,
+                          success: function (data) {
+                            if(data.length==0)
+                            {
+                                li+=`<li class="list-group-item">
+                                        <div>
+                                            暫無通知對象
+                                        </div>
+                                     </li>`;
+                            }
+							for(var user of data)
+                            {
+                                var colorClass = user.isRead ? "text-success fw-bold" : "text-muted" ;
+                                li+=`<li class="list-group-item ${colorClass}">
+                                        <div>
+                                            ${user.name}
+                                            ${user.email}
+                                        </div>
+                                     </li>`;
+                            }
+                            var ul = `<ul class="list-group">
+                                    ${li}
+                                  </ul>`;
+                            var div = `<div id="users-${id}" class="d-none">
+                                            ${ul}
+                                        </div>`;
+                            $("#notifysTable").append(div);
+                            content = ul;
+                            row.child('<div class="p-3 bg-light">' + content + '</div>').show();
+                            tr.addClass('shown');
+                          },
+                          error: function () {
+
+                            }
+                        });                    
+                    }
+                    else
+                    {
+                        row.child('<div class="p-3 bg-light">' + content + '</div>').show();
+                        tr.addClass('shown');
+                    }
                 }
             });
 
