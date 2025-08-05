@@ -8,7 +8,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 		
 		public int Id { get; set; }
 		public int? FatherId { get; set; }
-		public string name { get; set; }
+		public string Name { get; set; }
 		public bool IsActive { get; set; }
 		public int Level { get; set; } // 用於縮排顯示 
 
