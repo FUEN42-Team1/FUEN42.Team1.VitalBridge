@@ -53,11 +53,11 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
 
         public void UpdateCategory(int id,NotifysCategory newCategory)
         {
-            if (!checkName(newCategory.Name))
+            var category = _context.NotifysCategories.Find(id);
+            if (category.Name!=newCategory.Name&&!checkName(newCategory.Name))
             {
                 throw new Exception("名稱已存在");
             }
-            var category = _context.NotifysCategories.Find(id);
             category.Name = newCategory.Name;
             category.Enable = newCategory.Enable;
             _context.Update(category);

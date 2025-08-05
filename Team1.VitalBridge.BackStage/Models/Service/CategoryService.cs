@@ -56,15 +56,23 @@ namespace Team1.VitalBridge.BackStage.Models.Service
         public void setEnable(int id,bool enable)
         {
             var category = _repository.getCategoryById(id);
-            category.Enable = enable;
-            UpdateCategory(id,category);
+            var newcategory = new NotifysCategory
+            {
+                Name = category.Name,
+                Enable = enable
+            };
+            UpdateCategory(id, newcategory);
         }
 
         public void setName(int id, string name)
         {
             var category = _repository.getCategoryById(id);
-            category.Name = name;
-            UpdateCategory(id, category);
+            var newcategory = new NotifysCategory
+            {
+                Name = name,
+                Enable = category.Enable
+            };
+            UpdateCategory(id, newcategory);
         }
     }
 }
