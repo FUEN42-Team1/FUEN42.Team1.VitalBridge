@@ -11,7 +11,6 @@ function loadAdsByDate(dateStr) {
             targetDate: dateStr
         },
         success: function (response) {
-            console.log('success');
             plates = response;
 
             for (var p of plates) {

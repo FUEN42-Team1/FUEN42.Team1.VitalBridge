@@ -25,6 +25,13 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
             return Ok(notify);
         }
+        [HttpGet("getUser/{id}")]
+        public IActionResult GetUser(int id)
+        {
+            var notify = _service.GetNotifyUserById(id);
+
+            return Ok(notify);
+        }
 
         [HttpPost("getByPage")]
         public IActionResult Post([FromBody] DataTableRequest request)

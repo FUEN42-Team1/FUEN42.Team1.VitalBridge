@@ -4,6 +4,7 @@ using Team1.VitalBridge.BackStage.Models.Interface;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Team1.VitalBridge.BackStage.Models.Dto;
 
 namespace Team1.VitalBridge.BackStage.Models.Service
 {
@@ -53,6 +54,18 @@ namespace Team1.VitalBridge.BackStage.Models.Service
                 NotifyUsers = n.NotifyUsers
             };
         }
+        public List<NotifyUserDTO> GetNotifyUserById(int id)
+        {
+            var users = _repository.GetNotifyById(id).NotifyUsers.Select(n=>new NotifyUserDTO
+            {
+                Name = n.User.Name,
+                Email = n.User.Email,
+                Id = n.User.Id,
+                IsRead = n.IsRead,
+            }).ToList();
+
+            return users;
+        }
 
         public List<NotifyViewModel> GetNotifyByPage(DataTableRequest request)
         {
@@ -62,7 +75,7 @@ namespace Team1.VitalBridge.BackStage.Models.Service
             if (!string.IsNullOrEmpty(request.Search?.Value))
             {
                 string keyword = request.Search.Value.ToLower();
-                query = query.Where(n => n.Title.ToLower().Contains(keyword) || n.Text.ToLower().Contains(keyword));
+                query = query.Where(n => n.Title!=null && n.Title.ToLower().Contains(keyword) || n.Text!=null && n.Text.ToLower().Contains(keyword) || n.Categories.Name!=null && n.Categories.Name.ToLower().Contains(keyword));
             }
             var columnMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
