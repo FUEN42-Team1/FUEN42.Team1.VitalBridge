@@ -17,9 +17,9 @@ namespace Team1.VitalBridge.BackStage.Models.Service
             this._repository = repository;
         }
 
-        public void CreateNotify()
+        public void CreateNotify(CreateNotifyDTO notify)
         {
-            _repository.CreateNotify();
+            _repository.CreateNotify(notify);
         }
 
         public List<NotifyViewModel> GetAllNotify()
@@ -46,6 +46,7 @@ namespace Team1.VitalBridge.BackStage.Models.Service
             {
                 Id = n.Id,
                 Title = n.Title,
+                Text = n.Text,
                 NotifysUrl = n.NotifysUrl,
                 CategoriesId = n.CategoriesId,
                 SendDate = n.SendDate,

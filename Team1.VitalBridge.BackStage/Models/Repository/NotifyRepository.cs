@@ -4,6 +4,7 @@ using Team1.VitalBridge.BackStage.Models.Interface;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Team1.VitalBridge.BackStage.Models.Dto;
 
 
 namespace Team1.VitalBridge.BackStage.Models.Repository
@@ -17,9 +18,19 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             this._context = context;
         }
 
-        public void CreateNotify()
+        public void CreateNotify(CreateNotifyDTO notifyDTO)
         {
-            throw new NotImplementedException();
+            Notify notify = new Notify
+            {
+                Title = notifyDTO.Title,
+                Text = notifyDTO.Text,
+                NotifysUrl = notifyDTO.NotifysUrl,
+                CategoriesId = notifyDTO.CategoriesId,
+                SendDate = notifyDTO.SendDate,
+                ValidityDate = notifyDTO.ValidityDate
+            };
+            _context.Notifys.Add(notify);
+            _context.SaveChanges();
         }
 
         public void DeleteNotify(int id)
