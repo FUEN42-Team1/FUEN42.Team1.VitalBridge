@@ -10,7 +10,6 @@
         ＋ 新增通知
     </button>
 </p>
-
 <!-- CreateModal -->
 <div class="modal fade" id="CreateNotify" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -146,7 +145,7 @@
             data: 'userCount',
             render: function (data, type, row) {
               return `<a class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm btn-detail" data-id="${row.id}">
-                        <i class="bi bi-people-fill"></i> ${data}
+                        <i class="bi bi-people-fill" id="row-${row.id}" data-count="${data}">${data}</i>
                       </a>`;
             }
           },
@@ -196,10 +195,11 @@
 							for(var user of data)
                             {
                                 var colorClass = user.isRead ? "text-success fw-bold" : "text-muted" ;
-                                li+=`<li class="list-group-item ${colorClass}">
+                                li+=`<li class="list-group-item ${colorClass}" id="${user.id}in${id}"">
                                         <div>
                                             ${user.name}
                                             ${user.email}
+                                            <button class = "float-end btn btn-danger btn-deleteUser" data-id="${user.id}" data-nid="${id}">-</button>
                                         </div>
                                      </li>`;
                             }
@@ -296,6 +296,39 @@
     </script>
     <script>
         $(document).ready(function(){
+
+            $(document).on('click','.btn-deleteUser',function(e){
+                  Swal.fire({
+                    title: "確定要刪除嗎?",
+                    text: "即將移除通知對象",
+                    icon: "warning",
+                    showCancelButton: true,
+                    cancelButtonText: "取消",
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "確定"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var uid = $(this).data('id');
+                        var nid = $(this).data('nid');
+                        $.ajax({
+                          url: `/api/NotifyUser/${nid}/${uid}`,
+                          type: 'DELETE',
+                          success: function () {
+                            Swal.fire('刪除成功', '通知對象已移除', 'success');
+                            $('#users-' + nid).find(`#${uid}in${nid}`).remove();
+                            $(`#${uid}in${nid}`).remove();
+                            var num = $(`#row-${nid}`).data('count')-1;
+                            $(`#row-${nid}`).data('count',num);
+                            $(`#row-${nid}`).text(num);
+                          },
+                          error: function (xhr) {
+                          }
+                        });
+                    }
+                });
+            });
+
 
             $(document).on('click','.btn-create',function(e){
                   const payload = {
