@@ -35,9 +35,17 @@ namespace Team1.VitalBridge.BackStage
 
             // 註冊 AppDbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+                        maxRetryCount: 10,  // 最多重試 10 次
+                        maxRetryDelay: TimeSpan.FromSeconds(30), // 重試之間的延遲時間
+                        errorNumbersToAdd: null // null 表示使用預設的 SQL Server 錯誤碼
+                    )
+                )
+            );
 
-            
+
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
             builder.Services.AddScoped<PlateService>();
             builder.Services.AddScoped<IPlateImageRepository, PlateImageRepository>();

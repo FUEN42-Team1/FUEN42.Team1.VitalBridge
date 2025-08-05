@@ -14,10 +14,13 @@ public partial class OrganizationType
     [Column("id")]
     public int Id { get; set; }
 
+    [Display(Name = "類型名稱")]
     [Required]
     [Column("name")]
     [StringLength(100)]
     public string Name { get; set; }
+
+    public bool IsActive { get; set; }
 
     [InverseProperty("Type")]
     public virtual ICollection<Organization> Organizations { get; set; } = new List<Organization>();

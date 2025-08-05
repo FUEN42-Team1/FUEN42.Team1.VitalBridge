@@ -1,0 +1,33 @@
+﻿<div class="input-group mb-3">
+    <input type="file" class="form-control" id="fileInput">
+    <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+</div>
+<div>
+    <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+</div>
+<div id="result"></div>
+<div class="form-group mb-3">
+    <input class="form-control" id="image" readonly />
+</div>
+
+<button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileInput = $("#fileInput");
+            var showImage = $("#showimage");
+            var resultDiv = $("#result");
+            var image = $("#image");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+        });
+    </script>
+}

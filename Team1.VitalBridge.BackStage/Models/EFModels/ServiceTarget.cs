@@ -14,10 +14,13 @@ public partial class ServiceTarget
     [Column("id")]
     public int Id { get; set; }
 
+    [Display(Name = "服務對象")]
     [Required]
     [Column("name")]
     [StringLength(100)]
     public string Name { get; set; }
+
+    public bool IsActive { get; set; }
 
     [InverseProperty("ServiceTarget")]
     public virtual ICollection<OrganizationServiceTarget> OrganizationServiceTargets { get; set; } = new List<OrganizationServiceTarget>();

@@ -14,6 +14,7 @@ public partial class FeatureService
     [Column("id")]
     public int Id { get; set; }
 
+    [Display(Name = "特色服務")]
     [Required]
     [Column("name")]
     [StringLength(100)]
@@ -21,6 +22,7 @@ public partial class FeatureService
 
     public int? FileId { get; set; }
 
+    [Display(Name = "照片")]
     [ForeignKey("FileId")]
     [InverseProperty("FeatureServices")]
     public virtual FileStream File { get; set; }

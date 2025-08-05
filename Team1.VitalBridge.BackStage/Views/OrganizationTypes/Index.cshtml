@@ -1,0 +1,296 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.EFModels.OrganizationType>
+
+@{
+    ViewData["Title"] = "機構類型清單";
+}
+
+@section Styles {
+    <style>
+        /* 新增/編輯/啟用/停用按鈕配色 */
+        .btn-add {
+            background-color: #28a745; /* 綠色 */
+            color: white;
+            border-color: #28a745;
+        }
+
+            .btn-add:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+                color: white;
+            }
+
+        .btn-edit {
+            background-color: #ffc107; /* 橘黃色 */
+            color: white;
+            border-color: #ffc107;
+        }
+
+            .btn-edit:hover {
+                background-color: #e0a800;
+                border-color: #d39e00;
+                color: white;
+            }
+
+        /* 啟用/停用按鈕的樣式 */
+        .btn-deactivate {
+            background-color: #e74a3b; /* 紅色 */
+            color: white;
+            border-color: #e74a3b;
+        }
+
+            .btn-deactivate:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+                color: white;
+            }
+
+        .btn-activate {
+            background-color: #36b9cc; /* 藍色 */
+            color: white;
+            border-color: #36b9cc;
+        }
+
+            .btn-activate:hover {
+                background-color: #2c9faf;
+                border-color: #2a96a9;
+                color: white;
+            }
+
+        /* 表格標頭配色 */
+        .table thead th {
+            background-color: #e2f3f5; /* 淺藍綠色 */
+            color: #000;
+            border-bottom: 2px solid #d1d3e2;
+        }
+
+        /* Modal 標頭與頁尾配色 */
+        .modal-header, .modal-footer {
+            background-color: #f8f9fa; /* 淺灰色背景 */
+        }
+    </style>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h6 class="m-0 font-weight-bold text-primary">機構類型清單</h6>
+            </div>
+            <div class="col-sm-6 text-right">
+                <button type="button" class="btn btn-add" data-toggle="modal" data-target="#organizationTypeModal" id="createBtn">
+                    <i class="fas fa-plus"></i> 新增機構類型
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="organizationTypeTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Name)
+                        </th>
+                        <th>
+                            狀態
+                        </th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
+                                    @(item.IsActive ? "啟用中" : "已停用")
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-edit btn-sm edit-btn" data-id="@item.Id" data-name="@item.Name">
+                                    <i class="fas fa-edit"></i> 編輯
+                                </a>
+                                <a href="#" class="btn btn-sm @(item.IsActive ? "btn-deactivate deactivate-btn" : "btn-activate activate-btn")" data-id="@item.Id" data-is-active="@item.IsActive">
+                                    <i class="fas @(item.IsActive ? "fa-power-off" : "fa-check")"></i> @(item.IsActive ? "停用" : "啟用")
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="organizationTypeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">新增機構類型</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="organizationTypeForm">
+                    <input type="hidden" id="organizationTypeId" name="Id" value="" />
+                    <div class="form-group">
+                        <label for="organizationTypeName">機構類型名稱</label>
+                        <input type="text" class="form-control" id="organizationTypeName" name="Name" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-add" id="saveBtn">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statusConfirmModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">狀態變更確認</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="statusConfirmText">您確定要停用這筆資料嗎？</p>
+                <input type="hidden" id="statusId" value="" />
+                <input type="hidden" id="statusChangeTo" value="" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-deactivate" id="confirmStatusBtn">確定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 新增按鈕
+            $("#createBtn").on("click", function () {
+                $("#modalTitle").text("新增機構類型");
+                $("#organizationTypeForm")[0].reset();
+                $("#organizationTypeId").val("");
+                $("#saveBtn").removeClass("btn-edit").addClass("btn-add");
+            });
+
+            // 編輯按鈕
+            $("#organizationTypeTable").on("click", ".edit-btn", function () {
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+                $("#modalTitle").text("編輯機構類型");
+                $("#organizationTypeId").val(id);
+                $("#organizationTypeName").val(name);
+                $("#organizationTypeModal").modal("show");
+                $("#saveBtn").removeClass("btn-add").addClass("btn-edit");
+            });
+
+            // 監聽 Enter 鍵，按下後觸發表單提交
+            $("#organizationTypeName").on("keydown", function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $("#saveBtn").click();
+                }
+            });
+
+            // 儲存按鈕 (新增與編輯)
+            $("#saveBtn").on("click", function () {
+                var id = $("#organizationTypeId").val();
+                var name = $("#organizationTypeName").val();
+                var url = "";
+
+                if (name.trim() === "") {
+                    alert("機構類型名稱不能為空。");
+                    return;
+                }
+
+                var data = { Name: name };
+                if (id) {
+                    url = "/OrganizationTypes/Edit/" + id;
+                    data.Id = id;
+                } else {
+                    url = "/OrganizationTypes/Create";
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: data,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // 重新載入頁面以顯示最新的資料
+                            window.location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    },
+                    complete: function () {
+                        $("#organizationTypeModal").modal("hide");
+                    }
+                });
+            });
+
+            // 啟用/停用按鈕
+            $("#organizationTypeTable").on("click", ".deactivate-btn, .activate-btn", function () {
+                var id = $(this).data("id");
+                // 將取得的 data-is-active 字串明確轉換為布林值
+                var isActive = $(this).data("is-active") === "True"; // 因為 C# 的 Razor 會輸出 "True" 或 "False"
+                var newStatus = !isActive;
+
+                $("#statusId").val(id);
+                $("#statusChangeTo").val(newStatus);
+                $("#statusConfirmText").text("您確定要將此資料" + (newStatus ? "啟用" : "停用") + "嗎？");
+
+                // 根據新狀態調整確認按鈕樣式
+                if (newStatus) {
+                    $("#confirmStatusBtn").removeClass("btn-deactivate").addClass("btn-activate").text("啟用");
+                } else {
+                    $("#confirmStatusBtn").removeClass("btn-activate").addClass("btn-deactivate").text("停用");
+                }
+
+                $("#statusConfirmModal").modal("show");
+            });
+
+            // 確認啟用/停用按鈕
+            $("#confirmStatusBtn").on("click", function () {
+                var id = $("#statusId").val();
+                var newStatus = $("#statusChangeTo").val() === "true"; // 將字串轉換為布林值
+
+                $.ajax({
+                    url: "/OrganizationTypes/ToggleStatus/" + id,
+                    type: "POST",
+                    data: { isActive: newStatus },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // 成功後重新載入頁面以更新表格
+                            window.location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    },
+                    complete: function () {
+                        $("#statusConfirmModal").modal("hide");
+                    }
+                });
+            });
+        });
+    </script>
+}

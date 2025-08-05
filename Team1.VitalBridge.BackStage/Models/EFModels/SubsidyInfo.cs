@@ -14,6 +14,7 @@ public partial class SubsidyInfo
     [Column("id")]
     public int Id { get; set; }
 
+    [Display(Name = "補助描述")]
     [Required]
     [Column("description")]
     [StringLength(100)]

@@ -1,0 +1,257 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.EFModels.SubsidyInfo>
+
+@{
+    ViewData["Title"] = "補助清單";
+}
+
+@section Styles {
+    <style>
+        /* 新增/編輯/刪除按鈕配色 */
+        .btn-add {
+            background-color: #28a745; /* 綠色 */
+            color: white;
+            border-color: #28a745;
+        }
+
+            .btn-add:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+                color: white;
+            }
+
+        .btn-edit {
+            background-color: #ffc107; /* 橘黃色 */
+            color: white;
+            border-color: #ffc107;
+        }
+
+            .btn-edit:hover {
+                background-color: #e0a800;
+                border-color: #d39e00;
+                color: white;
+            }
+
+        .btn-delete {
+            background-color: #dc3545; /* 紅色 */
+            color: white;
+            border-color: #dc3545;
+        }
+
+            .btn-delete:hover {
+                background-color: #c82333;
+                border-color: #bd2130;
+                color: white;
+            }
+
+        /* 表格標頭配色 */
+        .table thead th {
+            background-color: #e2f3f5; /* 淺藍綠色 */
+            color: #000;
+            border-bottom: 2px solid #d1d3e2;
+        }
+
+        /* Modal 標頭與頁尾配色 */
+        .modal-header, .modal-footer {
+            background-color: #f8f9fa; /* 淺灰色背景 */
+        }
+    </style>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h6 class="m-0 font-weight-bold text-primary">補助清單</h6>
+            </div>
+            <div class="col-sm-6 text-right">
+                <button type="button" class="btn btn-add" data-toggle="modal" data-target="#subsidyInfoModal" id="createBtn">
+                    <i class="fas fa-plus"></i> 新增補助
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="subsidyInfoTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Description)
+                        </th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row-@item.Id">
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-edit btn-sm edit-btn" data-id="@item.Id" data-description="@item.Description">
+                                    <i class="fas fa-edit"></i> 編輯
+                                </a>
+                                <a href="#" class="btn btn-delete btn-sm delete-btn" data-id="@item.Id" data-description="@item.Description">
+                                    <i class="fas fa-trash"></i> 刪除
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="subsidyInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">新增補助</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="subsidyInfoForm">
+                    <input type="hidden" id="subsidyInfoId" name="Id" value="" />
+                    <div class="form-group">
+                        <label for="subsidyInfoDescription">補助描述</label>
+                        <input type="text" class="form-control" id="subsidyInfoDescription" name="Description" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-add" id="saveBtn">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">刪除確認</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteConfirmText">您確定要刪除「<span id="deleteItemDescription"></span>」這筆資料嗎？</p>
+                <input type="hidden" id="deleteId" value="" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">確定刪除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // 新增按鈕
+            $("#createBtn").on("click", function () {
+                $("#modalTitle").text("新增補助");
+                $("#subsidyInfoForm")[0].reset();
+                $("#subsidyInfoId").val("");
+                $("#saveBtn").removeClass("btn-edit").addClass("btn-add");
+            });
+
+            // 編輯按鈕
+            $("#subsidyInfoTable").on("click", ".edit-btn", function () {
+                var id = $(this).data("id");
+                var description = $(this).data("description");
+                $("#modalTitle").text("編輯補助");
+                $("#subsidyInfoId").val(id);
+                $("#subsidyInfoDescription").val(description);
+                $("#subsidyInfoModal").modal("show");
+                $("#saveBtn").removeClass("btn-add").addClass("btn-edit");
+            });
+
+            // 監聽 Enter 鍵，按下後觸發表單提交
+            $("#subsidyInfoDescription").on("keydown", function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $("#saveBtn").click();
+                }
+            });
+
+            // 儲存按鈕 (新增與編輯)
+            $("#saveBtn").on("click", function () {
+                var id = $("#subsidyInfoId").val();
+                var description = $("#subsidyInfoDescription").val();
+                var url = "";
+
+                if (description.trim() === "") {
+                    alert("補助描述不能為空。");
+                    return;
+                }
+
+                var data = { Description: description };
+                if (id) {
+                    url = "/SubsidyInfos/Edit/" + id;
+                    data.Id = id;
+                } else {
+                    url = "/SubsidyInfos/Create";
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: data,
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    },
+                    complete: function () {
+                        $("#subsidyInfoModal").modal("hide");
+                    }
+                });
+            });
+
+            // 刪除按鈕
+            $("#subsidyInfoTable").on("click", ".delete-btn", function () {
+                var id = $(this).data("id");
+                var description = $(this).data("description");
+                $("#deleteId").val(id);
+                $("#deleteItemDescription").text(description);
+                $("#deleteConfirmModal").modal("show");
+            });
+
+            // 確認刪除按鈕
+            $("#confirmDeleteBtn").on("click", function () {
+                var id = $("#deleteId").val();
+
+                $.ajax({
+                    url: "/SubsidyInfos/Delete/" + id,
+                    type: "POST",
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            // 移除表格中對應的行
+                            $("#row-" + id).remove();
+                            $("#deleteConfirmModal").modal("hide");
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    }
+                });
+            });
+        });
+    </script>
+}
