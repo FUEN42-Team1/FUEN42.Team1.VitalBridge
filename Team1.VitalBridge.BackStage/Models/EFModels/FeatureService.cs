@@ -20,6 +20,8 @@ public partial class FeatureService
     [StringLength(100)]
     public string Name { get; set; }
 
+    public bool IsActive { get; set; }
+
     public int? FileId { get; set; }
 
     [Display(Name = "照片")]

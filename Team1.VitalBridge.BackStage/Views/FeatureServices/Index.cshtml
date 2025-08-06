@@ -1,17 +1,202 @@
-﻿<div class="input-group mb-3">
-    <input type="file" class="form-control" id="fileInput">
-    <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
-</div>
-<div>
-    <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
-</div>
-<div id="result"></div>
-<div class="form-group mb-3">
-    <input class="form-control" id="image" readonly />
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.FeatureServiceViewModel>
+
+@{
+    ViewData["Title"] = "特色服務管理";
+}
+
+<style>
+    /* 這裡可以放自訂的 CSS 樣式 */
+    .btn-add {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+        .btn-add:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: white;
+        }
+
+    .btn-edit {
+        background-color: #ffc107;
+        color: white;
+        border-color: #ffc107;
+    }
+
+        .btn-edit:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
+            color: white;
+        }
+
+    .btn-deactivate {
+        background-color: #e74a3b;
+        color: white;
+        border-color: #e74a3b;
+    }
+
+        .btn-deactivate:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            color: white;
+        }
+
+    .btn-activate {
+        background-color: #36b9cc;
+        color: white;
+        border-color: #36b9cc;
+    }
+
+        .btn-activate:hover {
+            background-color: #2c9faf;
+            border-color: #2a96a9;
+            color: white;
+        }
+
+    .table thead th {
+        background-color: #e2f3f5;
+        color: #000;
+        border-bottom: 2px solid #d1d3e2;
+    }
+
+    .modal-header, .modal-footer {
+        background-color: #f8f9fa;
+    }
+</style>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h6 class="m-0 font-weight-bold text-primary">特色服務清單</h6>
+            </div>
+            <div class="col-sm-6 text-right">
+                <button type="button" class="btn btn-add" data-toggle="modal" data-target="#featureServiceModal" id="createBtn">
+                    <i class="fas fa-plus"></i> 新增特色服務
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="featureServiceTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ImageUrl)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.IsActive)
+                        </th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @{
+                                    // 修正：當ImageUrl為空時，不顯示任何圖片
+                                    var imageUrl = !string.IsNullOrEmpty(item.ImageUrl) ? $"/images/feature_services/{item.ImageUrl}" : "";
+                                }
+                                <img src="@imageUrl" alt="@item.Name" class="img-thumbnail" style="max-height: 100px;" />
+                            </td>
+                            <td>
+                                <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
+                                    @(item.IsActive ? "啟用中" : "已停用")
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-edit btn-sm edit-btn"
+                                   data-id="@item.Id"
+                                   data-name="@item.Name"
+                                   data-imageurl="@item.ImageUrl"
+                                   data-toggle="modal" data-target="#featureServiceModal">
+                                    <i class="fas fa-edit"></i> 編輯
+                                </a>
+                                <a href="#" class="btn btn-sm @(item.IsActive ? "btn-deactivate deactivate-btn" : "btn-activate activate-btn")" data-id="@item.Id" data-is-active="@item.IsActive">
+                                    <i class="fas @(item.IsActive ? "fa-power-off" : "fa-check")"></i> @(item.IsActive ? "停用" : "啟用")
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+<div class="modal fade" id="featureServiceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">新增特色服務</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="featureServiceForm">
+                    <input type="hidden" id="serviceId" name="Id" value="" />
 
+                    <div class="form-group mb-3">
+                        <label for="serviceName">特色服務名稱</label>
+                        <input type="text" class="form-control" id="serviceName" name="Name" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>服務圖片</label>
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" id="fileInput">
+                            <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
+                        </div>
+                        <div id="result" class="mt-2"></div>
+                        <div class="form-group mt-2">
+                            <input class="form-control" id="image" name="ImageUrl" readonly required />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-add" id="saveBtn">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statusConfirmModal" tabindex="-1" role="role" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">狀態變更確認</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="statusConfirmText">您確定要停用這筆資料嗎？</p>
+                <input type="hidden" id="statusId" value="" />
+                <input type="hidden" id="statusChangeTo" value="" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-deactivate" id="confirmStatusBtn">確定</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{
@@ -21,12 +206,119 @@
     <script>
         $(document).ready(function () {
             var fileInput = $("#fileInput");
-            var showImage = $("#showimage");
             var resultDiv = $("#result");
             var image = $("#image");
-            ready(fileInput,showImage);
-            $("#upload").on('click',function(){
-                uploadFile(fileInput,resultDiv,image,showimage);
+            var showimage = $("#showimage");
+
+            ready(fileInput, showimage);
+
+            $("#upload").on('click', function () {
+                uploadFile(fileInput, resultDiv, image, showimage[0]);
+            });
+
+            $("#createBtn").on("click", function () {
+                $("#modalTitle").text("新增特色服務");
+                $("#featureServiceForm")[0].reset();
+                $("#serviceId").val("");
+                $("#image").val("");
+                $("#showimage").attr("src", "");
+                $("#result").empty();
+                $("#saveBtn").removeClass("btn-edit").addClass("btn-add");
+                $("#featureServiceModal").modal("show");
+            });
+
+            $("#featureServiceTable").on("click", ".edit-btn", function () {
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+                var imageUrl = $(this).data("imageurl");
+
+                $("#modalTitle").text("編輯特色服務");
+                $("#serviceId").val(id);
+                $("#serviceName").val(name);
+                $("#image").val(imageUrl);
+                // 修正：當ImageUrl為空時，不顯示任何圖片
+                var src = imageUrl ? `/images/feature_services/${imageUrl}` : '';
+                $("#showimage").attr("src", src);
+                $("#result").empty();
+                $("#featureServiceModal").modal("show");
+                $("#saveBtn").removeClass("btn-add").addClass("btn-edit");
+            });
+
+            $("#saveBtn").on("click", function () {
+                var id = $("#serviceId").val();
+                var name = $("#serviceName").val();
+                var imageUrl = $("#image").val();
+
+                if (name.trim() === "" || imageUrl.trim() === "") {
+                    alert("特色服務名稱與圖片不能為空。");
+                    return;
+                }
+
+                var data = { Id: id, Name: name, ImageUrl: imageUrl };
+                var url = id ? "/FeatureServices/Edit" : "/FeatureServices/Create";
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    },
+                    complete: function () {
+                        $("#featureServiceModal").modal("hide");
+                    }
+                });
+            });
+
+            $("#featureServiceTable").on("click", ".deactivate-btn, .activate-btn", function () {
+                var id = $(this).data("id");
+                var isActive = $(this).data("is-active") === true;
+                var newStatus = !isActive;
+
+                $("#statusId").val(id);
+                $("#statusChangeTo").val(newStatus);
+                $("#statusConfirmText").text("您確定要將此資料" + (newStatus ? "啟用" : "停用") + "嗎？");
+
+                if (newStatus) {
+                    $("#confirmStatusBtn").removeClass("btn-deactivate").addClass("btn-activate").text("啟用");
+                } else {
+                    $("#confirmStatusBtn").removeClass("btn-activate").addClass("btn-deactivate").text("停用");
+                }
+                $("#statusConfirmModal").modal("show");
+            });
+
+            $("#confirmStatusBtn").on("click", function () {
+                var id = $("#statusId").val();
+                var newStatus = $("#statusChangeTo").val() === "true";
+
+                $.ajax({
+                    url: "/FeatureServices/ToggleStatus/" + id,
+                    type: "POST",
+                    data: { isActive: newStatus },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("發生錯誤，請稍後再試。");
+                    },
+                    complete: function () {
+                        $("#statusConfirmModal").modal("hide");
+                    }
+                });
             });
         });
     </script>
