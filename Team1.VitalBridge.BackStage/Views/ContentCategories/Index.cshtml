@@ -109,12 +109,19 @@
 @section Scripts {
 	<script>
 		$(document).ready(function () {
+
 			// Handle click on the plus/minus icon
-			$(document).on('click', '.category-toggle', function () {
-				const toggleElement = $(this);
+			// $(document).on('click', '.category-toggle', function () {
+			$(document).on('click', '.category-item', function (e) {
+				const itemElement = $(this);
+				const toggleElement = itemElement.find('.category-toggle');
+				// const toggleElement = $(this);
 				const categoryId = toggleElement.data('id');
 				const isExpanded = toggleElement.data('expanded');
 				const subcategoriesContainer = $(`#subcategories-${categoryId}`);
+
+				//🛑 Prevent toggle if clicking on .category-actions or links
+				if ($(e.target).closest('.category-actions, a').length > 0) return;
 
 				if (isExpanded === false) {
 					// Not expanded, so fetch subcategories via AJAX
