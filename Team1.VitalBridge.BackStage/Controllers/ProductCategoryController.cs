@@ -25,7 +25,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 		{
 			// 1. 取得所有類別資料
 
-			var categories = _context.Categories
+			var  categories = _context.Categories
 				.ToList();
 
 			// 2. 轉換成ViewModel並計算層級
@@ -33,7 +33,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			var categoryTreelist = new List<ProductCategoryTreeViewModel>();
 
 			// 3. 先處理第一層（ParentId == null）
-			var rootCategories = categories
+			var rootCategories =  categories
 				.Where(c => c.FatherId == null).ToList();
 			foreach(var root in rootCategories)
 			{
@@ -50,7 +50,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 				// 4. 處理子類別
 				// 在categories 裡面 篩選出 FatherId 已經有填的，也就是上面的root.Id
 				// 因為root.id 代表已經是父類別，這邊就是在找所有root的子類別
-				var children = categories.Where (c =>c.FatherId ==root.Id).ToList();
+				var children =  categories.Where (c =>c.FatherId ==root.Id).ToList();
 				foreach (var child in children)
 				{
 					categoryTreelist.Add(new ProductCategoryTreeViewModel
@@ -70,7 +70,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 						categoryTreelist.Add(new ProductCategoryTreeViewModel
 						{
 							Id = childthree.Id,
-							name = childthree.Name,
+							Name = childthree.Name,
 							FatherId = childthree.FatherId,
 							IsActive = childthree.IsActive,
 							Level = 2
@@ -78,11 +78,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 						});
 
 					}
-
 				}
-
-
-
 			}
 			return View(categoryTreelist);
 		}
@@ -98,29 +94,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 		}
 
 
-		// 共用方法 載入下拉式選單
-		private async Task LoadParentOptions(ProductCategoryFormViewModel vm)
-		{
-			// 1. 從資料庫查詢所有啟用的類別
-			var categories = await _context.Categories
-				.Where(c => c.IsActive).ToListAsync();
-
-			// 2. 初始化下拉選單清單，並加入「無父類別」選項
-			vm.ParentOptions = new List<SelectListItem>
-			{
-				new SelectListItem("--無上層類別--","") 
-				//Text="-- 無上層類別 --", Value=""
-			};
-
-			// 3. 遍歷每個類別，轉換成下拉選單格式
-			foreach (var category in categories)
-			{
-				vm.ParentOptions.Add(new SelectListItem(category.Name, category.Id.ToString()));
-			}
-
-		}
-
-
+		
 
 		//Post :ProductCategory/CreateProductCategory
 		[HttpPost]
@@ -152,6 +126,27 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		// 共用方法 載入下拉式選單
+		private async Task LoadParentOptions(ProductCategoryFormViewModel vm)
+		{
+			// 1. 從資料庫查詢所有啟用的類別
+			var categories = await _context.Categories
+				.Where(c => c.IsActive).ToListAsync();
+
+			// 2. 初始化下拉選單清單，並加入「無父類別」選項
+			vm.ParentOptions = new List<SelectListItem>
+			{
+				new SelectListItem("--無上層類別--","") 
+				//Text="-- 無上層類別 --", Value=""
+			};
+
+			// 3. 遍歷每個類別，轉換成下拉選單格式
+			foreach (var category in categories)
+			{
+				vm.ParentOptions.Add(new SelectListItem(category.Name, category.Id.ToString()));
+			}
+
+		}
 
 
 	}
