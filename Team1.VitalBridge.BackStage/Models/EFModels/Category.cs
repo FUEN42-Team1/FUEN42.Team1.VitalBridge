@@ -22,15 +22,18 @@ public partial class Category
     [StringLength(50)]
     public string Name { get; set; }
 
-    [Column("bannerImageUrl")]
-    public string BannerImageUrl { get; set; }
-
     [Column("isActive")]
     public bool IsActive { get; set; }
+
+    public int? FileId { get; set; }
 
     [ForeignKey("FatherId")]
     [InverseProperty("InverseFather")]
     public virtual Category Father { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("Categories")]
+    public virtual FileStream File { get; set; }
 
     [InverseProperty("Father")]
     public virtual ICollection<Category> InverseFather { get; set; } = new List<Category>();

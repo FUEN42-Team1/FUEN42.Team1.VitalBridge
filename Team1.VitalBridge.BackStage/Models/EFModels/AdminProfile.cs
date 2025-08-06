@@ -8,17 +8,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class AdminUsersRole
+[Index("UserId", Name = "UQ__AdminPro__CB9A1CFEA340D48F", IsUnique = true)]
+public partial class AdminProfile
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
-    [Column("roleId")]
-    public int RoleId { get; set; }
-
     [Column("userId")]
     public int UserId { get; set; }
+
+    [Column("isSuperAdmin")]
+    public bool IsSuperAdmin { get; set; }
+
+    [Column("createdByUserId")]
+    public int? CreatedByUserId { get; set; }
+
+    [Column("note")]
+    [StringLength(50)]
+    [Unicode(false)]
+    public string Note { get; set; }
+
+    [Column("lastAdminActionAt", TypeName = "datetime")]
+    public DateTime? LastAdminActionAt { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -26,11 +38,7 @@ public partial class AdminUsersRole
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [ForeignKey("RoleId")]
-    [InverseProperty("AdminUsersRoles")]
-    public virtual AdminRole Role { get; set; }
-
     [ForeignKey("UserId")]
-    [InverseProperty("AdminUsersRoles")]
-    public virtual AdminUser User { get; set; }
+    [InverseProperty("AdminProfile")]
+    public virtual User User { get; set; }
 }

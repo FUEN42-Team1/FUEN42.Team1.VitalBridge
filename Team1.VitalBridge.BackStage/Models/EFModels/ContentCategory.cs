@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Name", "ParentCategoryId", Name = "UQ__ContentC__9E071C07CD725A64", IsUnique = true)]
+[Index("Name", "ParentCategoryId", Name = "UQ__ContentC__9E071C079D3EC513", IsUnique = true)]
 public partial class ContentCategory
 {
     [Key]

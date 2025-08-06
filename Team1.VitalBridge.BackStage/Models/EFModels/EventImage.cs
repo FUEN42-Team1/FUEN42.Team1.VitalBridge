@@ -24,12 +24,6 @@ public partial class EventImage
     public string ImgName { get; set; }
 
     [Required]
-    [Column("imgUrl")]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ImgUrl { get; set; }
-
-    [Required]
     [Column("mimeType")]
     [StringLength(50)]
     [Unicode(false)]
@@ -41,7 +35,13 @@ public partial class EventImage
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
+    public int? FileId { get; set; }
+
     [ForeignKey("EventId")]
     [InverseProperty("EventImages")]
     public virtual Event Event { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("EventImages")]
+    public virtual FileStream File { get; set; }
 }

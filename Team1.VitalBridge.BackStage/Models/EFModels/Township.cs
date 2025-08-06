@@ -46,11 +46,11 @@ public partial class Township
     public virtual ICollection<Institution> Institutions { get; set; } = new List<Institution>();
 
     [InverseProperty("Township")]
+    public virtual ICollection<MemberProfile> MemberProfiles { get; set; } = new List<MemberProfile>();
+
+    [InverseProperty("Township")]
     public virtual ICollection<OrderShipMethod> OrderShipMethods { get; set; } = new List<OrderShipMethod>();
 
     [InverseProperty("District")]
     public virtual ICollection<Organization> Organizations { get; set; } = new List<Organization>();
-
-    [InverseProperty("Township")]
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

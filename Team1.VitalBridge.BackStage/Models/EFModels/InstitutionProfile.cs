@@ -8,22 +8,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class LogType
+[Index("UserId", Name = "UQ__Institut__CB9A1CFE4807411E", IsUnique = true)]
+public partial class InstitutionProfile
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
-    [Required]
-    [Column("name")]
+    [Column("userId")]
+    public int UserId { get; set; }
+
+    [Column("institutionId")]
+    public int InstitutionId { get; set; }
+
+    [Column("position")]
     [StringLength(20)]
     [Unicode(false)]
-    public string Name { get; set; }
+    public string Position { get; set; }
 
-    [Column("info")]
-    [StringLength(100)]
-    [Unicode(false)]
-    public string Info { get; set; }
+    [Column("isResponsible")]
+    public bool IsResponsible { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -31,6 +35,11 @@ public partial class LogType
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [InverseProperty("Type")]
-    public virtual ICollection<Log> Logs { get; set; } = new List<Log>();
+    [ForeignKey("InstitutionId")]
+    [InverseProperty("InstitutionProfiles")]
+    public virtual Institution Institution { get; set; }
+
+    [ForeignKey("UserId")]
+    [InverseProperty("InstitutionProfile")]
+    public virtual User User { get; set; }
 }

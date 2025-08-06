@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
 [Table("OrderShipMethod")]
-[Index("OrderId", Name = "UQ__OrderShi__0809335C25F2FDD7", IsUnique = true)]
+[Index("OrderId", Name = "UQ__OrderShi__0809335C021559F8", IsUnique = true)]
 public partial class OrderShipMethod
 {
     [Key]

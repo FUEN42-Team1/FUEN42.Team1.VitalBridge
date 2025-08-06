@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("CareRecipientId", Name = "UQ__CareReci__ED1D4897C8148AB5", IsUnique = true)]
+[Index("CareRecipientId", Name = "UQ__CareReci__ED1D4897B5A255B3", IsUnique = true)]
 public partial class CareRecipient
 {
     [Key]
@@ -48,16 +48,6 @@ public partial class CareRecipient
     [Unicode(false)]
     public string Phone { get; set; }
 
-    [Column("photoUrl")]
-    [StringLength(256)]
-    [Unicode(false)]
-    public string PhotoUrl { get; set; }
-
-    [Column("photoInfo")]
-    [StringLength(50)]
-    [Unicode(false)]
-    public string PhotoInfo { get; set; }
-
     [Column("cityId")]
     public int? CityId { get; set; }
 
@@ -69,19 +59,11 @@ public partial class CareRecipient
     [Unicode(false)]
     public string Address { get; set; }
 
-    [Column("confirmCode")]
-    [StringLength(50)]
-    [Unicode(false)]
-    public string ConfirmCode { get; set; }
-
     [Column("careLevel")]
     public int CareLevel { get; set; }
 
     [Column("isActive")]
     public bool IsActive { get; set; }
-
-    [Column("confirmCodeExpiresAt", TypeName = "datetime")]
-    public DateTime? ConfirmCodeExpiresAt { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -91,6 +73,12 @@ public partial class CareRecipient
 
     [InverseProperty("CareRecipient")]
     public virtual ICollection<CareRecipientHealthCondition> CareRecipientHealthConditions { get; set; } = new List<CareRecipientHealthCondition>();
+
+    [InverseProperty("CareRecipient")]
+    public virtual ICollection<CareRecipientInvitation> CareRecipientInvitations { get; set; } = new List<CareRecipientInvitation>();
+
+    [InverseProperty("CareRecipient")]
+    public virtual ICollection<CareRecipientsImage> CareRecipientsImages { get; set; } = new List<CareRecipientsImage>();
 
     [ForeignKey("CityId")]
     [InverseProperty("CareRecipients")]

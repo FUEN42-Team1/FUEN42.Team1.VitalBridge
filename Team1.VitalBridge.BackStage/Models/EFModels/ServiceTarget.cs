@@ -19,6 +19,9 @@ public partial class ServiceTarget
     [StringLength(100)]
     public string Name { get; set; }
 
+    [Column("isActive")]
+    public bool IsActive { get; set; }
+
     [InverseProperty("ServiceTarget")]
     public virtual ICollection<OrganizationServiceTarget> OrganizationServiceTargets { get; set; } = new List<OrganizationServiceTarget>();
 }
