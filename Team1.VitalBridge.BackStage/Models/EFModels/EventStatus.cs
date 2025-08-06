@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
 [Table("EventStatus")]
-[Index("StatusCode", Name = "UQ__EventSta__AD4366F69EF61BBD", IsUnique = true)]
+[Index("StatusCode", Name = "UQ__EventSta__AD4366F61C2A98EF", IsUnique = true)]
 public partial class EventStatus
 {
     [Key]

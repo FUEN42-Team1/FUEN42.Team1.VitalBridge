@@ -8,17 +8,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class AdminUsersRole
+[Index("UserId", Name = "UQ__MemberPr__CB9A1CFE19DA6BBA", IsUnique = true)]
+public partial class MemberProfile
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
-    [Column("roleId")]
-    public int RoleId { get; set; }
-
     [Column("userId")]
     public int UserId { get; set; }
+
+    [Column("cityId")]
+    public int? CityId { get; set; }
+
+    [Column("townshipId")]
+    public int? TownshipId { get; set; }
+
+    [Column("address")]
+    [StringLength(100)]
+    [Unicode(false)]
+    public string Address { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -26,11 +35,15 @@ public partial class AdminUsersRole
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [ForeignKey("RoleId")]
-    [InverseProperty("AdminUsersRoles")]
-    public virtual AdminRole Role { get; set; }
+    [ForeignKey("CityId")]
+    [InverseProperty("MemberProfiles")]
+    public virtual City City { get; set; }
+
+    [ForeignKey("TownshipId")]
+    [InverseProperty("MemberProfiles")]
+    public virtual Township Township { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("AdminUsersRoles")]
-    public virtual AdminUser User { get; set; }
+    [InverseProperty("MemberProfile")]
+    public virtual User User { get; set; }
 }

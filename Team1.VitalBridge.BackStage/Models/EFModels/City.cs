@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Name", Name = "UQ__Citys__72E12F1B64D0AA2A", IsUnique = true)]
+[Index("Name", Name = "UQ__Citys__72E12F1B59B172B2", IsUnique = true)]
 public partial class City
 {
     [Key]
@@ -31,6 +31,9 @@ public partial class City
     public virtual ICollection<Institution> Institutions { get; set; } = new List<Institution>();
 
     [InverseProperty("City")]
+    public virtual ICollection<MemberProfile> MemberProfiles { get; set; } = new List<MemberProfile>();
+
+    [InverseProperty("City")]
     public virtual ICollection<OrderShipMethod> OrderShipMethods { get; set; } = new List<OrderShipMethod>();
 
     [InverseProperty("City")]
@@ -38,7 +41,4 @@ public partial class City
 
     [InverseProperty("City")]
     public virtual ICollection<Township> Townships { get; set; } = new List<Township>();
-
-    [InverseProperty("City")]
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

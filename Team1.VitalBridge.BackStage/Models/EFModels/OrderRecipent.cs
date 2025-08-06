@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("OrderId", Name = "UQ__OrderRec__0809335C280DCAE9", IsUnique = true)]
+[Index("OrderId", Name = "UQ__OrderRec__0809335C40B74BF4", IsUnique = true)]
 public partial class OrderRecipent
 {
     [Key]

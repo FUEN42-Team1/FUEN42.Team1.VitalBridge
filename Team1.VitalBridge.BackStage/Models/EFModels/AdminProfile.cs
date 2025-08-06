@@ -8,22 +8,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class LogType
+[Index("UserId", Name = "UQ__AdminPro__CB9A1CFE7D598B90", IsUnique = true)]
+public partial class AdminProfile
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
-    [Required]
-    [Column("name")]
-    [StringLength(20)]
-    [Unicode(false)]
-    public string Name { get; set; }
+    [Column("userId")]
+    public int UserId { get; set; }
 
-    [Column("info")]
-    [StringLength(100)]
+    [Column("isSuperAdmin")]
+    public bool IsSuperAdmin { get; set; }
+
+    [Column("createdByUserId")]
+    public int? CreatedByUserId { get; set; }
+
+    [Column("note")]
+    [StringLength(50)]
     [Unicode(false)]
-    public string Info { get; set; }
+    public string Note { get; set; }
+
+    [Column("lastAdminActionAt", TypeName = "datetime")]
+    public DateTime? LastAdminActionAt { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -31,6 +38,7 @@ public partial class LogType
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [InverseProperty("Type")]
-    public virtual ICollection<Log> Logs { get; set; } = new List<Log>();
+    [ForeignKey("UserId")]
+    [InverseProperty("AdminProfile")]
+    public virtual User User { get; set; }
 }

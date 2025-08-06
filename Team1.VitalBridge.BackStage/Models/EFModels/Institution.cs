@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("InstitutionCode", Name = "UQ__Institut__5BDD9EFDC9FC6B54", IsUnique = true)]
-[Index("Email", Name = "UQ__Institut__AB6E6164C156C92D", IsUnique = true)]
+[Index("InstitutionCode", Name = "UQ__Institut__5BDD9EFD5BA060CD", IsUnique = true)]
+[Index("Email", Name = "UQ__Institut__AB6E6164689FE98F", IsUnique = true)]
 public partial class Institution
 {
     [Key]
@@ -87,10 +87,10 @@ public partial class Institution
     public virtual City City { get; set; }
 
     [InverseProperty("Institution")]
-    public virtual ICollection<InstitutionImage> InstitutionImages { get; set; } = new List<InstitutionImage>();
+    public virtual ICollection<InstitutionAuditImage> InstitutionAuditImages { get; set; } = new List<InstitutionAuditImage>();
 
     [InverseProperty("Institution")]
-    public virtual ICollection<InstitutionUser> InstitutionUsers { get; set; } = new List<InstitutionUser>();
+    public virtual ICollection<InstitutionProfile> InstitutionProfiles { get; set; } = new List<InstitutionProfile>();
 
     [ForeignKey("TownshipId")]
     [InverseProperty("Institutions")]

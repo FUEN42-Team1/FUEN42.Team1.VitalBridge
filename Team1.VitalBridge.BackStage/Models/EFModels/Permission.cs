@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("PermissionCode", Name = "UQ__Permissi__DF6AE8FFD81FEEA8", IsUnique = true)]
+[Index("PermissionCode", Name = "UQ__Permissi__DF6AE8FFC105FDD0", IsUnique = true)]
 public partial class Permission
 {
     [Key]
@@ -34,6 +34,15 @@ public partial class Permission
 
     [Column("isActive")]
     public bool IsActive { get; set; }
+
+    [Required]
+    [Column("permissionType")]
+    [StringLength(30)]
+    [Unicode(false)]
+    public string PermissionType { get; set; }
+
+    [Column("isSystemDefault")]
+    public bool IsSystemDefault { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }

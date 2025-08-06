@@ -8,32 +8,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("PermissionCode", Name = "UQ__AdminPer__DF6AE8FF182866FB", IsUnique = true)]
-public partial class AdminPermission
+public partial class CareRecipientsImage
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
+    [Column("careRecipientId")]
+    public int CareRecipientId { get; set; }
+
     [Required]
-    [Column("permissionCode")]
+    [Column("imgName")]
     [StringLength(50)]
     [Unicode(false)]
-    public string PermissionCode { get; set; }
+    public string ImgName { get; set; }
 
     [Required]
-    [Column("name")]
-    [StringLength(20)]
+    [Column("mimeType")]
+    [StringLength(50)]
     [Unicode(false)]
-    public string Name { get; set; }
-
-    [Column("info")]
-    [StringLength(100)]
-    [Unicode(false)]
-    public string Info { get; set; }
-
-    [Column("isActive")]
-    public bool IsActive { get; set; }
+    public string MimeType { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -41,9 +35,13 @@ public partial class AdminPermission
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [Column("deprecatedAt", TypeName = "datetime")]
-    public DateTime? DeprecatedAt { get; set; }
+    public int? FileId { get; set; }
 
-    [InverseProperty("Permission")]
-    public virtual ICollection<AdminRolePermission> AdminRolePermissions { get; set; } = new List<AdminRolePermission>();
+    [ForeignKey("CareRecipientId")]
+    [InverseProperty("CareRecipientsImages")]
+    public virtual CareRecipient CareRecipient { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("CareRecipientsImages")]
+    public virtual FileStream File { get; set; }
 }

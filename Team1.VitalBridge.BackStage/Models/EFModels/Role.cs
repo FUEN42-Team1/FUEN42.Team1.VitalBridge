@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("RoleCode", Name = "UQ__Roles__44FD4F90E466E3B1", IsUnique = true)]
+[Index("RoleCode", Name = "UQ__Roles__44FD4F9001B9E2A6", IsUnique = true)]
 public partial class Role
 {
     [Key]
@@ -34,6 +34,15 @@ public partial class Role
 
     [Column("isActive")]
     public bool IsActive { get; set; }
+
+    [Required]
+    [Column("roleType")]
+    [StringLength(30)]
+    [Unicode(false)]
+    public string RoleType { get; set; }
+
+    [Column("isSystemDefault")]
+    public bool IsSystemDefault { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }

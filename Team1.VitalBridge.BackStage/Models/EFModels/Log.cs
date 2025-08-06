@@ -17,13 +17,16 @@ public partial class Log
     [Column("userId")]
     public int UserId { get; set; }
 
-    [Column("typeId")]
-    public int TypeId { get; set; }
-
     [Column("info")]
     [StringLength(100)]
     [Unicode(false)]
     public string Info { get; set; }
+
+    [Required]
+    [Column("type")]
+    [StringLength(30)]
+    [Unicode(false)]
+    public string Type { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -32,10 +35,6 @@ public partial class Log
     [StringLength(50)]
     [Unicode(false)]
     public string IpAddress { get; set; }
-
-    [ForeignKey("TypeId")]
-    [InverseProperty("Logs")]
-    public virtual LogType Type { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("Logs")]
