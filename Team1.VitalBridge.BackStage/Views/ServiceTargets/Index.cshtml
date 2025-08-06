@@ -299,7 +299,6 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // ... (您原本的程式碼)
 
             // 監聽「啟用/停用確認」Modal 的 Enter 鍵
             $('#statusConfirmModal').on('shown.bs.modal', function () {
@@ -316,8 +315,6 @@
             $('#statusConfirmModal').on('hidden.bs.modal', function () {
                 $(document).off('keypress');
             });
-
-            // ... (您原本的程式碼)
 
             // 新增按鈕
             $("#createBtn").on("click", function () {

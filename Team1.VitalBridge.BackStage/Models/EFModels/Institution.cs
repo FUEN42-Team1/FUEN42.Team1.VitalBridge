@@ -95,4 +95,6 @@ public partial class Institution
     [ForeignKey("TownshipId")]
     [InverseProperty("Institutions")]
     public virtual Township Township { get; set; }
+
+    public ICollection<Organization> Organizations { get; set; }
 }

@@ -670,7 +670,12 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Type).WithMany(p => p.Organizations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Organizat__typeI__0D7A0286");
-        });
+            entity.HasOne(d => d.Institution) 
+                .WithMany(p => p.Organizations)
+                .HasForeignKey(d => d.institutionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Organizations_Institutions");
+                });
 
         modelBuilder.Entity<OrganizationCertificationRequest>(entity =>
         {

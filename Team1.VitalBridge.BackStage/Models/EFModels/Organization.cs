@@ -63,6 +63,9 @@ public partial class Organization
     [Column("isActive")]
     public bool IsActive { get; set; }
 
+    public int? institutionId { get; set; }
+    public Institution Institution { get; set; }
+
     [ForeignKey("CityId")]
     [InverseProperty("Organizations")]
     public virtual City City { get; set; }

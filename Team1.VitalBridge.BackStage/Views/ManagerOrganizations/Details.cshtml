@@ -1,0 +1,216 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.ManagerOrganizationDetailsViewModel
+
+@{
+    ViewData["Title"] = "機構詳情 - " + Model.Name;
+}
+
+<h1 class="mb-4">機構詳情</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">@Html.DisplayFor(model => model.Name)</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.PhotoUrl)
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                {
+                    <img src="@Model.PhotoUrl" alt="@Model.Name 照片" class="img-fluid rounded" style="max-width: 300px; height: auto;" />
+                }
+                else
+                {
+                    <span>無照片</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.InstitutionName)
+            </dt>
+            <dd class="col-sm-9">
+                @(string.IsNullOrEmpty(Model.InstitutionName) ? "無" : Model.InstitutionName)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.TypeName)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.TypeName)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Address)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.CityName) @Html.DisplayFor(model => model.DistrictName) @Html.DisplayFor(model => model.Address)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.BedCount)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.BedCount)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.AgeLimits)
+            </dt>
+            <dd class="col-sm-9">
+                @(string.IsNullOrEmpty(Model.AgeLimits) ? "無" : Model.AgeLimits)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+            <dd class="col-sm-9">
+                @(string.IsNullOrEmpty(Model.Description) ? "無" : Model.Description)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.MapUrl)
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.MapUrl))
+                {
+                    <a href="@Model.MapUrl" target="_blank" class="btn btn-sm btn-outline-info">查看地圖</a>
+                }
+                else
+                {
+                    <span>無地圖連結</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.SubsidyInfoNames)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.SubsidyInfoNames != null && Model.SubsidyInfoNames.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in Model.SubsidyInfoNames)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span>無補貼資訊</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.FeatureServiceNames)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.FeatureServiceNames != null && Model.FeatureServiceNames.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in Model.FeatureServiceNames)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span>無特色服務</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.ServiceTargetNames)
+            </dt>
+            <dd class="col-sm-9">
+                @if (Model.ServiceTargetNames != null && Model.ServiceTargetNames.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var item in Model.ServiceTargetNames)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span>無服務對象</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">房型與價格</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Rooms != null && Model.Rooms.Any())
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>房型</th>
+                        <th class="text-end">每月價格</th>
+                        <th class="text-center">房間數量</th>
+                        <th class="text-center">有押金</th>
+                        <th class="text-end">押金金額</th>
+                        <th class="text-center">押金月數</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model.Rooms)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => room.RoomTypeName)</td>
+                            <td class="text-end">
+                                @if (room.MonthlyPrice.HasValue && room.MonthlyPrice.Value > 0)
+                                {
+                                    @room.MonthlyPrice.Value.ToString("C0")
+                                }
+                                else
+                                {
+                                    <span>面議</span>
+                                }
+                            </td>
+                            <td class="text-center">@Html.DisplayFor(modelItem => room.RoomQuantity)</td>
+                            <td class="text-center">
+                                @(room.HasDeposit == true ? "是" : "否")
+                            </td>
+                            <td class="text-end">
+                                @if (room.HasDeposit == true)
+                                {
+                                    @room.DepositAmount?.ToString("C0")
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (room.HasDeposit == true)
+                                {
+                                    @Html.DisplayFor(modelItem => room.DepositMonths)
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>無房型與價格資訊。</p>
+        }
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+</div>
