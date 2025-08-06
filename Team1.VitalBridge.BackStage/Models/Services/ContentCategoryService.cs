@@ -34,7 +34,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
         public async Task DeleteCategoryAsync(int id)
         {
-            throw new NotImplementedException();
+            await _repository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<ContentCategoryDTO>> GetAllCategoriesAsync()
@@ -86,9 +86,24 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             return dto;
         }
 
-        public async Task UpdateCategoryAsync(ContentCategoryDTO category)
+        public async Task UpdateCategoryAsync(ContentCategoryEditDTO category)
         {
-            throw new NotImplementedException();
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category), "Category cannot be null");
+            }
+            // Convert DTO to EF model
+            var entity = new ContentCategory
+            {
+                Id = category.Id,
+                Name = category.Name,
+                ParentCategoryId = category.ParentCategoryId,
+                IsEnabled = category.IsEnabled,
+                DisplayOrder = category.DisplayOrder,
+                //UpdatedAt = DateTime.UtcNow // Update timestamp
+            };
+            await _repository.UpdateAsync(entity);
+
         }
     }
 }

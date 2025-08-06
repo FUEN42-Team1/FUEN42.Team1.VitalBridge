@@ -35,24 +35,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return View(vm);
         }
 
-        // GET: ContentCategories/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            //var contentCategory = await _context.ContentCategories
-            //    .Include(c => c.ParentCategory)
-            //    .FirstOrDefaultAsync(m => m.Id == id);
-            //if (contentCategory == null)
-            //{
-            //    return NotFound();
-            //}
-
-            return View();
-        }
 
         // GET: ContentCategories/Create?parentId=
         public async Task<IActionResult> Create()
@@ -121,12 +103,38 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return NotFound();
             }
 
-            //var contentCategory = await _context.ContentCategories.FindAsync(id);
-            //if (contentCategory == null)
-            //{
-            //    return NotFound();
-            //}
-            return View();
+            var dto = await _service.GetCategoryByIdAsync(id.Value);
+            if (dto == null)
+            {
+                return NotFound();
+            }
+
+
+
+            // 將 DTO 轉換為 ViewModel
+            var vm = new ContentCategoryEditViewModel();
+
+            vm.Id = dto.Id;
+            vm.Name = dto.Name;
+            vm.IsEnabled = dto.IsEnabled;
+            vm.DisplayOrder = dto.DisplayOrder;
+            vm.ParentCategoryId = dto.ParentCategoryId;
+
+            if (dto.ParentCategoryId.HasValue)
+            {
+                // 如果有父類別，則查詢父類別的名稱
+                var parentCategory = await _service.GetCategoryByIdAsync(dto.ParentCategoryId.Value);
+                if (parentCategory != null)
+                {
+                    vm.ParentCategoryName = parentCategory.Name;
+                }
+            }
+            else
+            {
+                vm.ParentCategoryName = "沒有父類別"; // 沒有父類別時
+            }
+
+            return View(vm);
         }
 
         // POST: ContentCategories/Edit/5
@@ -134,58 +142,39 @@ namespace Team1.VitalBridge.BackStage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ParentCategoryId,IsEnabled,DisplayOrder,UpdatedAt,CreatedAt")] ContentCategory contentCategory)
+        public async Task<IActionResult> Edit(ContentCategoryEditViewModel vm)
         {
-            if (id != contentCategory.Id)
-            {
-                return NotFound();
-            }
+            if (!ModelState.IsValid) return View(vm);
 
-            if (ModelState.IsValid)
+            // 將 ViewModel 轉換為 DTO
+            var dto = new ContentCategoryEditDTO
             {
-                try
-                {
-                    //_context.Update(contentCategory);
-                    //await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    
-                }
-                return RedirectToAction(nameof(Index));
-            }
+                Id = vm.Id,
+                Name = vm.Name,
+                ParentCategoryId = vm.ParentCategoryId,
+                IsEnabled = vm.IsEnabled,
+                DisplayOrder = vm.DisplayOrder
+            };
 
-            return View();
+            // 呼叫服務層更新資料
+            await _service.UpdateCategoryAsync(dto);
+
+            return RedirectToAction("Index");
         }
 
-        // GET: ContentCategories/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            //var contentCategory = await _context.ContentCategories
-            //    .Include(c => c.ParentCategory)
-            //    .FirstOrDefaultAsync(m => m.Id == id);
-            //if (contentCategory == null)
-            //{
-            //    return NotFound();
-            //}
+            // 呼叫服務層刪除資料
+            await _service.DeleteCategoryAsync(id);
 
-
-            return View();
+            return RedirectToAction(nameof(Index));
         }
-
-        // POST: ContentCategories/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-
-            return View();
-        }
-
     }
 }

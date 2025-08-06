@@ -8,7 +8,7 @@ namespace Team1.VitalBridge.BackStage.Models.Interfaces
         public Task<IEnumerable<ContentCategoryDTO?>> GetSubCategoriesAsync(int? parentId);
         public Task<ContentCategoryDTO> GetCategoryByIdAsync(int id);
         public Task AddCategoryAsync(ContentCategoryCreateDTO category);
-        public Task UpdateCategoryAsync(ContentCategoryDTO category);
+        public Task UpdateCategoryAsync(ContentCategoryEditDTO category);
         public Task DeleteCategoryAsync(int id);
     }
 }

@@ -18,4 +18,13 @@
         public bool IsEnabled { get; set; }
         public int DisplayOrder { get; set; }
     }
+
+    public class ContentCategoryEditDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int? ParentCategoryId { get; set; }
+        public bool IsEnabled { get; set; }
+        public int DisplayOrder { get; set; }
+    }
 }

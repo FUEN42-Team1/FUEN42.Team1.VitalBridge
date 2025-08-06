@@ -31,8 +31,17 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             {
                 throw new KeyNotFoundException($"ContentCategory with ID {id} not found.");
             }
-            _context.ContentCategories.Remove(contentCategory);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                _context.ContentCategories.Remove(contentCategory);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Handle the exception, e.g., log it or rethrow it
+                throw new Exception("An error occurred while deleting the content category.", ex);
+            }
         }
 
         public async Task<IEnumerable<ContentCategory>> GetAllAsync()
