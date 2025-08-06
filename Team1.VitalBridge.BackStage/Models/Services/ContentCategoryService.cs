@@ -1,4 +1,5 @@
 ﻿using Team1.VitalBridge.BackStage.Models.DTOs;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
 
 namespace Team1.VitalBridge.BackStage.Models.Services
@@ -12,9 +13,23 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             this._repository = repository;
         }
 
-        public async Task AddCategoryAsync(ContentCategoryDTO category)
+        public async Task AddCategoryAsync(ContentCategoryCreateDTO category)
         {
-            throw new NotImplementedException();
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category), "Category cannot be null");
+            }
+            // Convert DTO to EF model
+            var entity = new ContentCategory
+            {
+                Name = category.Name,
+                ParentCategoryId = category.ParentCategoryId,
+                IsEnabled = category.IsEnabled,
+                DisplayOrder = category.DisplayOrder
+                //CreatedAt = DateTime.Now,
+                //UpdatedAt = DateTime.Now
+            };
+            await _repository.AddAsync(entity);
         }
 
         public async Task DeleteCategoryAsync(int id)
@@ -52,7 +67,23 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
         public async Task<ContentCategoryDTO> GetCategoryByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var entity = await _repository.GetByIdAsync(id);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"ContentCategory with ID {id} not found.");
+            }
+            // Convert EF model to DTO
+            var dto = new ContentCategoryDTO
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                ParentCategoryId = entity.ParentCategoryId,
+                IsEnabled = entity.IsEnabled,
+                DisplayOrder = entity.DisplayOrder,
+                UpdatedAt = entity.UpdatedAt,
+                CreatedAt = entity.CreatedAt
+            };
+            return dto;
         }
 
         public async Task UpdateCategoryAsync(ContentCategoryDTO category)

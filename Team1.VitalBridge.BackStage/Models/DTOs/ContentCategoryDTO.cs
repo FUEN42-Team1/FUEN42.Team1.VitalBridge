@@ -9,6 +9,13 @@
         public int? ParentCategoryId { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
+    }
 
+    public class ContentCategoryCreateDTO
+    {
+        public string Name { get; set; }
+        public int? ParentCategoryId { get; set; }
+        public bool IsEnabled { get; set; }
+        public int DisplayOrder { get; set; }
     }
 }
