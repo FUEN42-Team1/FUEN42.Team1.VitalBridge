@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
@@ -49,8 +50,9 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
 
 
+        [Display(Name = "身分")]
+        public List<string> Roles { get; set; } = new List<string>(); // 顯示用
 
-        public List<int> SelectedRoleIds { get; set; } = new();
-        public List<string> Roles { get; set; } = new();
+
     }
 }

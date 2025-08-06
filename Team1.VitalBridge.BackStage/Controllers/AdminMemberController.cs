@@ -15,176 +15,178 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly LocationService _locationService;
 
-
-        public AdminMemberController(AppDbContext context, IConfiguration configuration)
+        public AdminMemberController(AppDbContext context, IConfiguration configuration, LocationService locationService)
         {
             this._context = context;
             this._configuration = configuration;
-
+            this._locationService = locationService;
         }
 
 
         public IActionResult Index()
         {
-            var userdata = _context.Users
-    .Select(u => new UserViewModel
-    {
-        //Id = u.Id,
-        UserId = u.UserId,
-        Name = u.Name,
-        Email = u.Email,
-        Phone = u.Phone,
-        CityId = u.CityId,
-        //CityName = u.City?.Name, // 假設有 City 導覽屬性
-        TownshipId = u.TownshipId,
-        //TownshipName = u.Township?.Name, // 假設有 Township 導覽屬性
-        Address = u.Address,
-        Status = u.Status,
-        CreatedAt = u.CreatedAt,
-        UpdatedAt = u.UpdatedAt,
-        LastLoginAt = u.LastLoginAt,
-        Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
-    })
-    .ToList();
-
-            return View("UserList", userdata);
-        }
-
-        public IActionResult UserList()
-        {
-            //        var userdata = _context.Users
-            //.Select(u => new UserViewModel
-            //{
-            //    //Id = u.Id,
-            //    UserId = u.UserId,
-            //    Name = u.Name,
-            //    Email = u.Email,
-            //    Phone = u.Phone,
-            //    CityId = u.CityId,
-            //    //CityName = u.City?.Name, // 假設有 City 導覽屬性
-            //    TownshipId = u.TownshipId,
-            //    //TownshipName = u.Township?.Name, // 假設有 Township 導覽屬性
-            //    Address = u.Address,
-            //    Status = u.Status,
-            //    CreatedAt = u.CreatedAt,
-            //    UpdatedAt = u.UpdatedAt,
-            //    LastLoginAt = u.LastLoginAt,
-            //    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
-            //})
-            //.ToList();
-
-            //        return View("UserList", userdata);
-            return View();
-        }
-
-
-
-        // 這裡可以添加其他方法，例如新增、編輯、刪除成員等
-        // 這些方法可以使用 [HttpGet] 或 [HttpPost] 特性來區分 GET 和 POST 請求
-        // 例如：
-        [HttpGet]
-        public IActionResult Create()
-        {
-            // 返回創建成員的視圖
-            return View();
-        }
-
-
-        //編輯使用者資料
-        public IActionResult Edit(string userId)
-        {
-            var user = _context.Users
-                .AsNoTracking()
+            var users = _context.Users
+                .Where(u => u.AccountType == "Member")
+                .Include(u => u.MemberProfile)
+                    .ThenInclude(mp => mp.City)
+                .Include(u => u.MemberProfile)
+                    .ThenInclude(mp => mp.Township)
                 .Include(u => u.UserRoles)
-                .FirstOrDefault(u => u.UserId == userId);
+                    .ThenInclude(ur => ur.Role)
+                .AsNoTracking()
+                .ToList();
+
+            var viewModelList = users.Select(u => new UserViewModel
+            {
+                Id = u.Id,
+                UserId = u.UserId,
+                Name = u.Name,
+                Email = u.Email,
+                Phone = u.Phone,
+
+                CityId = u.MemberProfile?.CityId,
+                TownshipId = u.MemberProfile?.TownshipId,
+                Address = u.MemberProfile?.Address,
+                CityName = u.MemberProfile?.City?.Name ?? "-",
+                TownshipName = u.MemberProfile?.Township?.Name ?? "-",
+
+                Status = u.Status,
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt,
+                LastLoginAt = u.LastLoginAt,
+
+                Roles = u.UserRoles?.Select(ur => ur.Role.Name).ToList() ?? new List<string>()
+            }).ToList();
+
+            return View(viewModelList);
+        }
+
+        //編輯會員
+        [HttpGet]
+        public async Task<IActionResult> Edit(string userId)
+        {
+            var user = await _context.Users
+                .Where(u => u.UserId == userId && u.AccountType == "Member")
+                .Include(u => u.MemberProfile)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync();
 
             if (user == null)
-            {
                 return NotFound();
-            }
-
 
             var vm = new UserViewModel
             {
+                Id = user.Id,
                 UserId = user.UserId,
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
-                CityId = user.CityId,
-                TownshipId = user.TownshipId,
-                Address = user.Address,
+                CityId = user.MemberProfile?.CityId,
+                TownshipId = user.MemberProfile?.TownshipId,
+                Address = user.MemberProfile?.Address,
+                CityName = user.MemberProfile?.City?.Name,
+                TownshipName = user.MemberProfile?.Township?.Name,
                 Status = user.Status,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
                 LastLoginAt = user.LastLoginAt,
-                SelectedRoleIds = user.UserRoles.Select(ur => ur.RoleId).ToList()
+                Roles = user.UserRoles.Select(ur => ur.Role.RoleCode).ToList()
             };
 
+            ViewBag.AllCities = _locationService.GetAllCities();
+            ViewBag.AllTownships = _locationService.GetTownshipsByCityId(vm.CityId ?? 0);
             ViewBag.AllRoles = _context.Roles
-                .Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name })
-                .ToList();
+                .Where(r => r.RoleType == "Member")
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RoleCode,
+                    Text = r.Name
+                }).ToList();
 
             return View(vm);
         }
 
+
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserViewModel vm)
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.AllCities = _locationService.GetAllCities();
+                ViewBag.AllTownships = _locationService.GetTownshipsByCityId(vm.CityId ?? 0);
                 ViewBag.AllRoles = _context.Roles
-                    .Select(r => new SelectListItem { Value = r.Id.ToString(), Text = r.Name })
-                    .ToList();
+                    .Where(r => r.RoleType == "Member")
+                    .Select(r => new SelectListItem
+                    {
+                        Value = r.RoleCode,
+                        Text = r.Name
+                    }).ToList();
+
                 return View(vm);
             }
-            // 更新使用者資料
+
             var user = await _context.Users
+                .Include(u => u.MemberProfile)
                 .Include(u => u.UserRoles)
-                .FirstOrDefaultAsync(u => u.UserId == vm.UserId);
-            if (user == null)
-            {
-                return NotFound();
-            }
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserId == vm.UserId && u.AccountType == "Member");
+
+            if (user == null) return NotFound();
+
             user.Name = vm.Name;
             user.Phone = vm.Phone;
-            user.CityId = vm.CityId;
-            user.TownshipId = vm.TownshipId;
-            user.Address = vm.Address;
             user.Status = vm.Status;
             user.UpdatedAt = DateTime.Now;
 
-            var selectedRoleIds = vm.SelectedRoleIds.ToHashSet();
-            var currentRoleIds = user.UserRoles.Select(ur => ur.RoleId).ToList();
-
-            // 移除未選擇的角色
-            var rolesToRemove = user.UserRoles
-                .Where(ur => !selectedRoleIds.Contains(ur.RoleId))
-                .ToList(); // 必須 ToList() 才能在迴圈中修改原集合
-
-            foreach (var role in rolesToRemove)
+            if (user.MemberProfile != null)
             {
-                user.UserRoles.Remove(role);
+                user.MemberProfile.CityId = vm.CityId;
+                user.MemberProfile.TownshipId = vm.TownshipId;
+                user.MemberProfile.Address = vm.Address;
+                user.MemberProfile.UpdatedAt = DateTime.Now;
             }
 
-            // 新增新的角色（避免重複）
-            var toAdd = selectedRoleIds.Except(currentRoleIds).ToList();
-            foreach (var roleId in toAdd)
+            var currentRoleCodes = user.UserRoles.Select(ur => ur.Role.RoleCode).ToList();
+            var newRoleCodes = vm.Roles ?? new List<string>();
+
+            var rolesToRemove = user.UserRoles.Where(ur => !newRoleCodes.Contains(ur.Role.RoleCode)).ToList();
+            foreach (var ur in rolesToRemove)
+                user.UserRoles.Remove(ur);
+
+            var rolesToAdd = newRoleCodes.Except(currentRoleCodes).ToList();
+            foreach (var roleCode in rolesToAdd)
             {
-                user.UserRoles.Add(new UserRole
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleCode == roleCode && r.RoleType == "Member");
+                if (role != null)
                 {
-                    UserId = user.Id, // ✅ 正確對應主鍵 Id
-                    RoleId = roleId
-                });
+                    user.UserRoles.Add(new UserRole
+                    {
+                        UserId = user.Id,
+                        RoleId = role.Id
+                    });
+                }
             }
 
-
-
-
-            _context.Users.Update(user);
             await _context.SaveChangesAsync();
-            return RedirectToAction("UserList");
+
+            return RedirectToAction("Index");
         }
+
+
+
+
+
+
+
+
+
+
+
 
         //詳細資訊
         public async Task<IActionResult> Detail(string userId)
@@ -199,9 +201,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
            Name = u.Name,
            Email = u.Email,
            Phone = u.Phone,
-           CityId = u.CityId,
-           TownshipId = u.TownshipId,
-           Address = u.Address,
+           //CityId = u.CityId,
+           //TownshipId = u.TownshipId,
+           //Address = u.Address,
            Status = u.Status,
            CreatedAt = u.CreatedAt,
            UpdatedAt = u.UpdatedAt,
@@ -224,6 +226,19 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             //刪除帳號 應該是不用
             return RedirectToAction("Index"); // 刪除後重定向到成員列表頁面
+        }
+
+
+
+        [HttpGet]
+        public JsonResult GetTownships(int cityId)
+        {
+            var townships = _context.Townships
+                .Where(t => t.CityId == cityId)
+                .Select(t => new { t.Id, t.Name })
+                .ToList();
+
+            return Json(townships);
         }
 
 

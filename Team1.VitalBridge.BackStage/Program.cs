@@ -62,7 +62,8 @@ namespace Team1.VitalBridge.BackStage
             //KueiFu
             //註冊生成JWT Token 服務
             builder.Services.AddScoped<JwtService>();
-
+            //縣市、鄉鎮服務
+            builder.Services.AddScoped<LocationService>();
 
 
 
@@ -138,7 +139,7 @@ namespace Team1.VitalBridge.BackStage
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.MapControllers();
 
             app.UseAuthentication();
             app.UseAuthorization();

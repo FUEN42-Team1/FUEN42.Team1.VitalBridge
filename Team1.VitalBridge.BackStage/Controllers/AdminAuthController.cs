@@ -49,10 +49,10 @@ namespace Team1.VitalBridge.BackStage.Controllers
             }
             // 檢查使用者是否存在
 
-            var adminUser = await _context.AdminUsers
-               .Include(au => au.AdminUsersRoles) // 載入 AdminUsersRoles 集合
+            var adminUser = await _context.Users
+               .Include(au => au.UserRoles) // 載入 AdminUsersRoles 集合
                    .ThenInclude(aur => aur.Role) // 從 AdminUsersRoles 進入，載入實際的 AdminRole
-                       .ThenInclude(ar => ar.AdminRolePermissions) // 從 AdminRole 進入，載入 AdminRolePermissions 集合 (假設有此中間表)
+                       .ThenInclude(ar => ar.RolePermissions) // 從 AdminRole 進入，載入 AdminRolePermissions 集合 (假設有此中間表)
                            .ThenInclude(arp => arp.Permission) // 從 AdminRolePermissions 進入，載入實際的 AdminPermission
                .SingleOrDefaultAsync(au => au.Email == vm.Email);
 
@@ -84,16 +84,16 @@ namespace Team1.VitalBridge.BackStage.Controllers
             // 建立 Claims 列表 
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, adminUser.AdminId), // 使用者唯一ID
+            new Claim(ClaimTypes.NameIdentifier, adminUser.UserId), // 使用者唯一ID
             new Claim(ClaimTypes.Email, adminUser.Email),
             new Claim(ClaimTypes.Name, adminUser.Name)
         };
 
 
-            if (adminUser.AdminUsersRoles?.Any() == true)
+            if (adminUser.UserRoles?.Any() == true)
             {
                 // 使用 SelectMany 取得所有唯一的角色代碼
-                var roleCodes = adminUser.AdminUsersRoles
+                var roleCodes = adminUser.UserRoles
                     .Where(r => r.Role != null && !string.IsNullOrEmpty(r.Role.RoleCode))
                     .Select(r => r.Role.RoleCode)
                     .Distinct()
@@ -103,9 +103,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 claims.AddRange(roleCodes.Select(roleCode => new Claim(ClaimTypes.Role, roleCode)));
 
                 // 使用 SelectMany 取得所有唯一的權限代碼
-                var permissionCodes = adminUser.AdminUsersRoles
-                    .Where(r => r.Role?.AdminRolePermissions?.Any() == true)
-                    .SelectMany(r => r.Role.AdminRolePermissions)
+                var permissionCodes = adminUser.UserRoles
+                    .Where(r => r.Role?.RolePermissions?.Any() == true)
+                    .SelectMany(r => r.Role.RolePermissions)
                     .Where(p => p.Permission != null && !string.IsNullOrEmpty(p.Permission.PermissionCode))
                     .Select(p => p.Permission.PermissionCode)
                     .Distinct()

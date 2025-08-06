@@ -12,6 +12,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
     [Authorize(AuthenticationSchemes = "AdminJwtScheme")]
     [Route("Admin/[controller]/[action]")]
+
     public class AdminUsersController : Controller
     {
 
@@ -19,6 +20,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         private readonly IConfiguration _configuration;
         private readonly JwtService _jwtService;
 
+        //管理會員相關
         public AdminUsersController(AppDbContext context, IConfiguration configuration, JwtService jwtService)
         {
             this._context = context;
@@ -51,8 +53,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendResetPasswordLink(string AdminUserId)
         {
-            var adminUser = await _context.AdminUsers
-        .FirstOrDefaultAsync(u => u.AdminId == AdminUserId); 
+            var adminUser = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == AdminUserId); 
             if (adminUser == null) return NotFound();
 
             // 建立 token
@@ -83,7 +85,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         public IActionResult ResetPassword(string uid, string code)
         {
             // 檢查使用者是否存在
-            var adminUser = _context.AdminUsers.FirstOrDefault(u => u.AdminId == uid && u.ResetPasswordConfirmCode == code);
+            var adminUser = _context.Users.FirstOrDefault(u => u.UserId == uid && u.ResetPasswordConfirmCode == code);
             if (adminUser == null || adminUser.ResetPasswordConfirmCodeExpiresAt < DateTime.UtcNow)
             {
                 return NotFound("無效的重設密碼連結或已過期");
@@ -106,8 +108,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
             if (!ModelState.IsValid)
                 return View(vm);
 
-            var adminUser = await _context.AdminUsers
-                .FirstOrDefaultAsync(u => u.AdminId == vm.uid && u.ResetPasswordConfirmCode == vm.Code);
+            var adminUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == vm.uid && u.ResetPasswordConfirmCode == vm.Code);
 
             if (adminUser == null || adminUser.ResetPasswordConfirmCodeExpiresAt < DateTime.UtcNow)
             {
