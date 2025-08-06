@@ -51,7 +51,9 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 
 
         [Display(Name = "身分")]
-        public List<string> Roles { get; set; } = new List<string>(); // 顯示用
+        public List<string> RoleDisplay { get; set; } = new List<string>(); // 顯示用
+        [Display(Name = "身分")]
+        public string[] Roles { get; set; } = Array.Empty<string>();
 
 
     }

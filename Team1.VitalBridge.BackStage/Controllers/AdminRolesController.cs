@@ -10,14 +10,14 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
     [Authorize(AuthenticationSchemes = "AdminJwtScheme")]
     [Route("Admin/[controller]/[action]")]
-    public class AdminMemberRolesController : Controller
+    public class AdminRolesController : Controller
     {
 
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
 
 
-        public AdminMemberRolesController(AppDbContext context, IConfiguration configuration)
+        public AdminRolesController(AppDbContext context, IConfiguration configuration)
         {
             this._context = context;
             this._configuration = configuration;
@@ -30,7 +30,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             var roles = _context.Roles
         .OrderBy(r => r.CreatedAt)
-        .Select(r => new MemberRoleViewModel
+        .Select(r => new RoleViewModel
         {
             RoleCode = r.RoleCode,
             Name = r.Name,
@@ -52,7 +52,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(MemberRoleViewModel vm)
+        public IActionResult Create(RoleViewModel vm)
         {
             // 在這裡處理新增身分的邏輯
             // 例如，將 roleName 儲存到資料庫中

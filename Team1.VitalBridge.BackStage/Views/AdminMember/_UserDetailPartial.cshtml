@@ -3,6 +3,9 @@
 
 <div class="modal-body">
     <div class="container-fluid">
+
+        @* <h3 class="mb-4 border-bottom pb-2 text-primary">編輯會員資料</h3> *@
+
         <div class="row mb-3">
             <!-- 一欄：會員代碼 -->
             <div class="col-12">
@@ -25,11 +28,19 @@
                 </p>
                 <p class="mb-2">
                     <span class="fw-semibold">身分：</span>
-                    @foreach (var role in Model.Roles)
+                    @if (Model.RoleDisplay != null && Model.RoleDisplay.Any())
                     {
-                        @role
-                        @* <span class="badge bg-info text-dark me-1">@role</span> *@
+                        foreach (var role in Model.RoleDisplay)
+                        {
+                            <span class="badge bg-secondary me-1">@role</span>
+                        }
                     }
+                    else
+                    {
+                        <span class="text-muted">無</span>
+                    }
+
+
                 </p>
                 <p class="mb-2">
                     <span class="fw-semibold">狀態：</span>
@@ -59,10 +70,12 @@
             <!-- 右欄：地址資訊 -->
             <div class="col-md-6">
                 <p class="mb-2">
-                    <span class="fw-semibold">縣市：</span>@Model.CityId
+                    @* <span class="fw-semibold">縣市：</span>@Model.CityId *@
+                    <span class="fw-semibold">縣市：</span>@Model.CityName
                 </p>
                 <p class="mb-2">
-                    <span class="fw-semibold">鄉鎮：</span>@Model.TownshipId
+                    @* <span class="fw-semibold">鄉鎮：</span>@Model.TownshipId *@
+                    <span class="fw-semibold">鄉鎮：</span>@Model.TownshipName
                 </p>
                 <p class="mb-2">
                     <span class="fw-semibold">地址：</span>
@@ -76,8 +89,6 @@
                 <span class="fw-semibold">建立時間：</span>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")<br />
                 <span class="fw-semibold">最後更新：</span>@Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm")<br />
                 <span class="fw-semibold">最後登入：</span>@(Model.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "尚未登入")
-
-                
             </div>
         </div>
     </div>
