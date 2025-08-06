@@ -2,7 +2,7 @@
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
-    public class MemberRoleViewModel
+    public class RoleViewModel
     {
         [Required]
         [Display(Name = "身分代碼")]

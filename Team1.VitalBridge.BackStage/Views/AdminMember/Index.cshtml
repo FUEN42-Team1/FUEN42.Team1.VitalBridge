@@ -82,7 +82,7 @@
                     <td>@user.Email</td>
                     <td>@user.Phone</td>
                     <td>
-                        @string.Join(", ", user.Roles)
+                        @string.Join(", ", user.RoleDisplay)
                     </td>
 
                     @{
@@ -111,7 +111,10 @@
                         <button class="btn btn-sm btn-info me-1" onclick="showUserDetail('@user.UserId')">詳細</button>
 
 
-                        <a asp-action="Edit" asp-route-userId="@user.UserId" class="btn btn-sm btn-warning">編輯</a>
+                        @* <a asp-action="Edit" asp-route-userId="@user.UserId" class="btn btn-sm btn-warning">編輯</a> *@
+                        <button class="btn btn-sm btn-warning" onclick="showEditMember('@user.UserId')">編輯</button>
+
+
                     </td>
                 </tr>
             }
@@ -131,20 +134,37 @@
 
 
 
-@* 彈窗 *@
+@* 詳細資訊(彈窗) *@
 <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">會員詳細資料</h5>
+                 <h3 class="text-primary">會員詳細資料</h3> 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+            </div> 
 
             <div id="userDetailContainer"></div>
 
         </div>
     </div>
 </div>
+
+
+@* 編輯資訊(彈窗) *@
+<div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" >
+            <div class="modal-header">
+                <h3 class="text-primary">編輯會員資料</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="editMemberContainer"></div>
+            <!-- 內容由 AJAX 載入 -->
+        </div>
+    </div>
+</div>
+
+
 
 @section Scripts {
 
@@ -167,4 +187,95 @@
                 });
         }
     </script>
+
+    @* 編輯 *@
+    <script>
+        const editMemberModal = new bootstrap.Modal(document.getElementById('editMemberModal'));
+
+        function showEditMember(userId) {
+            $('#editMemberContainer').html('載入中...');
+            $.get('@Url.Action("Edit", "AdminMember")', { userId: userId })
+                .done(function (data) {
+                    $('#editMemberContainer').html(data);
+                    editMemberModal.show();
+                })
+                .fail(function (xhr) {
+                    alert('載入失敗：' + xhr.status);
+                });
+        }
+
+                $(document).on('change', '#CityId', function () {
+            const cityId = $(this).val();
+            const townshipSelect = $('#TownshipId');
+
+            townshipSelect.empty().append($('<option>', {
+                value: '',
+                text: '載入中...'
+            }));
+
+            if (!cityId) return;
+
+            $.get(`/api/LocationApi/townships?cityId=${cityId}`)
+                .done(function (data) {
+                    townshipSelect.empty().append($('<option>', {
+                        value: '',
+                        text: '請選擇鄉鎮'
+                    }));
+                    data.forEach(t => {
+                        townshipSelect.append($('<option>', {
+                            value: t.id,
+                            text: t.name
+                        }));
+                    });
+                })
+                .fail(function () {
+                    townshipSelect.empty().append($('<option>', {
+                        value: '',
+                        text: '載入失敗，請重試'
+                    }));
+                });
+        });
+
+
+
+
+        
+                // 用 on() 綁定表單送出
+        $(document).on('submit', '#editMemberForm', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        //成功 
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editMemberModal'));
+                        modal.hide();
+
+                        //重新整理整個頁面或重新載入列表區塊
+                        location.reload();
+                    } else {
+                        // 驗證失敗
+                        $('#editMemberContainer').html(response);
+                    }
+                },
+                error: function () {
+                    alert('儲存失敗，請稍後再試');
+                }
+            });
+        });
+        
+
+    </script>
+
 }
+
+
+
+
+
+
+
+
