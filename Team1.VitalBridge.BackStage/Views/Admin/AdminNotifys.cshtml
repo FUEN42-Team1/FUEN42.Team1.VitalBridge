@@ -77,8 +77,8 @@
         </div>
     </div>
 </div>
-<div class="table-responsive table-rounded shadow-sm">
-    <table id="notifysTable" class="table table-striped table-bordered table-hover align-middle bg-white">
+<div class="table-responsive table-rounded shadow-sm w-100">
+    <table id="notifysTable" class="table table-striped table-bordered table-hover align-middle bg-white w-100">
         <thead class="table-info text-dark">
             <tr>
                 <th>@Html.DisplayNameFor(model => model.Id)</th>
@@ -137,7 +137,20 @@
             ,
           columns: [
           { data: 'id' },
-          { data: 'title' },
+          { data: 'title',
+            render: function (data, type, row) {
+              if(row.notifysUrl!=null)
+              {
+                  return `<a href="${row.notifysUrl}">
+                            ${data}
+                          </a>`;
+              }
+              else
+              {
+                return data;
+              }
+            }
+          },
           { data: 'categoriesName' },
           { data: 'sendDate' },
           { data: 'validityDate' },
