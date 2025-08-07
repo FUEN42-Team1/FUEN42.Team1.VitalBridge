@@ -43,7 +43,7 @@
                     <td>@role.Name</td>
                     <td>@role.Info</td>
                     <td>
-                        @if (role.isActive)
+                        @if (role.IsActive)
                         {
                             <span class="badge bg-success">啟用</span>
                         }
@@ -55,8 +55,13 @@
                     <td>@role.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>@role.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                     <td class="text-center">
-                        <a asp-action="Edit" asp-route-id="@role.RoleCode" class="btn btn-sm btn-warning me-1">編輯</a>
-                        <form asp-action="Delete" asp-route-id="@role.RoleCode" method="post" class="d-inline"
+                        <a asp-action="Edit"
+                           asp-route-roleCode="@role.RoleCode"
+                           class="btn btn-sm btn-warning me-1 edit-btn"
+                           data-default="@role.IsSystemDefault.ToString().ToLower()">
+                            編輯
+                        </a>
+                        <form asp-action="Delete" asp-route-roleCode="@role.RoleCode" method="post" class="d-inline"
                               onsubmit="return confirm('確定要停用這個身分嗎？');">
                             <button type="submit" class="btn btn-sm btn-danger">停用</button>
                         </form>
@@ -66,3 +71,28 @@
         }
     </tbody>
 </table>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.edit-btn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                const isDefault = this.dataset.default === "true";
+                if (isDefault) {
+                    e.preventDefault();
+
+                    // 呼叫 SweetAlert2 彈窗
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '禁止操作',
+                        text: '此為系統預設身分，無法編輯！',
+                        confirmButtonText: '了解'
+                    });
+                }
+            });
+        });
+    });
+</script>
+

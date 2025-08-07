@@ -3,7 +3,7 @@
 @{
     // @Url.Action("Login", "AdminAuth")
     ViewData["Title"] = "登入";
-   // Layout = "~/Views/Shared/_Layout.cshtml";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
     Layout = null; // 不使用任何 Layout
 }
 
@@ -229,7 +229,7 @@
 </div> *@
 
 
-
+@*
 <style>
     .weird-card {
         background: linear-gradient(135deg, #ff00aa, #00ffe1);
@@ -341,9 +341,97 @@
     </div>
 </div>
 
+*@
 
 
+<style>
+    body {
+        background-color: #008080;
+        font-family: 'Courier New', monospace;
+    }
 
+    .win98-card {
+        background-color: #C0C0C0;
+        border: 2px solid #000;
+        box-shadow: 4px 4px #808080;
+        padding: 20px;
+    }
+
+    .win98-title {
+        font-weight: bold;
+        font-size: 20px;
+        border-bottom: 2px solid #000;
+        margin-bottom: 20px;
+        padding-bottom: 5px;
+    }
+
+    .win98-label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .win98-input {
+        width: 100%;
+        padding: 5px;
+        border: 2px inset #fff;
+        background-color: #fff;
+        margin-bottom: 15px;
+        font-family: 'Courier New', monospace;
+    }
+
+    .win98-button {
+        background-color: #C0C0C0;
+        border: 2px outset #fff;
+        padding: 5px 15px;
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        margin-right: 10px;
+    }
+
+        .win98-button:hover {
+            background-color: #A0A0A0;
+        }
+
+    .text-right {
+        text-align: right;
+    }
+
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="win98-card">
+                <div class="win98-title">🖥️ 管理員登入</div>
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <label asp-for="Email" class="win98-label">電子郵件</label>
+                    <input asp-for="Email" class="win98-input" />
+
+                    <label asp-for="Password" class="win98-label">密碼</label>
+                    <input asp-for="Password" class="win98-input" type="password" />
+
+                    <div class="text-right">
+                        <button type="submit" class="win98-button">登入</button>
+                    </div>
+                </form>
+
+                <form method="post" asp-controller="AdminUsers" asp-action="SendResetPasswordLink" class="mt-3">
+                    <input type="hidden" name="AdminUserId" value="DDF16E3A-82D5-4546-A5AF-F7C90B39B22B" />
+                    <div class="text-right">
+                        <button type="submit" class="win98-button">重設密碼</button>
+                    </div>
+                </form>
+
+                <div class="text-right mt-3">
+                    <button type="button" class="win98-button" onclick="quickFill()">快速填入 (Dev)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
