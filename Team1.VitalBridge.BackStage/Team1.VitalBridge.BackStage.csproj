@@ -7,13 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\DTOs\**" />
     <Compile Remove="wwwroot\matrix-admin\**" />
-    <Content Remove="Models\DTOs\**" />
     <Content Remove="wwwroot\matrix-admin\**" />
-    <EmbeddedResource Remove="Models\DTOs\**" />
     <EmbeddedResource Remove="wwwroot\matrix-admin\**" />
-    <None Remove="Models\DTOs\**" />
     <None Remove="wwwroot\matrix-admin\**" />
   </ItemGroup>
 

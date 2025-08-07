@@ -12,6 +12,7 @@ using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Interface;
 using Team1.VitalBridge.BackStage.Models.Repository;
 using Team1.VitalBridge.BackStage.Models.Service;
+using Team1.VitalBridge.BackStage.Models.Interfaces;
 
 namespace Team1.VitalBridge.BackStage
 {
@@ -55,15 +56,8 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddScoped<IContentArticleRepository, ContentArticleRepository>();
             builder.Services.AddScoped<IContentArticleService, ContentArticleService>();
             //Johnny end
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
-            maxRetryCount: 10,  // 最多重試 10 次
-            maxRetryDelay: TimeSpan.FromSeconds(30), // 重試之間的延遲時間
-            errorNumbersToAdd: null // null 表示使用預設的 SQL Server 錯誤碼
-        )
-    )
-);
+
+             
 
 
 
