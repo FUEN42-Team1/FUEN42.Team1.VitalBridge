@@ -1,0 +1,180 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ProductCategoryTreeViewModel>
+
+@{
+    ViewData["Title"] = "商品類別";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <style>
+        .category-container {
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .add-category-btn {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+            .add-category-btn:hover {
+                background-color: #f1b4b8;
+                color: #721c24;
+            }
+
+        .category-content {
+            border: 2px solid #6c757d;
+            border-radius: 6px;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .main-category {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .category-group {
+            margin-bottom: 25px;
+        }
+
+        .parent-category {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .parent-category::after {
+            content: '▼';
+            position: absolute;
+            right: 0;
+            font-size: 12px;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+        }
+
+        .parent-category.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .sub-categories {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        .sub-category {
+            color: #6c757d;
+            margin-bottom: 6px;
+            padding: 4px 0;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .sub-category:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+        .collapse-transition {
+            transition: all 0.3s ease;
+        }
+
+        .sub-category.selected {
+            color: #007bff;
+            font-weight: 500;
+        }
+    </style>
+
+
+<div class="container">
+    <div class="category-container">
+        <!-- 新增商品類別按鈕 -->
+        <button type="button" class="btn add-category-btn" onclick="location.href='@Url.Action("Create", "ProductCategory")'">
+            新增商品類別
+        </button>
+
+        <!-- 內容區域 -->
+        <div class="category-content">
+            <div class="main-category">目前類別</div>
+
+            @{
+                var parentCategories = Model.Where(m => m.Level == 0).ToList();
+            }
+
+            @foreach (var parent in parentCategories)
+            {
+                <div class="category-group">
+                    <div class="parent-category collapsed" data-bs-toggle="collapse"
+                         data-bs-target="#category_@parent.Id" aria-expanded="false">
+                        @parent.Name
+                    </div>
+                    @{
+                        var children = Model.Where(m => m.Level == 1 && m.FatherId == parent.Id).ToList();
+                    }
+
+                    <div class="collapse collapse-transition" id="category_@parent.Id">
+                        <div class="sub-categories">
+                            @foreach (var child in children)
+                            {
+                                <div class="sub-category" data-id="@child.Id">@child.Name</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                
+            }
+
+            
+        </div>
+    </div>
+</div>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 處理展開/收合的箭頭動畫
+            $('.collapse').on('show.bs.collapse', function() {
+                var trigger = $('[data-bs-target="#' + this.id + '"]');
+                trigger.removeClass('collapsed');
+            });
+
+            $('.collapse').on('hide.bs.collapse', function() {
+                var trigger = $('[data-bs-target="#' + this.id + '"]');
+                trigger.addClass('collapsed');
+            });
+
+            // 子類別點擊效果
+            $('.sub-category').click(function() {
+                // 移除其他選中狀態
+                $('.sub-category').removeClass('selected');
+
+                // 添加選中狀態
+                $(this).addClass('selected');
+
+                // 獲取類別名稱
+                var categoryName = $(this).data('category');
+                console.log('選中類別：', categoryName);
+
+                // 可以在這裡添加 AJAX 請求或其他處理邏輯
+                // $.post('@Url.Action("SelectCategory", "Category")', { category: categoryName });
+            });
+        });
+    </script>
+}
