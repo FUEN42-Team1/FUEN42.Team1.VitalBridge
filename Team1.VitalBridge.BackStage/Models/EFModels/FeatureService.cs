@@ -14,17 +14,16 @@ public partial class FeatureService
     [Column("id")]
     public int Id { get; set; }
 
-    [Display(Name = "特色服務")]
     [Required]
     [Column("name")]
     [StringLength(100)]
     public string Name { get; set; }
 
+    [Column("isActive")]
     public bool IsActive { get; set; }
 
     public int? FileId { get; set; }
 
-    [Display(Name = "照片")]
     [ForeignKey("FileId")]
     [InverseProperty("FeatureServices")]
     public virtual FileStream File { get; set; }

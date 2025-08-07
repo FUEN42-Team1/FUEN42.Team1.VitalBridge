@@ -57,7 +57,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 .Include(o => o.City)
                 .Include(o => o.District)
                 .Include(o => o.Type)
-                .Include(o => o.Institution)
+                //.Include(o => o.Institution) // 新增的資料表的欄位
                 .Include(o => o.OrganizationFeatureServices)
                 .ThenInclude(ofs => ofs.FeatureService)
                 .Include(o => o.OrganizationServiceTargets)
@@ -83,7 +83,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                     AgeLimits = organization.AgeLimits,
                     Description = organization.Description,
                     MapUrl = organization.MapUrl,
-                    InstitutionName = organization.Institution.Name,
+                    //InstitutionName = organization.Institution.Name, // 新增的資料表的欄位
                     IsActive = organization.IsActive,
                     IsDeleted = organization.IsDeleted,
                     SubsidyInfoDescription = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfo.Description).ToList(),

@@ -14,7 +14,6 @@ public partial class RoomType
     [Column("id")]
     public int Id { get; set; }
 
-    [Display(Name = "房型名稱")]
     [Required]
     [Column("name")]
     [StringLength(20)]

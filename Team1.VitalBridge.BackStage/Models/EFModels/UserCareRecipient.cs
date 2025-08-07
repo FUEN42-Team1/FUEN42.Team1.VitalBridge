@@ -29,6 +29,12 @@ public partial class UserCareRecipient
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
+    [Required]
+    [Column("permissionLevel")]
+    [StringLength(30)]
+    [Unicode(false)]
+    public string PermissionLevel { get; set; }
+
     [ForeignKey("CareRecipientId")]
     [InverseProperty("UserCareRecipients")]
     public virtual CareRecipient CareRecipient { get; set; }

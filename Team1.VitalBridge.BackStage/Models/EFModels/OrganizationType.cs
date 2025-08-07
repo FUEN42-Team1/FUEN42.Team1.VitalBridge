@@ -14,7 +14,6 @@ public partial class OrganizationType
     [Column("id")]
     public int Id { get; set; }
 
-    [Display(Name = "類型名稱")]
     [Required]
     [Column("name")]
     [StringLength(100)]

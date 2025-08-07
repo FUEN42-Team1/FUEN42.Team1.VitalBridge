@@ -8,17 +8,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class InstitutionUserRole
+[Index("UserId", Name = "UQ__Institut__CB9A1CFE4B36A687", IsUnique = true)]
+public partial class InstitutionProfile
 {
     [Key]
     [Column("id")]
     public int Id { get; set; }
 
-    [Column("roleId")]
-    public int RoleId { get; set; }
-
     [Column("userId")]
     public int UserId { get; set; }
+
+    [Column("institutionId")]
+    public int InstitutionId { get; set; }
+
+    [Column("position")]
+    [StringLength(20)]
+    [Unicode(false)]
+    public string Position { get; set; }
+
+    [Column("isResponsible")]
+    public bool IsResponsible { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
@@ -26,11 +35,11 @@ public partial class InstitutionUserRole
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }
 
-    [ForeignKey("RoleId")]
-    [InverseProperty("InstitutionUserRoles")]
-    public virtual InstitutionRole Role { get; set; }
+    [ForeignKey("InstitutionId")]
+    [InverseProperty("InstitutionProfiles")]
+    public virtual Institution Institution { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("InstitutionUserRoles")]
-    public virtual InstitutionUser User { get; set; }
+    [InverseProperty("InstitutionProfile")]
+    public virtual User User { get; set; }
 }

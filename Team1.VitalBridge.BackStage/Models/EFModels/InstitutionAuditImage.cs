@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class InstitutionImage
+public partial class InstitutionAuditImage
 {
     [Key]
     [Column("id")]
@@ -24,12 +24,6 @@ public partial class InstitutionImage
     public string ImgName { get; set; }
 
     [Required]
-    [Column("imgUrl")]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string ImgUrl { get; set; }
-
-    [Required]
     [Column("mimeType")]
     [StringLength(50)]
     [Unicode(false)]
@@ -38,7 +32,13 @@ public partial class InstitutionImage
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
+    public int? FileId { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("InstitutionAuditImages")]
+    public virtual FileStream File { get; set; }
+
     [ForeignKey("InstitutionId")]
-    [InverseProperty("InstitutionImages")]
+    [InverseProperty("InstitutionAuditImages")]
     public virtual Institution Institution { get; set; }
 }
