@@ -42,7 +42,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string? MapUrl { get; set; }
 
         [Display(Name = "補貼資訊")]
-        public List<string> SubsidyInfoNames { get; set; } = new List<string>();
+        public List<string> SubsidyInfoDescription { get; set; } = new List<string>();
 
         [Display(Name = "特色服務")]
         public List<string> FeatureServiceNames { get; set; } = new List<string>();

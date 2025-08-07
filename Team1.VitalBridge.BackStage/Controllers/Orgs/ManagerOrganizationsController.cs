@@ -19,10 +19,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             _context = context;
         }
 
-        // GET: ManagerOrganizations (Index 方法保持不變)
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string keyword = "")
         {
-            // ... (程式碼保持不變)
             var query = _context.Organizations
                 .AsNoTracking()
                 .Where(o => !o.IsDeleted)
@@ -38,6 +36,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
+            // 獲取分頁後的項目列表
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -51,6 +50,60 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 })
                 .ToListAsync();
 
+            // 為了能在 Index 頁面中直接生成模態視窗，我們需要預先載入所有詳細資訊
+            var organizationIds = items.Select(i => i.Id).ToList();
+            var detailsList = await _context.Organizations
+                .AsNoTracking()
+                .Include(o => o.City)
+                .Include(o => o.District)
+                .Include(o => o.Type)
+                .Include(o => o.Institution)
+                .Include(o => o.OrganizationFeatureServices)
+                .ThenInclude(ofs => ofs.FeatureService)
+                .Include(o => o.OrganizationServiceTargets)
+                .ThenInclude(ost => ost.ServiceTarget)
+                .Include(o => o.OrganizationSubsidyInfos)
+                .ThenInclude(osi => osi.SubsidyInfo)
+                .Include(o => o.OrganizationRooms)
+                .ThenInclude(or => or.RoomType)
+                .Where(o => organizationIds.Contains(o.Id)) // 只查詢當前頁面上的機構
+                .Select(organization => new ManagerOrganizationDetailsViewModel
+                {
+                    Id = organization.Id,
+                    Name = organization.Name,
+                    PhotoUrl = organization.PhotoUrl,
+                    CityId = organization.CityId,
+                    CityName = organization.City.Name,
+                    DistrictId = organization.DistrictId,
+                    DistrictName = organization.District.Name,
+                    Address = organization.Address,
+                    TypeId = organization.TypeId,
+                    TypeName = organization.Type.Name,
+                    BedCount = organization.BedCount,
+                    AgeLimits = organization.AgeLimits,
+                    Description = organization.Description,
+                    MapUrl = organization.MapUrl,
+                    InstitutionName = organization.Institution.Name,
+                    IsActive = organization.IsActive,
+                    IsDeleted = organization.IsDeleted,
+                    SubsidyInfoDescription = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfo.Description).ToList(),
+                    FeatureServiceNames = organization.OrganizationFeatureServices.Select(ofs => ofs.FeatureService.Name).ToList(),
+                    ServiceTargetNames = organization.OrganizationServiceTargets.Select(ost => ost.ServiceTarget.Name).ToList(),
+                    Rooms = organization.OrganizationRooms.Select(r => new OrganizationRoomViewModel
+                    {
+                        Id = r.Id,
+                        OrganizationId = r.OrganizationId,
+                        RoomTypeId = r.RoomTypeId,
+                        RoomTypeName = r.RoomType.Name,
+                        MonthlyPrice = r.MonthlyPrice,
+                        RoomQuantity = r.RoomQuantity,
+                        HasDeposit = r.HasDeposit,
+                        DepositAmount = r.DepositAmount,
+                        DepositMonths = r.DepositMonths
+                    }).ToList()
+                })
+                .ToListAsync();
+
             var result = new PaginatedResult<ManagerOrganizationsViewModel>
             {
                 Items = items,
@@ -61,98 +114,17 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             };
 
             ViewBag.Keyword = keyword;
+            ViewBag.DetailsViewModels = detailsList; // 將詳細資訊列表傳遞給 View
 
             return View(result);
         }
 
-        // GET: ManagerOrganizations/DetailsPartial/5
-        // 此方法將用來獲取部分視圖的內容，以在模態視窗中顯示
-        public async Task<IActionResult> DetailsPartial(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var organization = await _context.Organizations
-                .AsNoTracking()
-                .Include(o => o.Institution)
-                .Include(o => o.City)
-                .Include(o => o.District)
-                .Include(o => o.Type)
-                .Include(o => o.OrganizationSubsidyInfos)
-                    .ThenInclude(osi => osi.SubsidyInfo)
-                .Include(o => o.OrganizationFeatureServices)
-                    .ThenInclude(ofs => ofs.FeatureService)
-                .Include(o => o.OrganizationServiceTargets)
-                    .ThenInclude(ost => ost.ServiceTarget)
-                .Include(o => o.OrganizationRooms)
-                    .ThenInclude(or => or.RoomType)
-                .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
 
-            if (organization == null)
-            {
-                return NotFound();
-            }
 
-            var viewModel = new ManagerOrganizationDetailsViewModel
-            {
-                // ... (這裡的 ViewModel 映射邏輯保持不變)
-                Id = organization.Id,
-                Name = organization.Name,
-                PhotoUrl = organization.PhotoUrl,
-                BedCount = organization.BedCount,
-                Address = organization.Address,
-                Description = organization.Description,
-                MapUrl = organization.MapUrl,
-                AgeLimits = organization.AgeLimits,
-
-                CityId = organization.CityId,
-                CityName = organization.City?.Name,
-                DistrictId = organization.DistrictId,
-                DistrictName = organization.District?.Name,
-                TypeId = organization.TypeId,
-                TypeName = organization.Type?.Name,
-
-                InstitutionName = organization.Institution?.Name,
-
-                SubsidyInfoNames = organization.OrganizationSubsidyInfos
-                    .Select(osi => osi.SubsidyInfo.Description)
-                    .ToList(),
-                FeatureServiceNames = organization.OrganizationFeatureServices
-                    .Select(ofs => ofs.FeatureService.Name)
-                    .ToList(),
-                ServiceTargetNames = organization.OrganizationServiceTargets
-                    .Select(ost => ost.ServiceTarget.Name)
-                    .ToList(),
-
-                Rooms = organization.OrganizationRooms
-                    .Select(or => new OrganizationRoomViewModel
-                    {
-                        Id = or.Id,
-                        OrganizationId = or.OrganizationId,
-                        RoomTypeId = or.RoomTypeId,
-                        RoomTypeName = or.RoomType?.Name,
-                        MonthlyPrice = or.MonthlyPrice,
-                        RoomQuantity = or.RoomQuantity,
-                        HasDeposit = or.HasDeposit,
-                        DepositAmount = or.DepositAmount,
-                        DepositMonths = or.DepositMonths
-                    })
-                    .ToList(),
-
-                IsActive = organization.IsActive,
-                IsDeleted = organization.IsDeleted
-            };
-
-            return PartialView("_DetailsPartial", viewModel);
-        }
-
-        // POST: Toggle Active Status (這個方法保持不變)
         [HttpPost]
         public async Task<IActionResult> ToggleActive(int id)
         {
-            // ... (程式碼保持不變)
             var organization = await _context.Organizations.FindAsync(id);
             if (organization == null)
             {

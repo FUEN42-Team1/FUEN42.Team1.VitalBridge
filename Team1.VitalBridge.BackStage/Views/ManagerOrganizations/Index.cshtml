@@ -54,7 +54,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-info btn-sm btn-details" data-bs-toggle="modal" data-bs-target="#detailsModal" data-bs-id="@item.Id">詳情</button>
+                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#detailsModal_@item.Id">詳情</button>
                                 </td>
                             </tr>
                         }
@@ -91,133 +91,176 @@
     </div>
 </div>
 
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
+@foreach (var item in Model.Items)
+{
+    var organizationDetails = (ViewBag.DetailsViewModels as List<ManagerOrganizationDetailsViewModel>)
+        .FirstOrDefault(d => d.Id == item.Id);
+
+    if (organizationDetails != null)
+    {
+        <div class="modal fade" id="detailsModal_@item.Id" tabindex="-1" aria-labelledby="detailsModalLabel_@item.Id" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailsModalLabel_@item.Id">機構詳情 - @organizationDetails.Name</h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            @if (!string.IsNullOrEmpty(organizationDetails.PhotoUrl))
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@organizationDetails.PhotoUrl" class="img-fluid rounded" alt="機構照片" style="max-height: 300px; object-fit: cover;">
+                                </div>
+                            }
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <p><strong>名稱:</strong> @organizationDetails.Name</p>
+                                    <p><strong>所屬機構名稱:</strong> @organizationDetails.InstitutionName</p>
+                                    <p><strong>機構類別名稱:</strong> @organizationDetails.TypeName</p>
+                                    <p><strong>地址:</strong> @organizationDetails.CityName @organizationDetails.DistrictName @organizationDetails.Address</p>
+                                    <p><strong>床位數:</strong> @organizationDetails.BedCount</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>收容年齡限制:</strong> @organizationDetails.AgeLimits</p>
+                                    <p><strong>Google 地圖連結:</strong> <a href="@organizationDetails.MapUrl" target="_blank">點擊前往</a></p>
+                                    <p><strong>是否啟用:</strong> @(organizationDetails.IsActive ? "是" : "否")</p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>機構簡述:</strong> @organizationDetails.Description</p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>政府補助資訊:</strong> @string.Join(", ", organizationDetails.SubsidyInfoDescription)</p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>特色服務:</strong> @string.Join(", ", organizationDetails.FeatureServiceNames)</p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>服務對象:</strong> @string.Join(", ", organizationDetails.ServiceTargetNames)</p>
+                                </div>
+                            </div>
+                            <hr />
+
+                            <h5>房型資訊</h5>
+                            @if (organizationDetails.Rooms.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>房型名稱</th>
+                                                <th>每月費用</th>
+                                                <th>房間數量</th>
+                                                <th>是否需要押金</th>
+                                                <th>押金金額</th>
+                                                <th>押金月數</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var room in organizationDetails.Rooms)
+                                            {
+                                                <tr>
+                                                    <td>@Html.DisplayFor(modelItem => room.RoomTypeName)</td>
+                                                    <td>@room.MonthlyPrice?.ToString("C0")</td>
+                                                    <td>@Html.DisplayFor(modelItem => room.RoomQuantity)</td>
+                                                    <td>
+                                                        @if (room.HasDeposit.GetValueOrDefault())
+                                                        {
+                                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-x-circle-fill text-danger"></i>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (room.HasDeposit.GetValueOrDefault())
+                                                        {
+                                                            @room.DepositAmount?.ToString("C0")
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>-</span>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (room.HasDeposit.GetValueOrDefault())
+                                                        {
+                                                            @Html.DisplayFor(modelItem => room.DepositMonths)
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>-</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p>無房型資訊。</p>
+                            }
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
-@section Styles {
-    <style>
-        .table thead th {
-            background-color: #e2f3f5;
-            color: #000;
-            border-bottom: 2px solid #d1d3e2;
-            white-space: nowrap;
-        }
-
-        .modal-header, .modal-footer {
-            background-color: #f8f9fa;
-        }
-
-        .btn-info {
-            background-color: #36b9cc;
-            border-color: #36b9cc;
-            color: white;
-        }
-
-            .btn-info:hover {
-                background-color: #2c9faf;
-                border-color: #2a96a9;
-                color: white;
-            }
-    </style>
+    }
 }
 
 @section Scripts {
+    <script src="~/sb-admin/vendor/jquery/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 啟用/停用切換開關的邏輯
-            document.querySelectorAll('.toggle-active-switch').forEach(function (switchElement) {
-                switchElement.addEventListener('change', function () {
-                    const organizationId = this.dataset.id;
-                    const isChecked = this.checked;
+        $(document).ready(function () {
+            // 啟用/停用切換開關的邏輯 (使用 jQuery)
+            $('.toggle-active-switch').on('change', function () {
+                const organizationId = $(this).data('id');
+                const isChecked = $(this).prop('checked');
+                const switchElement = $(this);
 
-                    fetch(`@Url.Action("ToggleActive", "ManagerOrganizations")?id=${organizationId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '操作成功',
-                                text: `${data.organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: '操作失敗',
-                                text: data.message,
-                            });
-                            this.checked = !isChecked;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
+                fetch(`@Url.Action("ToggleActive", "ManagerOrganizations")?id=${organizationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '操作成功',
+                            text: `${data.organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
-                            title: '系統錯誤',
-                            text: '操作過程中發生錯誤，請稍後再試。'
+                            title: '操作失敗',
+                            text: data.message,
                         });
-                        this.checked = !isChecked;
+                        switchElement.prop('checked', !isChecked);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '系統錯誤',
+                        text: '操作過程中發生錯誤，請稍後再試。'
                     });
+                    switchElement.prop('checked', !isChecked);
                 });
             });
-
-            // 詳情模態視窗的邏輯
-            const detailsModalElement = document.getElementById('detailsModal');
-            if (detailsModalElement) {
-                detailsModalElement.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const organizationId = button.getAttribute('data-bs-id');
-                    const modalContent = detailsModalElement.querySelector('.modal-content');
-
-                    // 顯示載入中的訊息，給予使用者回饋
-                    modalContent.innerHTML = `
-                        <div class="modal-body text-center p-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-2">載入中...</p>
-                        </div>
-                    `;
-
-                    // 載入 partial view
-                    fetch(`@Url.Action("_DetailsPartial", "ManagerOrganizations", new { id = -1 })`.replace('-1', organizationId))
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.text();
-                        })
-                        .then(html => {
-                            modalContent.innerHTML = html;
-                        })
-                        .catch(error => {
-                            console.error('Error loading partial view:', error);
-                            modalContent.innerHTML = `
-                                <div class="modal-header">
-                                    <h5 class="modal-title">錯誤</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>無法載入詳情內容。請稍後再試。</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                                </div>
-                            `;
-                        });
-                });
-            }
         });
     </script>
 }
