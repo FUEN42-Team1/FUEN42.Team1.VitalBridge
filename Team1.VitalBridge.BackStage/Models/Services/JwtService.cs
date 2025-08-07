@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace MvcDemo.Models.Services
+namespace Team1.VitalBridge.BackStage.Models.Services
 {
     public class JwtService
     {

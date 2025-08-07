@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using Team1.VitalBridge.BackStage.Models.EFModels;
-using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.Repositories;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Interface;
@@ -34,6 +33,9 @@ namespace Team1.VitalBridge.BackStage
             //    options.UseSqlServer(connectionString));
 
             // 註冊 AppDbContext
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -53,6 +55,17 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddScoped<IContentArticleRepository, ContentArticleRepository>();
             builder.Services.AddScoped<IContentArticleService, ContentArticleService>();
             //Johnny end
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,  // 最多重試 10 次
+            maxRetryDelay: TimeSpan.FromSeconds(30), // 重試之間的延遲時間
+            errorNumbersToAdd: null // null 表示使用預設的 SQL Server 錯誤碼
+        )
+    )
+);
+
+
 
 
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
@@ -67,6 +80,11 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddScoped<NotifyUserService>();
 
 
+            //KueiFu
+            //註冊生成JWT Token 服務
+            builder.Services.AddScoped<JwtService>();
+            //縣市、鄉鎮服務
+            builder.Services.AddScoped<LocationService>();
 
 
 
@@ -142,7 +160,7 @@ namespace Team1.VitalBridge.BackStage
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.MapControllers();
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -178,17 +196,18 @@ namespace Team1.VitalBridge.BackStage
                 {
                     OnMessageReceived = context =>
                     {
-                        // 從參數傳入的 cookieName 中讀取 Token
+                        // 從參數傳入的 cookieName 中讀取 Token 並作驗證
                         context.Token = context.Request.Cookies[cookieName];
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
-                    {
+                    {   // 驗證失敗時的處理
                         Console.WriteLine($"JWT Authentication for {cookieName} failed: {context.Exception.Message}");
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
+                        // 驗證成功時的處理
                         Console.WriteLine($"JWT Token for {cookieName} successfully validated!");
                         return Task.CompletedTask;
                     },
@@ -204,11 +223,11 @@ namespace Team1.VitalBridge.BackStage
                         }
                         else if (cookieName == "institution_auth_token")
                         {
-                            loginPath = "/Institution/Login";
+                            loginPath = "/Institution/InstitutionAuth/Login";
                         }
                         else if (cookieName == "admin_auth_token")
                         {
-                            loginPath = "/Admin/Auth/Login";
+                            loginPath = "/Admin/AdminAuth/Login";
                         }
                         else
                         {
