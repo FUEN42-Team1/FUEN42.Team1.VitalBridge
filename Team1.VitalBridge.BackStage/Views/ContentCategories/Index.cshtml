@@ -1,0 +1,180 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ContentCategoryViewModel>
+
+@{
+	ViewData["Title"] = "Index";
+	<style>
+		body {
+			font-family: 'Arial', sans-serif;
+		}
+
+		.category-list {
+			list-style: none;
+			padding: 0;
+		}
+
+		.category-item {
+			margin-bottom: 5px;
+			padding: 8px 0;
+			display: flex;
+			align-items: center;
+		}
+
+		.category-item:hover {
+			background-color: #f0f0f0;
+		}
+
+		.category-toggle {
+			cursor: pointer;
+			margin-right: 10px;
+			color: #555;
+			transition: transform 0.2s;
+		}
+
+		.category-toggle.expanded {
+			transform: rotate(90deg);
+		}
+
+		.category-name {
+			flex-grow: 1;
+			font-weight: 500;
+		}
+
+		.category-actions {
+			margin-left: auto;
+		}
+
+		.category-actions a {
+			color: #007bff;
+			text-decoration: none;
+			margin-left: 10px;
+		}
+
+		.category-actions a:hover {
+			text-decoration: underline;
+		}
+
+		.subcategories-container {
+			list-style: none;
+			padding-left: 20px;
+			border-left: 1px solid #ccc;
+			margin-left: 10px;
+		}
+
+		.create-link-item {
+			padding: 8px 0;
+		}
+
+		.create-link-item a {
+			color: #28a745;
+			text-decoration: none;
+			font-weight: bold;
+		}
+
+	</style>
+}
+
+<h1>Index</h1>
+
+<h2>Category Management</h2>
+<div id="category-tree">
+	@* Initial rendering of top-level categories *@
+	@if (Model != null && Model.Any())
+	{
+		<ul class="category-list">
+			@foreach (var category in Model)
+			{
+				<li class="category-item" data-id="@category.Id">
+					<span class="category-toggle fa-solid fa-plus-square" data-id="@category.Id" data-expanded="false"></span>
+					<span class="category-name">@category.Name</span>
+					<span class="category-actions">
+						<a href="@Url.Action("Edit", "ContentCategories", new { id = category.Id })">Edit</a>
+					</span>
+				</li>
+				<li class="subcategories-placeholder" id="subcategories-@category.Id" style="display:none;"></li>
+			}
+			<li class="create-link-item">
+				<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+			</li>
+		</ul>
+	}
+	else
+	{
+		<p>No categories found.</p>
+		<li class="create-link-item">
+			<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+		</li>
+	}
+</div>
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+
+			// Handle click on the plus/minus icon
+			// $(document).on('click', '.category-toggle', function () {
+			$(document).on('click', '.category-item', function (e) {
+				const itemElement = $(this);
+				const toggleElement = itemElement.find('.category-toggle');
+				// const toggleElement = $(this);
+				const categoryId = toggleElement.data('id');
+				const isExpanded = toggleElement.data('expanded');
+				const subcategoriesContainer = $(`#subcategories-${categoryId}`);
+
+				//🛑 Prevent toggle if clicking on .category-actions or links
+				if ($(e.target).closest('.category-actions, a').length > 0) return;
+
+				if (isExpanded === false) {
+					// Not expanded, so fetch subcategories via AJAX
+					toggleElement.removeClass('fa-plus-square').addClass('fa-minus-square');
+					subcategoriesContainer.show();
+					toggleElement.data('expanded', true);
+
+					// Check if subcategories have already been loaded
+					if (subcategoriesContainer.children().length === 0) {
+						// AJAX call to the API endpoint
+						// This is a placeholder URL. Replace with your actual API route.
+						$.ajax({
+							url: '/api/ContentCategoriesAPI/SubCategories/' + categoryId,
+							method: 'GET',
+							success: function (subcategories) {
+								let html = '';
+								html += `<ul class="category-list subcategories-container">`;
+								if (subcategories && subcategories.length > 0) {
+									$.each(subcategories, function (index, subcategory) {
+										html += `
+											<li class="category-item" data-id="${subcategory.id}">
+												<span class="category-toggle fa-solid fa-plus-square" data-id="${subcategory.id}" data-expanded="false"></span>
+												<span class="category-name ">${subcategory.name}</span>
+												<span class="category-actions">
+													<a href="@Url.Action("Edit", "ContentCategories")?id=${subcategory.id}">Edit</a>
+												</span>
+											</li>
+											<li class="subcategories-placeholder" id="subcategories-${subcategory.id}" style="display:none;"></li>
+										`;
+									});
+								} else {
+									html += '<li>no subcategories found</li>';
+								}
+								// Add the 'Create' link for this level
+								html += `<li class="create-link-item">
+									<a href="@Url.Action("Create", "ContentCategories")?parentId=${categoryId}">Create Subcategory</a>
+								</li>`;
+								html += `</ul>`;
+								subcategoriesContainer.append(html);
+							},
+							error: function (error) {
+								console.error('Error fetching subcategories:', error);
+								subcategoriesContainer.append(`<p style="margin-left: 20px; color: red;">Failed to load subcategories.</p>`);
+							}
+						});
+					}
+				} else {
+					// Already expanded, so collapse
+					toggleElement.removeClass('fa-minus-square').addClass('fa-plus-square');
+					subcategoriesContainer.hide();
+					toggleElement.data('expanded', false);
+				}
+			});
+		});
+	</script>
+}
