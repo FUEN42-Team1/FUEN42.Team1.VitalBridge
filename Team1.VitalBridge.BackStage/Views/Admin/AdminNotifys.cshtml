@@ -99,8 +99,7 @@
 
     <!-- DataTables CSS & JS -->
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>ㄈ
     <script>
         $(document).ready(function () {
             $.ajax({
@@ -309,7 +308,7 @@
     </script>
     <script>
         $(document).ready(function(){
-
+            //移除通知對象
             $(document).on('click','.btn-deleteUser',function(e){
                   Swal.fire({
                     title: "確定要刪除嗎?",
@@ -342,7 +341,7 @@
                 });
             });
 
-
+            //送出新增通知表單
             $(document).on('click','.btn-create',function(e){
                   const payload = {
                     text: $('#CreateText').val(),
@@ -360,17 +359,19 @@
                     data: JSON.stringify(payload),
                     success: function (response) {
                       Swal.fire('新增成功', '資料已新增', 'success');
+                      $("#CreateForm")[0].reset();
                       //關閉視窗
-                      bootstrap.Modal.getInstance($('#CreateNotify')).hide();
+                      $("#CreateNotify").modal("hide");
                       //更新table
                       $('#notifysTable').DataTable().ajax.reload(null, false);
                     },
                     error: function (xhr) {
-                      Swal.fire('❌ 錯誤', `新增失敗：${xhr.responseText}`, 'error');
+                      Swal.fire('❌ 錯誤', `新增失敗`, 'error');
                     }
                   });
             });
 
+            //儲存通知變更
             $(document).on('click','.btn-save',function(e){
                 const id = $('#editId').val(); // 取得 ID
                   const payload = {
@@ -388,17 +389,19 @@
                     contentType: 'application/json',
                     data: JSON.stringify(payload),
                     success: function (response) {
-                      Swal.fire('更新成功', '資料已儲存', 'success');
-                      //關閉視窗
-                      bootstrap.Modal.getInstance($('#staticBackdrop')).hide();
-                      //更新table
-                      $('#notifysTable').DataTable().ajax.reload(null, false);
+                      $("#staticBackdrop").modal("hide");
+                      Swal.fire('更新成功', '資料已儲存', 'success').then(()=>{
+                          //更新table
+                          $('#notifysTable').DataTable().ajax.reload(null, false);
+                      });
                     },
                     error: function (xhr) {
-                      Swal.fire('❌ 錯誤', `更新失敗：${xhr.responseText}`, 'error');
+                      Swal.fire('❌ 錯誤', `更新失敗`, 'error');
                     }
                   });
             });
+
+            //刪除通知
             $(document).on('click', '.btn-delete', function (e) {
               e.preventDefault();
 

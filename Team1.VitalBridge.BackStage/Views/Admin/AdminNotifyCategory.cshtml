@@ -30,7 +30,7 @@
     </div>
 </div>
 <!-- 新增Modal -->
-<div class="modal fade" id="editCategoryModal2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editCategoryLabel" aria-hidden="true">
+<div class="modal fade" id="createCategoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createCategoryLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -96,6 +96,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
+
+            //切換開關
             $(".toggle-enable").change(function () {
                 var categoryId = $(this).data("id");
                 var newEnable = $(this).is(":checked");
@@ -157,7 +159,7 @@
             // });
         });
         $(document).ready(function () {
-            // 開啟 Modal
+            // 編輯分類
             $(".edit-btn").click(function () {
                 const categoryId = $(this).data("id");
                 const categoryName = $(this).data("name");
@@ -167,9 +169,7 @@
             });
 
             $(".create-btn").click(function () {
-                const categoryId = $(this).data("id");
-                const categoryName = $(this).data("name");
-                $("#editCategoryModal2").modal("show");
+                $("#createCategoryModal").modal("show");
             });
 
             // 儲存分類名稱
@@ -217,7 +217,7 @@
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
-                            $("#createCategoryModal2").modal("hide");
+                            $("#createCategoryModal").modal("hide");
                             location.reload();
                         });
                     },

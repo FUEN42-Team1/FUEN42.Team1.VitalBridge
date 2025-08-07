@@ -23,8 +23,8 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             Notify notify = new Notify
             {
                 Title = notifyDTO.Title,
-                Text = notifyDTO.Text,
-                NotifysUrl = notifyDTO.NotifysUrl,
+                Text = string.IsNullOrEmpty(notifyDTO.Text) ? null : notifyDTO.Text,
+                NotifysUrl = string.IsNullOrEmpty(notifyDTO.NotifysUrl) ? null : notifyDTO.NotifysUrl,
                 CategoriesId = notifyDTO.CategoriesId,
                 SendDate = notifyDTO.SendDate,
                 ValidityDate = notifyDTO.ValidityDate

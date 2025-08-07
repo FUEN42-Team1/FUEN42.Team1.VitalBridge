@@ -22,12 +22,12 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             PlateImage image = new PlateImage
             {
                 PlateId = vm.PlateId,
-                Introduct = vm.Introduct,
+                Introduct = string.IsNullOrEmpty(vm.Introduct) ? null : vm.Introduct,
                 ImageFileId = FileId,
                 StartDate = vm.StartDate,
                 EndDate = vm.EndDate,
                 DisplayOrder = null,
-                ClickUrl = vm.ClickUrl,
+                ClickUrl = string.IsNullOrEmpty(vm.ClickUrl) ? null : vm.ClickUrl,
                 ClickNumber = null
             };
             _context.PlateImages.Add(image);
