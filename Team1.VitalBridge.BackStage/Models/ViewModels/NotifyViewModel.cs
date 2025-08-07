@@ -8,6 +8,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public int Id { get; set; }
         [Display(Name = "標題")]
         public string Title { get; set; }
+        [Display(Name = "說明文字")]
+        public string Text { get; set; }
         [Display(Name = "連結")]
         public string? NotifysUrl { get; set; }
 

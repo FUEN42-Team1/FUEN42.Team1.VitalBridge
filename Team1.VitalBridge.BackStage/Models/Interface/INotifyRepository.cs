@@ -1,4 +1,5 @@
 ﻿using Team1.VitalBridge.BackStage.Models.DataTables;
+using Team1.VitalBridge.BackStage.Models.Dto;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
 
@@ -8,7 +9,7 @@ namespace Team1.VitalBridge.BackStage.Models.Interface
     {
         public List<Notify> GetAllNotify();
         public Notify GetNotifyById(int id);
-        public void CreateNotify();
+        public void CreateNotify(CreateNotifyDTO notifyDTO);
 
         public int GetTotalCount();
 

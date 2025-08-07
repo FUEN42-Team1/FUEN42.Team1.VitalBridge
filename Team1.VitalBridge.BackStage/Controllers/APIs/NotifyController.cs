@@ -5,6 +5,7 @@ using Team1.VitalBridge.BackStage.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 
 namespace Team1.VitalBridge.BackStage.Controllers.APIs
 {
@@ -24,6 +25,24 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             var notify = _service.GetNotifyById(id);
 
             return Ok(notify);
+        }
+        [HttpGet("getUser/{id}")]
+        public IActionResult GetUser(int id)
+        {
+            var notify = _service.GetNotifyUserById(id);
+
+            return Ok(notify);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] CreateNotifyDTO notify)
+        {
+            if (notify == null)
+            {
+                return BadRequest("Error");
+            }
+            _service.CreateNotify(notify);
+            return Ok();
         }
 
         [HttpPost("getByPage")]
@@ -61,6 +80,13 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         public IActionResult Delete([FromForm] int id)
         {
             _service.DeleteNotify(id);
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, Notify notify)
+        {
+            _service.UpdateNotify(id, notify);
             return Ok();
         }
         public class DataTableResponse<T>

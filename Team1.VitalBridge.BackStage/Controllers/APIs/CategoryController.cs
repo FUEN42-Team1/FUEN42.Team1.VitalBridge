@@ -48,23 +48,43 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         [HttpPut("PutEnable")]
         public IActionResult PutEnable([FromForm] int id, [FromForm] bool enable)
         {
-
-            _service.setEnable(id, enable);
-            return Ok();
+            try
+            {
+                _service.setEnable(id, enable);
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut]
         public IActionResult Put([FromForm] int id, [FromForm] string name)
         {
-            _service.setName(id, name);
-            return Ok();
+            try
+            {
+                _service.setName(id, name);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         public IActionResult Post([FromForm] string name)
         {
-            _service.CreateCategory(name);
-            return Ok();
+            try
+            {
+                _service.CreateCategory(name);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

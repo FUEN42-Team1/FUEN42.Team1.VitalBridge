@@ -54,6 +54,8 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddScoped<NotifyService>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<CategoryService>();
+            builder.Services.AddScoped<INotifyUserRepository, NotifyUserRepository>();
+            builder.Services.AddScoped<NotifyUserService>();
 
 
 
