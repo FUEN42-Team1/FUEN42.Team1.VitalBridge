@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
 [Table("Payment")]
-[Index("OrderId", Name = "UQ__Payment__0809335C8A800477", IsUnique = true)]
+[Index("OrderId", Name = "UQ__Payment__0809335C1D2F0D0E", IsUnique = true)]
 public partial class Payment
 {
     [Key]

@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Email", Name = "UQ__Users__AB6E61643D72BB39", IsUnique = true)]
-[Index("UserId", Name = "UQ__Users__CB9A1CFEC37F768D", IsUnique = true)]
+[Index("Email", "AccountType", Name = "UQ__Users__C984845987E5F1AF", IsUnique = true)]
+[Index("UserId", Name = "UQ__Users__CB9A1CFEFC095A20", IsUnique = true)]
 public partial class User
 {
     [Key]
@@ -44,17 +44,6 @@ public partial class User
     [Unicode(false)]
     public string Phone { get; set; }
 
-    [Column("cityId")]
-    public int? CityId { get; set; }
-
-    [Column("townshipId")]
-    public int? TownshipId { get; set; }
-
-    [Column("address")]
-    [StringLength(100)]
-    [Unicode(false)]
-    public string Address { get; set; }
-
     [Required]
     [Column("status")]
     [StringLength(20)]
@@ -86,12 +75,26 @@ public partial class User
     [Column("lastLoginAt", TypeName = "datetime")]
     public DateTime? LastLoginAt { get; set; }
 
+    [Required]
+    [Column("accountType")]
+    [StringLength(30)]
+    [Unicode(false)]
+    public string AccountType { get; set; }
+
+    [Column("failedLoginCount")]
+    public int? FailedLoginCount { get; set; }
+
+    [Column("lockedUntil", TypeName = "datetime")]
+    public DateTime? LockedUntil { get; set; }
+
+    [InverseProperty("User")]
+    public virtual AdminProfile AdminProfile { get; set; }
+
+    [InverseProperty("InviterUser")]
+    public virtual ICollection<CareRecipientInvitation> CareRecipientInvitations { get; set; } = new List<CareRecipientInvitation>();
+
     [InverseProperty("Customer")]
     public virtual Cart Cart { get; set; }
-
-    [ForeignKey("CityId")]
-    [InverseProperty("Users")]
-    public virtual City City { get; set; }
 
     [InverseProperty("Customer")]
     public virtual ICollection<CouponRecord> CouponRecords { get; set; } = new List<CouponRecord>();
@@ -109,17 +112,19 @@ public partial class User
     public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
     [InverseProperty("User")]
+    public virtual InstitutionProfile InstitutionProfile { get; set; }
+
+    [InverseProperty("User")]
     public virtual ICollection<Log> Logs { get; set; } = new List<Log>();
+
+    [InverseProperty("User")]
+    public virtual MemberProfile MemberProfile { get; set; }
 
     [InverseProperty("User")]
     public virtual ICollection<NotifyUser> NotifyUsers { get; set; } = new List<NotifyUser>();
 
     [InverseProperty("Customer")]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
-    [ForeignKey("TownshipId")]
-    [InverseProperty("Users")]
-    public virtual Township Township { get; set; }
 
     [InverseProperty("User")]
     public virtual ICollection<UserCareRecipient> UserCareRecipients { get; set; } = new List<UserCareRecipient>();

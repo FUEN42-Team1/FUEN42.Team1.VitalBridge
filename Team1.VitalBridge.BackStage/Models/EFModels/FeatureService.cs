@@ -19,6 +19,9 @@ public partial class FeatureService
     [StringLength(100)]
     public string Name { get; set; }
 
+    [Column("isActive")]
+    public bool IsActive { get; set; }
+
     public int? FileId { get; set; }
 
     [ForeignKey("FileId")]

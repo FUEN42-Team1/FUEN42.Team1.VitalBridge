@@ -62,22 +62,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
 						Level = 1
 
 					});
-
-					//5. 第三層
-					var childrenthird = categories.Where(c => c.FatherId == child.Id).ToList();
-					foreach (var childthree in childrenthird)
-					{
-						categoryTreelist.Add(new ProductCategoryTreeViewModel
-						{
-							Id = childthree.Id,
-							Name = childthree.Name,
-							FatherId = childthree.FatherId,
-							IsActive = childthree.IsActive,
-							Level = 2
-
-						});
-
-					}
 				}
 			}
 			return View(categoryTreelist);

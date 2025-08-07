@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class Log
+[Index("UserId", Name = "UQ__MemberPr__CB9A1CFE44407F16", IsUnique = true)]
+public partial class MemberProfile
 {
     [Key]
     [Column("id")]
@@ -17,26 +18,32 @@ public partial class Log
     [Column("userId")]
     public int UserId { get; set; }
 
-    [Column("info")]
+    [Column("cityId")]
+    public int? CityId { get; set; }
+
+    [Column("townshipId")]
+    public int? TownshipId { get; set; }
+
+    [Column("address")]
     [StringLength(100)]
     [Unicode(false)]
-    public string Info { get; set; }
-
-    [Required]
-    [Column("type")]
-    [StringLength(30)]
-    [Unicode(false)]
-    public string Type { get; set; }
+    public string Address { get; set; }
 
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("ipAddress")]
-    [StringLength(50)]
-    [Unicode(false)]
-    public string IpAddress { get; set; }
+    [Column("updatedAt", TypeName = "datetime")]
+    public DateTime UpdatedAt { get; set; }
+
+    [ForeignKey("CityId")]
+    [InverseProperty("MemberProfiles")]
+    public virtual City City { get; set; }
+
+    [ForeignKey("TownshipId")]
+    [InverseProperty("MemberProfiles")]
+    public virtual Township Township { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("Logs")]
+    [InverseProperty("MemberProfile")]
     public virtual User User { get; set; }
 }

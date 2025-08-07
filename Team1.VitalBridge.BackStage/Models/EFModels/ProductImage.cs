@@ -17,13 +17,14 @@ public partial class ProductImage
     [Column("productId")]
     public int ProductId { get; set; }
 
-    [Required]
-    [Column("imageUrl")]
-    [StringLength(255)]
-    public string ImageUrl { get; set; }
-
     [Column("sortOrder")]
     public int? SortOrder { get; set; }
+
+    public int? FileId { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("ProductImages")]
+    public virtual FileStream File { get; set; }
 
     [ForeignKey("ProductId")]
     [InverseProperty("ProductImages")]

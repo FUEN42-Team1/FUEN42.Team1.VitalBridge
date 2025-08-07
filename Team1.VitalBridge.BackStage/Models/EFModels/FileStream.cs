@@ -23,7 +23,19 @@ public partial class FileStream
     public string FileName { get; set; }
 
     [InverseProperty("File")]
+    public virtual ICollection<CareRecipientsImage> CareRecipientsImages { get; set; } = new List<CareRecipientsImage>();
+
+    [InverseProperty("File")]
+    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+
+    [InverseProperty("File")]
+    public virtual ICollection<EventImage> EventImages { get; set; } = new List<EventImage>();
+
+    [InverseProperty("File")]
     public virtual ICollection<FeatureService> FeatureServices { get; set; } = new List<FeatureService>();
+
+    [InverseProperty("File")]
+    public virtual ICollection<InstitutionAuditImage> InstitutionAuditImages { get; set; } = new List<InstitutionAuditImage>();
 
     [InverseProperty("File")]
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();
@@ -33,4 +45,7 @@ public partial class FileStream
 
     [InverseProperty("DefaultImageFile")]
     public virtual ICollection<Plate> Plates { get; set; } = new List<Plate>();
+
+    [InverseProperty("File")]
+    public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 }

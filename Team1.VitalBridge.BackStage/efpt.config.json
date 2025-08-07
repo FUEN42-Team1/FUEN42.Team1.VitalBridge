@@ -4,7 +4,6 @@
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
-   "MinimumProductVersion": "2.6.0",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models\\EFModels",
@@ -16,23 +15,7 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[dbo].[AdminPermissions]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[AdminRolePermissions]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[AdminRoles]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[AdminUsers]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[AdminUsersRoles]",
+         "Name": "[dbo].[AdminProfiles]",
          "ObjectType": 0
       },
       {
@@ -40,7 +23,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[CareRecipientInvitations]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[CareRecipients]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CareRecipientsImages]",
          "ObjectType": 0
       },
       {
@@ -120,19 +111,11 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[InstitutionImages]",
+         "Name": "[dbo].[InstitutionAuditImages]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[InstitutionPermissions]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[InstitutionRolePermissions]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[InstitutionRoles]",
+         "Name": "[dbo].[InstitutionProfiles]",
          "ObjectType": 0
       },
       {
@@ -140,19 +123,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[InstitutionUserRoles]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[InstitutionUsers]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Logs]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[LogTypes]",
          "ObjectType": 0
       },
       {
@@ -161,6 +132,10 @@
       },
       {
          "Name": "[dbo].[MediaTypes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MemberProfiles]",
          "ObjectType": 0
       },
       {
