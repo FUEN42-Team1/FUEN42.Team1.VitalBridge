@@ -99,7 +99,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			{
 				FatherId = vm.FatherId,
 				Name = vm.Name,
-				BannerImageUrl = vm.BannerImageUrl,
+				//BannerImageUrl = vm.BannerImageUrl,
 				IsActive = vm.IsActive
 
 			};
