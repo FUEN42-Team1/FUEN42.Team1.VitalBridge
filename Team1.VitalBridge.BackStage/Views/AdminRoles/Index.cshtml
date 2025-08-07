@@ -45,11 +45,11 @@
                     <td>
                         @if (role.IsActive)
                         {
-                            <span class="badge bg-success">啟用</span>
+                            <span id="status-@role.RoleCode" class="badge bg-success">啟用</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">停用</span>
+                            <span id="status-@role.RoleCode" class="badge bg-secondary">停用</span>
                         }
                     </td>
                     <td>@role.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
@@ -61,10 +61,20 @@
                            data-default="@role.IsSystemDefault.ToString().ToLower()">
                             編輯
                         </a>
+
+
+                        <button class="btn btn-sm toggle-status-btn @(role.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                data-role-code="@role.RoleCode">
+                            @(role.IsActive ? "停用" : "啟用")
+                        </button>
+
+
+                        @*
                         <form asp-action="Delete" asp-route-roleCode="@role.RoleCode" method="post" class="d-inline"
                               onsubmit="return confirm('確定要停用這個身分嗎？');">
                             <button type="submit" class="btn btn-sm btn-danger">停用</button>
                         </form>
+                        *@
                     </td>
                 </tr>
             }
@@ -72,7 +82,7 @@
     </tbody>
 </table>
 
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -96,3 +106,32 @@
     });
 </script>
 
+
+
+<script>
+    $(document).on('click', '.toggle-status-btn', function () {
+        const btn = $(this);
+        const roleCode = btn.data('role-code');
+
+        $.post('/Admin/AdminRoles/ToggleStatus', { roleCode: roleCode }, function (res) {
+            if (res.success) {
+                // 更新按鈕文字（顯示下一步操作）
+                const nextAction = res.isActive ? '停用' : '啟用';
+                btn.text(nextAction);
+
+                // 更新狀態徽章
+                const badge = $('#status-' + roleCode);
+                if (res.isActive) {
+                    badge.text('啟用').removeClass('bg-secondary').addClass('bg-success');
+                } else {
+                    badge.text('停用').removeClass('bg-success').addClass('bg-secondary');
+                }
+            } else {
+                alert("操作失敗");
+            }
+        }).fail(function () {
+            alert("伺服器錯誤");
+        });
+    });
+
+</script>

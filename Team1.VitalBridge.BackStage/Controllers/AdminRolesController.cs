@@ -142,8 +142,36 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
 
 
+        //啟用/停用身分
+        [HttpPost]
+        public IActionResult ToggleStatus(string roleCode)
+        {
+            if (string.IsNullOrEmpty(roleCode))
+            {
+                return BadRequest("Role code is required.");
+            }
+
+            var role = _context.Roles.FirstOrDefault(r => r.RoleCode == roleCode);
+            if (role == null)
+            {
+                return NotFound("Role not found.");
+            }
+
+            // 切換狀態
+            role.IsActive = !role.IsActive;
+            _context.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                isActive = role.IsActive // ✅ 回傳目前的狀態
+            });
+
+        }
+
         //刪除身分(低低優先)
-        public IActionResult Delete(RoleViewModel vm) {
+        public IActionResult Delete()
+        {
             //刪除前需要將所有使用此身分的使用者身分清除
             //並設為Member身分
 
@@ -152,7 +180,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return View();
         }
 
-        
 
 
 
