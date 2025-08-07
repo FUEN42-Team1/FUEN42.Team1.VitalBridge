@@ -1,28 +1,46 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.EFModels;
+using Team1.VitalBridge.BackStage.Models.Interfaces;
+using Team1.VitalBridge.BackStage.Models.ViewModels;
 
 namespace Team1.VitalBridge.BackStage.Controllers
 {
     public class ContentArticlesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IContentArticleRepository _repository;
 
-        public ContentArticlesController(AppDbContext context)
+
+        public ContentArticlesController(AppDbContext context, IContentArticleRepository repository)
         {
-            _context = context;
+            this._context = context;
+            this._repository = repository;
         }
 
         // GET: ContentArticles
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Contents.Include(c => c.ContentCategory);
-            return View(await appDbContext.ToListAsync());
+            var entities = await _repository.GetAllAsync();
+
+            // Entities to ViewModel conversion can be done here if needed
+            var vm = entities.Select(e => new ContentArticleListViewModel
+            {
+                Id = e.Id,
+                Title = e.Title,
+                CoverPic = e.CoverPic,
+                ContentCategoryId = e.ContentCategoryId,
+                ContentCategoryName = e.ContentCategory?.Name, // Assuming ContentCategory is a navigation property
+                ViewCount = e.ViewCount,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt
+            }).ToList();
+            return View(vm);
         }
 
         // GET: ContentArticles/Details/5

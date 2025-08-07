@@ -37,10 +37,14 @@ namespace Team1.VitalBridge.BackStage
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Johnny
+            // Johnny start
             // µù¥U ContentCategoryService ©M ContentCategoryRepository
             builder.Services.AddScoped<IContentCategoryRepository, ContentCategoryRepository>();
             builder.Services.AddScoped<IContentCategoryService, ContentCategoryService>();
+            // µù¥U ContentArticleService ©M ContentArticleRepository
+            builder.Services.AddScoped<IContentArticleRepository, ContentArticleRepository>();
+            builder.Services.AddScoped<IContentArticleService, ContentArticleService>();
+            //Johnny end
 
 
             builder.Services.AddScoped<IPlateRepository, PlateRepository>();
