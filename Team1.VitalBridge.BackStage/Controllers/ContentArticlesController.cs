@@ -65,6 +65,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ContentArticleCreateViewModel vm)
         {
+
             if (!ModelState.IsValid) return View(vm);
 
             var dto = new ContentArticleCreateDTO
@@ -79,8 +80,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
             // Call the service to create the article
             await _service.CreateArticleAsync(dto);
-
-            return RedirectToAction(nameof(Search));
+            return RedirectToAction("Search", "ContentArticles");
         }
 
         // GET: ContentArticles/Edit/5

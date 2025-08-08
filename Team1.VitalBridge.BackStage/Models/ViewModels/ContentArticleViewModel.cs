@@ -26,11 +26,9 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string Content { get; set; }
         public int ContentCategoryId { get; set; }
 
-        public string CategoryName { get; set; }
-        public byte[] CoverPic { get; set; } // Base64 encoded image
+        public IFormFile? CoverPic { get; set; } 
         public string Status { get; set; } // efmodel is int , but view model is string for display purposes
 
-        public List<ContentCategoryDTO>? ListCategory { get; set; }
     }
     public enum ContentArticleStatus
     {

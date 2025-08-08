@@ -28,12 +28,13 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 Title = article.Title,
                 Content1 = article.Content,
                 ContentCategoryId = article.ContentCategoryId,
-                CoverPic = article.CoverPic, // Assuming CoverPic is a byte array
+                //CoverPic = article.CoverPic, CoverPic MediaId
                 Status = article.Status,
                 ViewCount = 0, // Initial view count
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+            Console.WriteLine("service ok");
             // Save to repository
             await _repository.AddAsync(entity);
         }
