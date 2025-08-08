@@ -40,7 +40,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel vm)
+        public async Task<IActionResult> Login(AdminLoginViewModel vm)
         {
 
             if (!ModelState.IsValid)

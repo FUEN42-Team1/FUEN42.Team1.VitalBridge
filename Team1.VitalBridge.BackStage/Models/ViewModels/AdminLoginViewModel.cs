@@ -2,7 +2,7 @@
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
-    public class LoginViewModel
+    public class AdminLoginViewModel
     {
         //登入
 
