@@ -51,11 +51,36 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
                 .ToListAsync();
         }
 
+        public IQueryable<Content> GetAllWithIncludes()
+        {
+            return _context.Contents
+                .Include(c => c.ContentCategory)
+                .Include(c => c.Comments)
+                //.Include(c => c.Member) // Assuming Member is a navigation property in Content
+                .AsNoTracking();
+        }
+
+        public async Task<IEnumerable<Content>> GetByCategoryAsync(string category)
+        {
+            return await _context.Contents
+                .Where(c => c.ContentCategory.Name == category)
+                .Include(c => c.ContentCategory)
+                .ToListAsync();
+        }
+
         public async Task<Content?> GetByIdAsync(int id)
         {
             var content = await _context.Contents
                 .Include(c => c.ContentCategory)
                 .FirstOrDefaultAsync(m => m.Id == id);
+            return content;
+        }
+
+        public async Task<Content?> GetByNameAsync(string name)
+        {
+            var content = await _context.Contents
+                .Include(c => c.ContentCategory)
+                .FirstOrDefaultAsync(m => m.Title == name);
             return content;
         }
 

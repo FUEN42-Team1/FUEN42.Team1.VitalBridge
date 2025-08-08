@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
@@ -15,53 +16,41 @@ namespace Team1.VitalBridge.BackStage.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IContentArticleRepository _repository;
+        private readonly IContentArticleService _service;
 
-
-        public ContentArticlesController(AppDbContext context, IContentArticleRepository repository)
+        public ContentArticlesController(AppDbContext context, IContentArticleRepository repository, IContentArticleService service)
         {
             this._context = context;
             this._repository = repository;
+            this._service = service;
         }
 
-        // GET: ContentArticles
-        public async Task<IActionResult> Index()
+        // GET: ContentArticles/Search
+        public async Task<IActionResult> Search([FromQuery] ContentArticleListCritriaDTO? criteria)
         {
-            var entities = await _repository.GetAllAsync();
-
-            // Entities to ViewModel conversion can be done here if needed
-            var vm = entities.Select(e => new ContentArticleListViewModel
+            if (criteria == null)
             {
-                Id = e.Id,
-                Title = e.Title,
-                CoverPic = e.CoverPic,
-                ContentCategoryId = e.ContentCategoryId,
-                ContentCategoryName = e.ContentCategory?.Name, // Assuming ContentCategory is a navigation property
-                ViewCount = e.ViewCount,
-                CreatedAt = e.CreatedAt,
-                UpdatedAt = e.UpdatedAt
+                criteria = new ContentArticleListCritriaDTO();
+            }
+            var results = await _service.SearchArticlesAsync(criteria);
+
+            var vm = results.Select(r => new ContentArticleListViewModel
+            {
+                Id = r.Id,
+                Title = r.Title,
+                CoverPic = r.CoverPic,
+                CategoryName = r.CategoryName,
+                MemberName = r.MemberName,
+                Status = r.Status.ToString(), // Convert int to string for display
+                ViewCount = r.ViewCount,
+                CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt
             }).ToList();
+
             return View(vm);
         }
 
-        // GET: ContentArticles/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var content = await _context.Contents
-                .Include(c => c.ContentCategory)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (content == null)
-            {
-                return NotFound();
-            }
-
-            return View(content);
-        }
-
+        
         // GET: ContentArticles/Create
         public IActionResult Create()
         {
@@ -74,16 +63,24 @@ namespace Team1.VitalBridge.BackStage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,MemberId,ContentCategoryId,Title,CoverPic,Content1,Status,ViewCount,UpdatedAt,CreatedAt")] Content content)
+        public async Task<IActionResult> Create(ContentArticleCreateViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(vm);
+
+            var dto = new ContentArticleCreateDTO
             {
-                _context.Add(content);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ContentCategoryId"] = new SelectList(_context.ContentCategories, "Id", "Name", content.ContentCategoryId);
-            return View(content);
+                Title = vm.Title,
+                Content = vm.Content,
+                ContentCategoryId = vm.ContentCategoryId,
+                CoverPic = vm.CoverPic,
+                // 修正：將 ContentArticleStatus 轉型為 int
+                Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
+            };
+
+            // Call the service to create the article
+            await _service.CreateArticleAsync(dto);
+
+            return RedirectToAction(nameof(Search));
         }
 
         // GET: ContentArticles/Edit/5
@@ -116,7 +113,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
             }
 
             if (!ModelState.IsValid) return View();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Search));
         }
 
         // GET: ContentArticles/Delete/5
