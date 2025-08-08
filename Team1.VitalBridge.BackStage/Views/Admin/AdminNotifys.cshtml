@@ -10,6 +10,34 @@
         ＋ 新增通知
     </button>
 </p>
+
+<!-- EditNotifyUsersModal -->
+<div class="modal fade" data-id="" id="EditNotifyUsers" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditNotifyUsersLabel">編輯通知對象</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive table-rounded shadow-sm w-800">
+                    <table id="EditNotifyUsersTable" class="table table-striped table-bordered table-hover align-middle bg-white w-100">
+                        <thead class="table-info text-dark">
+                            <tr>
+                                <th>Id</th>
+                                <th>姓名</th>
+                                <th>信箱</th>
+                                <th>身份</th>
+                                <th class="text-center">加入</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CreateModal -->
 <div class="modal fade" id="CreateNotify" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -191,7 +219,9 @@
                     var content = $('#users-' + id).html();
                     if(!content)
                     {
-                        var li = "";
+                        var li = `  <button type="button" class="btn btn-outline-primary rounded-pill px-4 mb-3 shadow-sm btn-addUsers" data-id="${id}">
+                                        ＋ 新增通知對象
+                                    </button>`;
                         $.ajax({
                           type: "GET",
                           url: `/Api/Notify/getUser/${id}`,
@@ -339,6 +369,71 @@
                         });
                     }
                 });
+            });
+
+            $(document).on('click','.btn-addUser',function(e){
+				var id = $(this).data('id');
+                var uid=$(this).data('uid');
+                $.ajax({
+                    url: `/api/NotifyUser/${id}/${uid}`,
+                    type: 'POST',
+                    success: function (response) {
+                      Swal.fire('新增成功', '通知對象已新增', 'success');
+                      $('#users-' + id).remove();
+                      //更新table
+                      $('#EditNotifyUsersTable').DataTable().ajax.reload(null, false);
+                      $('#notifysTable').DataTable().ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                      Swal.fire('❌ 錯誤', `新增失敗`, 'error');
+                    }
+                  });
+                
+            });
+
+            $(document).on('click','.btn-addUsers',function(e){
+                    var id = $(this).data('id');
+                  $('#EditNotifyUsers').modal("show");
+                  $('#EditNotifyUsersTable').DataTable().destroy();
+
+                  $('#EditNotifyUsersTable').DataTable({
+                      processing: true,
+                      language: {
+                        url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/zh_Hant.json"
+                      },
+                      serverSide: true,
+                      ajax: {
+                      url: `/api/NotifyUser/getUsersByPage/${id}`,
+                      type: 'POST',
+                      contentType: 'application/json',
+                      data: function (d) {
+                        return JSON.stringify(d);
+                      },
+                      error: function (xhr, status, error) {
+                        console.error("AJAX error:", status, error);
+                      }
+                    }
+                    ,
+                          columns: [
+                          { data: 'userId' },
+                          { data: 'userName'},
+                          { data: 'userEmail' },
+                          { data: 'userRoles' ,
+                          orderable: false},
+                          {
+                            data: 'id',
+                            render: function (data, type, row) {
+                              return `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-warning rounded-pill btn-addUser" data-id =${data} data-uid=${row.userId}>
+                                            +
+                                        </button>
+                                      </div>`;
+                            },
+                            className: "text-center",
+                            orderable: false
+                          }
+                        ]
+                    });
             });
 
             //送出新增通知表單
