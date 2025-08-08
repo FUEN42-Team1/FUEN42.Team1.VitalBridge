@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using System.Linq;
 using System.Threading.Tasks;
+using Team1.VitalBridge.BackStage.Models.ViewModels;
 
 namespace Team1.VitalBridge.BackStage.Controllers.Orgs
 {
@@ -15,15 +16,46 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string searchQuery = "")
         {
-            // 從資料庫中取得所有的 SubsidyInfo 資料
-            var data = await _context.SubsidyInfos
+            // 確保頁碼和每頁大小為有效值
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            // 取得所有補助清單資料的 IQueryable
+            var query = _context.SubsidyInfos.AsQueryable();
+
+            // 根據搜尋條件過濾資料
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(s => s.Description.Contains(searchQuery));
+            }
+
+            // 取得總筆數
+            var totalCount = await query.CountAsync();
+
+            // 計算總頁數
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            // 取得分頁後的資料
+            var items = await query
                 .OrderBy(s => s.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            // 將資料傳遞給 View
-            return View(data);
+            // 建立分頁結果物件
+            var paginatedResult = new PaginatedResult<SubsidyInfo>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalPages = totalPages
+            };
+
+            // 將分頁結果傳遞給 View
+            return View(paginatedResult);
         }
 
         [HttpPost]
