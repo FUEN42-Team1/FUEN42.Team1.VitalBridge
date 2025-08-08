@@ -259,7 +259,7 @@
                                   </div>
                                     <div class="mb-3">
                                       <label for="editTitle" class="form-label">說明文字</label>
-                                      <textarea class="form-control" id="editText" rows="4">${data.text}</textarea>
+                                      <textarea class="form-control" id="editText" rows="4">${data.text==null ? "" :data.text}</textarea>
                                     </div>
                                     <div class="mb-3">
                                       <label for="editCategories" class="form-label">分類</label>
@@ -279,7 +279,7 @@
 
                                   <div class="mb-3">
                                     <label for="editNotifysUrl" class="form-label">通知網址</label>
-                                    <input type="url" class="form-control" id="editNotifysUrl" value="${data.notifysUrl}">
+                                    <input type="url" class="form-control" id="editNotifysUrl" value="${data.notifysUrl==null? "" : data.notifysUrl}">
                                   </div>
                                 </form>
                               `);

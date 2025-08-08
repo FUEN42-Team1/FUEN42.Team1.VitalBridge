@@ -78,10 +78,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
         {
             var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == data.ImageFileName).Id;
             PlateImage plateImage = _context.PlateImages.Find(data.Id);
-            plateImage.ClickUrl = data.ClickUrl;
+            plateImage.ClickUrl = string.IsNullOrEmpty(data.ClickUrl) ? null : data.ClickUrl;
             plateImage.EndDate = data.EndDate;
             plateImage.StartDate = data.StartDate;
-            plateImage.Introduct = data.Introduct;
+            plateImage.Introduct = string.IsNullOrEmpty(data.Introduct) ? null : data.Introduct;
             plateImage.ImageFileId = FileId;
             _context.Update(plateImage);
             _context.SaveChanges();
