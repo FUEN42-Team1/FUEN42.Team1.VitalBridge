@@ -6,53 +6,70 @@
 
 @section Styles {
     <style>
-        /* 新增/編輯/刪除按鈕配色 */
+        /* 新增按鈕配色，使用範例中的 btn-success */
         .btn-add {
-            background-color: #28a745; /* 綠色 */
-            color: white;
-            border-color: #28a745;
+            background-color: var(--bs-success); /* 綠色 */
+            color: var(--bs-white);
+            border-color: var(--bs-success);
         }
 
             .btn-add:hover {
-                background-color: #218838;
-                border-color: #1e7e34;
-                color: white;
+                background-color: #198754; /* 更深的綠色 */
+                border-color: #198754;
+                color: var(--bs-white);
             }
 
+        /* 編輯按鈕配色，使用範例中的 btn-warning */
         .btn-edit {
-            background-color: #ffc107; /* 橘黃色 */
-            color: white;
-            border-color: #ffc107;
+            background-color: var(--bs-warning); /* 橘黃色 */
+            color: var(--bs-white);
+            border-color: var(--bs-warning);
         }
 
             .btn-edit:hover {
-                background-color: #e0a800;
+                background-color: #e0a800; /* 更深的橘黃色 */
                 border-color: #d39e00;
-                color: white;
+                color: var(--bs-white);
             }
 
+        /* 刪除按鈕配色，參考範例中的停用按鈕，使用 btn-danger */
         .btn-delete {
-            background-color: #dc3545; /* 紅色 */
-            color: white;
-            border-color: #dc3545;
+            background-color: var(--bs-danger); /* 紅色 */
+            color: var(--bs-white);
+            border-color: var(--bs-danger);
         }
 
             .btn-delete:hover {
-                background-color: #c82333;
+                background-color: #c82333; /* 更深的紅色 */
                 border-color: #bd2130;
-                color: white;
+                color: var(--bs-white);
             }
 
-        /* 表格標頭配色 */
+        /* 表格標頭配色調整為淺灰色，更中性且明亮 */
         .table thead th {
-            background-color: #e2f3f5; /* 淺藍綠色 */
-            color: #000;
-            border-bottom: 2px solid #d1d3e2;
+            background-color: #f8f9fa; /* 淺灰色 */
+            color: #212529;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
         }
 
-        /* Modal 標頭與頁尾配色 */
+        /* Modal 標頭與頁尾配色維持淺灰色 */
         .modal-header, .modal-footer {
-            background-color: #f8f9fa; /* 淺灰色背景 */
+            background-color: #f8f9fa;
+        }
+
+        /* 響應式操作按鈕：讓按鈕在小螢幕時垂直排列 */
+        @@media (max-width: 576px) {
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+                .action-buttons .btn {
+                    width: 100%;
+                }
         }
     </style>
 }
@@ -63,8 +80,8 @@
             <div class="col-sm-6">
                 <h6 class="m-0 font-weight-bold text-primary">房型清單</h6>
             </div>
-            <div class="col-sm-6 text-right">
-                <button type="button" class="btn btn-add" data-toggle="modal" data-target="#roomTypeModal" id="createBtn">
+            <div class="col-sm-6 text-sm-end text-center mt-2 mt-sm-0">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#roomTypeModal" id="createBtn">
                     <i class="fas fa-plus"></i> 新增房型
                 </button>
             </div>
@@ -72,7 +89,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered" id="roomTypeTable" width="100%" cellspacing="0">
+            <table class="table table-bordered table-hover" id="roomTypeTable" width="100%" cellspacing="0">
                 <thead>
                     <tr>
                         <th>
@@ -88,11 +105,11 @@
                             <td>
                                 @Html.DisplayFor(modelItem => item.Name)
                             </td>
-                            <td>
-                                <a href="#" class="btn btn-edit btn-sm edit-btn" data-id="@item.Id" data-name="@item.Name">
+                            <td class="action-buttons">
+                                <a href="#" class="btn btn-warning btn-sm edit-btn" data-id="@item.Id" data-name="@item.Name" data-bs-toggle="modal" data-bs-target="#roomTypeModal">
                                     <i class="fas fa-edit"></i> 編輯
                                 </a>
-                                <a href="#" class="btn btn-delete btn-sm delete-btn" data-id="@item.Id" data-name="@item.Name">
+                                <a href="#" class="btn btn-danger btn-sm delete-btn" data-id="@item.Id" data-name="@item.Name" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
                                     <i class="fas fa-trash"></i> 刪除
                                 </a>
                             </td>
@@ -104,47 +121,43 @@
     </div>
 </div>
 
-<div class="modal fade" id="roomTypeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="roomTypeModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle">新增房型</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="roomTypeForm">
                     <input type="hidden" id="roomTypeId" name="Id" value="" />
-                    <div class="form-group">
-                        <label for="roomTypeName">房型名稱</label>
+                    <div class="mb-3">
+                        <label for="roomTypeName" class="form-label">房型名稱</label>
                         <input type="text" class="form-control" id="roomTypeName" name="Name" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-add" id="saveBtn">儲存</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="saveBtn">儲存</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteModalLabel">刪除確認</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p id="deleteConfirmText">您確定要刪除「<span id="deleteItemName"></span>」這筆資料嗎？</p>
                 <input type="hidden" id="deleteId" value="" />
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteBtn">確定刪除</button>
             </div>
         </div>
@@ -159,7 +172,7 @@
                 $("#modalTitle").text("新增房型");
                 $("#roomTypeForm")[0].reset();
                 $("#roomTypeId").val("");
-                $("#saveBtn").removeClass("btn-edit").addClass("btn-add");
+                $("#saveBtn").removeClass("btn-warning").addClass("btn-success");
             });
 
             // 編輯按鈕
@@ -169,12 +182,11 @@
                 $("#modalTitle").text("編輯房型");
                 $("#roomTypeId").val(id);
                 $("#roomTypeName").val(name);
-                $("#roomTypeModal").modal("show");
-                $("#saveBtn").removeClass("btn-add").addClass("btn-edit");
+                $("#saveBtn").removeClass("btn-success").addClass("btn-warning");
             });
 
             // 監聽 Enter 鍵，按下後觸發表單提交
-            $("#roomTypeName").on("keydown", function(e) {
+            $("#roomTypeName").on("keydown", function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     $("#saveBtn").click();
@@ -207,6 +219,7 @@
                     success: function (response) {
                         if (response.success) {
                             alert(response.message);
+                            // 修正: 儲存成功後重新載入頁面
                             window.location.reload();
                         } else {
                             alert(response.message);
@@ -216,7 +229,11 @@
                         alert("發生錯誤，請稍後再試。");
                     },
                     complete: function () {
-                        $("#roomTypeModal").modal("hide");
+                        var modalElement = document.getElementById('roomTypeModal');
+                        var modal = bootstrap.Modal.getInstance(modalElement);
+                        if (modal) {
+                            modal.hide();
+                        }
                     }
                 });
             });
@@ -227,7 +244,6 @@
                 var name = $(this).data("name");
                 $("#deleteId").val(id);
                 $("#deleteItemName").text(name);
-                $("#deleteConfirmModal").modal("show");
             });
 
             // 確認刪除按鈕
@@ -240,9 +256,8 @@
                     success: function (response) {
                         if (response.success) {
                             alert(response.message);
-                            // 移除表格中對應的行
-                            $("#row-" + id).remove();
-                            $("#deleteConfirmModal").modal("hide");
+                            // 修正: 刪除成功後重新載入頁面
+                            window.location.reload();
                         } else {
                             alert(response.message);
                         }

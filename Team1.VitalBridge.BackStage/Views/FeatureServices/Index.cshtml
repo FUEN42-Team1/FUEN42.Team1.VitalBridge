@@ -6,100 +6,23 @@
 
 @section Styles {
     <style>
-        /* 新增/編輯/啟用/停用按鈕配色 */
-        .btn-add {
-            background-color: #28a745; /* 綠色 */
-            color: white;
-            border-color: #28a745;
-        }
-
-            .btn-add:hover {
-                background-color: #218838;
-                border-color: #1e7e34;
-                color: white;
-            }
-
-        .btn-edit {
-            background-color: #ffc107; /* 橘黃色 */
-            color: white;
-            border-color: #ffc107;
-        }
-
-            .btn-edit:hover {
-                background-color: #e0a800;
-                border-color: #d39e00;
-                color: white;
-            }
-
-        /* 啟用/停用按鈕的樣式 */
-        .btn-deactivate {
-            background-color: #e74a3b; /* 紅色 */
-            color: white;
-            border-color: #e74a3b;
-        }
-
-            .btn-deactivate:hover {
-                background-color: #c82333;
-                border-color: #bd2130;
-                color: white;
-            }
-
-        .btn-activate {
-            background-color: #36b9cc; /* 藍色 */
-            color: white;
-            border-color: #36b9cc;
-        }
-
-            .btn-activate:hover {
-                background-color: #2c9faf;
-                border-color: #2a96a9;
-                color: white;
-            }
-
-        /* 表格標頭配色 */
+        /* 表格標頭配色調整為淺灰色，更中性且明亮 */
         .table thead th {
-            background-color: #e2f3f5; /* 淺藍綠色 */
-            color: #000;
-            border-bottom: 2px solid #d1d3e2;
-            white-space: nowrap; /* 防止標題文字換行 */
+            background-color: #f8f9fa;
+            color: #212529;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
         }
 
-        /* Modal 標頭與頁尾配色 */
+        /* Modal 標頭與頁尾配色維持淺灰色 */
         .modal-header, .modal-footer {
-            background-color: #f8f9fa; /* 淺灰色背景 */
+            background-color: #f8f9fa;
         }
 
-        /* 確保表格在任何大小下都有一致的欄位寬度 */
+        /* 移除 table-layout: fixed; 並改用 <colgroup> 來控制寬度 */
         #featureServiceTable {
-            table-layout: fixed;
             width: 100%;
         }
-
-            #featureServiceTable th:nth-child(1),
-            #featureServiceTable td:nth-child(1) {
-                width: 30%; /* 名稱 */
-            }
-
-            #featureServiceTable th:nth-child(2),
-            #featureServiceTable td:nth-child(2) {
-                width: 25%; /* 圖片 */
-            }
-
-            #featureServiceTable th:nth-child(3),
-            #featureServiceTable td:nth-child(3) {
-                width: 15%; /* 狀態 */
-            }
-
-            #featureServiceTable th:nth-child(4),
-            #featureServiceTable td:nth-child(4) {
-                width: 30%; /* 操作 */
-            }
-
-            /* 讓表格內容在空間不足時自動換行 */
-            #featureServiceTable td {
-                word-break: break-word;
-                overflow-wrap: break-word;
-            }
 
         /* 響應式分頁導覽列 */
         .pagination-container {
@@ -117,16 +40,38 @@
 
         /* 響應式操作按鈕：讓按鈕在小螢幕時垂直排列 */
         @@media (max-width: 576px) {
-            #featureServiceTable td:last-child {
+            .action-buttons {
                 display: flex;
                 flex-direction: column;
-                align-items: center;
+                align-items: stretch; /* 讓按鈕佔滿寬度 */
                 gap: 5px; /* 按鈕間的間距 */
             }
 
-                #featureServiceTable td:last-child .btn {
+                .action-buttons .btn {
                     width: 100%;
                 }
+        }
+
+        /* 狀態標籤的樣式美化，使用 Bootstrap 內建顏色 */
+        .status-badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.5rem;
+        }
+
+        .status-badge-active {
+            background-color: var(--bs-green);
+        }
+
+        .status-badge-inactive {
+            background-color: var(--bs-red);
         }
     </style>
 }
@@ -137,8 +82,8 @@
             <div class="col-sm-6">
                 <h6 class="m-0 font-weight-bold text-primary">特色服務清單</h6>
             </div>
-            <div class="col-sm-6 text-right">
-                <button type="button" class="btn btn-add" data-toggle="modal" data-target="#featureServiceModal" id="createBtn">
+            <div class="col-sm-6 text-end">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#featureServiceModal" id="createBtn">
                     <i class="fas fa-plus"></i> 新增特色服務
                 </button>
             </div>
@@ -147,8 +92,8 @@
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-6 d-flex align-items-center">
-                <label for="pageSize" class="mr-2">顯示</label>
-                <select id="pageSize" class="form-control" style="width: auto;">
+                <label for="pageSize" class="me-2">顯示</label>
+                <select id="pageSize" class="form-select" style="width: auto;">
                     @{
                         var pageSizes = new[] { 5, 10, 20, 50 };
                         foreach (var size in pageSizes)
@@ -164,15 +109,22 @@
                         }
                     }
                 </select>
-                <span class="ml-2">筆結果</span>
+                <span class="ms-2">筆結果</span>
             </div>
             <div class="col-md-6 d-flex justify-content-md-end align-items-center mt-2 mt-md-0">
-                <label for="searchQuery" class="mr-2">搜尋:</label>
+                <label for="searchQuery" class="me-2">搜尋:</label>
                 <input type="search" id="searchQuery" class="form-control" placeholder="請輸入關鍵字" style="width: auto;" />
             </div>
         </div>
+
         <div class="table-responsive">
             <table class="table table-bordered" id="featureServiceTable" width="100%" cellspacing="0">
+                <colgroup>
+                    <col style="width: 35%;">
+                    <col style="width: 25%;">
+                    <col style="width: 15%;">
+                    <col style="width: 25%;">
+                </colgroup>
                 <thead>
                     <tr>
                         <th>
@@ -201,21 +153,23 @@
                                 <img src="@imageUrl" alt="@item.Name" class="img-thumbnail" style="max-height: 100px;" />
                             </td>
                             <td>
-                                <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
+                                <span class="status-badge @(item.IsActive ? "status-badge-active" : "status-badge-inactive")">
                                     @(item.IsActive ? "啟用中" : "已停用")
                                 </span>
                             </td>
                             <td>
-                                <a href="#" class="btn btn-edit btn-sm edit-btn"
-                                   data-id="@item.Id"
-                                   data-name="@item.Name"
-                                   data-imageurl="@item.ImageUrl"
-                                   data-toggle="modal" data-target="#featureServiceModal">
-                                    <i class="fas fa-edit"></i> 編輯
-                                </a>
-                                <a href="#" class="btn btn-sm @(item.IsActive ? "btn-deactivate deactivate-btn" : "btn-activate activate-btn")" data-id="@item.Id" data-is-active="@item.IsActive">
-                                    <i class="fas @(item.IsActive ? "fa-power-off" : "fa-check")"></i> @(item.IsActive ? "停用" : "啟用")
-                                </a>
+                                <div class="action-buttons">
+                                    <a href="#" class="btn btn-warning btn-sm edit-btn"
+                                       data-id="@item.Id"
+                                       data-name="@item.Name"
+                                       data-imageurl="@item.ImageUrl"
+                                       data-bs-toggle="modal" data-bs-target="#featureServiceModal">
+                                        <i class="fas fa-edit"></i> 編輯
+                                    </a>
+                                    <a href="#" class="btn btn-sm @(item.IsActive ? "btn-danger deactivate-btn" : "btn-info activate-btn")" data-id="@item.Id" data-is-active="@item.IsActive">
+                                        <i class="fas @(item.IsActive ? "fa-power-off" : "fa-check")"></i> @(item.IsActive ? "停用" : "啟用")
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -265,26 +219,24 @@
     </div>
 </div>
 
-<div class="modal fade" id="featureServiceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="featureServiceModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle">新增特色服務</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="featureServiceForm">
                     <input type="hidden" id="serviceId" name="Id" value="" />
 
-                    <div class="form-group mb-3">
-                        <label for="serviceName">特色服務名稱</label>
+                    <div class="mb-3">
+                        <label for="serviceName" class="form-label">特色服務名稱</label>
                         <input type="text" class="form-control" id="serviceName" name="Name" required>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label>服務圖片</label>
+                    <div class="mb-3">
+                        <label class="form-label">服務圖片</label>
                         <div class="input-group mb-3">
                             <input type="file" class="form-control" id="fileInput">
                             <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
@@ -293,28 +245,26 @@
                             <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
                         </div>
                         <div id="result" class="mt-2"></div>
-                        <div class="form-group mt-2">
+                        <div class="mt-2">
                             <input class="form-control" id="image" name="ImageUrl" readonly required />
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-add" id="saveBtn">儲存</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" id="saveBtn">儲存</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="statusConfirmModal" tabindex="-1" role="role" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="statusConfirmModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="statusModalLabel">狀態變更確認</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p id="statusConfirmText">您確定要停用這筆資料嗎？</p>
@@ -322,8 +272,8 @@
                 <input type="hidden" id="statusChangeTo" value="" />
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-deactivate" id="confirmStatusBtn">確定</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmStatusBtn">確定</button>
             </div>
         </div>
     </div>
@@ -335,6 +285,9 @@
     }
     <script src="~/js/UploadImage.js"></script>
     <script>
+        const featureServiceModal = new bootstrap.Modal(document.getElementById('featureServiceModal'));
+        const statusConfirmModal = new bootstrap.Modal(document.getElementById('statusConfirmModal'));
+
         $(document).ready(function () {
             // 頁面載入時根據 URL 參數設定搜尋框和每頁筆數
             var urlParams = new URLSearchParams(window.location.search);
@@ -378,7 +331,7 @@
                 }
             });
 
-            // --- 以下是原有的 modal 相關 JavaScript，沒有變動 ---
+            // --- Modal 相關 JavaScript ---
             var fileInput = $("#fileInput");
             var resultDiv = $("#result");
             var image = $("#image");
@@ -398,8 +351,8 @@
                 $("#image").val("");
                 $("#showimage").attr("src", "");
                 $("#result").empty();
-                $("#saveBtn").removeClass("btn-edit").addClass("btn-add");
-                $("#featureServiceModal").modal("show");
+                $("#saveBtn").removeClass("btn-warning").addClass("btn-success");
+                featureServiceModal.show();
             });
 
             $("#featureServiceTable").on("click", ".edit-btn", function () {
@@ -416,8 +369,8 @@
                 $("#showimage").attr("src", src);
 
                 $("#result").empty();
-                $("#featureServiceModal").modal("show");
-                $("#saveBtn").removeClass("btn-add").addClass("btn-edit");
+                $("#saveBtn").removeClass("btn-success").addClass("btn-warning");
+                featureServiceModal.show();
             });
 
             $("#saveBtn").on("click", function () {
@@ -450,7 +403,7 @@
                         alert("發生錯誤，請稍後再試。");
                     },
                     complete: function () {
-                        $("#featureServiceModal").modal("hide");
+                        featureServiceModal.hide();
                     }
                 });
             });
@@ -465,11 +418,11 @@
                 $("#statusConfirmText").text("您確定要將此資料" + (newStatus ? "啟用" : "停用") + "嗎？");
 
                 if (newStatus) {
-                    $("#confirmStatusBtn").removeClass("btn-deactivate").addClass("btn-activate").text("啟用");
+                    $("#confirmStatusBtn").removeClass("btn-danger").addClass("btn-info").text("啟用");
                 } else {
-                    $("#confirmStatusBtn").removeClass("btn-activate").addClass("btn-deactivate").text("停用");
+                    $("#confirmStatusBtn").removeClass("btn-info").addClass("btn-danger").text("停用");
                 }
-                $("#statusConfirmModal").modal("show");
+                statusConfirmModal.show();
             });
 
             $("#confirmStatusBtn").on("click", function () {
@@ -492,7 +445,7 @@
                         alert("發生錯誤，請稍後再試。");
                     },
                     complete: function () {
-                        $("#statusConfirmModal").modal("hide");
+                        statusConfirmModal.hide();
                     }
                 });
             });

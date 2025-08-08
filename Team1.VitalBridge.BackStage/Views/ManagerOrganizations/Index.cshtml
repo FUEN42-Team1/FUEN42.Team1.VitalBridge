@@ -9,84 +9,171 @@
     var keyword = ViewBag.Keyword;
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-4">機構清單</h1>
+@section Styles {
+    <style>
+        /* 新增的表格標頭樣式 */
+        .table thead th {
+            background-color: #f8f9fa;
+            color: #212529;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
 
-        <div class="d-flex justify-content-between mb-3">
-            <form asp-action="Index" method="get" class="form-inline">
-                <div class="input-group">
-                    <input type="text" name="keyword" value="@keyword" class="form-control" placeholder="搜尋機構名稱或地址..." />
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="submit">搜尋</button>
-                    </div>
-                </div>
-            </form>
+        /* Modal 標頭與頁尾配色維持淺灰色 */
+        .modal-header, .modal-footer {
+            background-color: #f8f9fa;
+        }
+
+        /* 響應式分頁導覽列 */
+        .pagination-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @@media (min-width: 768px) {
+            .pagination-container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        /* 響應式操作按鈕 */
+        @@media (max-width: 576px) {
+            .action-buttons {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+                .action-buttons .btn {
+                    width: 100%;
+                }
+        }
+    </style>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">機構清單</h6>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6 d-flex align-items-center mb-2 mb-md-0">
+                <label for="pageSize" class="me-2">顯示</label>
+                <select id="pageSize" class="form-select" style="width: auto;">
+                    @{
+                        var pageSizes = new[] { 5, 10, 20, 50 };
+                        foreach (var size in pageSizes)
+                        {
+                            if (size == pageSize)
+                            {
+                                <option value="@size" selected>@size</option>
+                            }
+                            else
+                            {
+                                <option value="@size">@size</option>
+                            }
+                        }
+                    }
+                </select>
+                <span class="ms-2">筆結果</span>
+            </div>
+            <div class="col-md-6 d-flex justify-content-md-end align-items-center">
+                <label for="searchQuery" class="me-2">搜尋:</label>
+                <input type="search" id="searchQuery" class="form-control" placeholder="請輸入關鍵字" style="width: auto;" />
+            </div>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <table class="table table-striped table-hover">
-                    <thead>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover" id="organizationsTable" width="100%" cellspacing="0">
+                <colgroup>
+                    <col style="width: 30%;">
+                    <col style="width: 35%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 15%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Items.First().Name)</th>
+                        <th>@Html.DisplayNameFor(model => model.Items.First().Address)</th>
+                        <th class="text-center">@Html.DisplayNameFor(model => model.Items.First().BedCount)</th>
+                        <th class="text-center">@Html.DisplayNameFor(model => model.Items.First().IsActive)</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @foreach (var item in Model.Items)
+                    {
                         <tr>
-                            <th style="width: 30%;">@Html.DisplayNameFor(model => model.Items.First().Name)</th>
-                            <th style="width: 30%;">@Html.DisplayNameFor(model => model.Items.First().Address)</th>
-                            <th class="text-center" style="width: 10%;">@Html.DisplayNameFor(model => model.Items.First().BedCount)</th>
-                            <th class="text-center" style="width: 15%;">@Html.DisplayNameFor(model => model.Items.First().IsActive)</th>
-                            <th class="text-center" style="width: 15%;">操作</th>
+                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                            <td class="text-center">@Html.DisplayFor(modelItem => item.BedCount)</td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input toggle-active-switch"
+                                           type="checkbox"
+                                           id="flexSwitchCheck_@item.Id"
+                                           data-id="@item.Id"
+                                           data-organization-name="@item.Name"
+                                           @Html.Raw(item.IsActive ? "checked" : "")>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="action-buttons">
+                                    <button type="button" class="btn btn-info btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detailsModal_@item.Id">
+                                        <i class="fas fa-info-circle"></i> 詳情
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Items)
-                        {
-                            <tr id="row-@item.Id">
-                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                                <td>@Html.DisplayFor(modelItem => item.Address)</td>
-                                <td class="text-center">@Html.DisplayFor(modelItem => item.BedCount)</td>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-inline-block">
-                                        <input class="form-check-input toggle-active-switch"
-                                               type="checkbox"
-                                               id="flexSwitchCheck_@item.Id"
-                                               data-id="@item.Id"
-                                               @Html.Raw(item.IsActive ? "checked" : "")>
-                                        <label class="form-check-label" for="flexSwitchCheck_@item.Id"></label>
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#detailsModal_@item.Id">詳情</button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-container mt-3">
+            <div class="text-nowrap mb-2 mb-md-0">
+                顯示第 @(Model.Items.Count > 0 ? (pageSize * (pageNumber - 1) + 1).ToString() : "0")
+                至 @(pageSize * (pageNumber - 1) + Model.Items.Count)
+                筆結果，共 @Model.TotalCount 筆
             </div>
-
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination mb-0">
-                        <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber - 1)" asp-route-keyword="@keyword">上一頁</a>
-                        </li>
-
-                        @for (int i = 1; i <= totalPages; i++)
-                        {
-                            <li class="page-item @(i == pageNumber ? "active" : "")">
-                                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-keyword="@keyword">@i</a>
-                            </li>
-                        }
-
-                        <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@(pageNumber + 1)" asp-route-keyword="@keyword">下一頁</a>
-                        </li>
-                    </ul>
-                </nav>
-
-                <small class="text-muted">
-                    第 @(Model.TotalCount == 0 ? 0 : pageNumber) 頁，共 @totalPages 頁
-                    (@Model.TotalCount 項結果)
-                </small>
-            </div>
+            <ul class="pagination mb-0 flex-wrap justify-content-center">
+                <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page-number="1">
+                        <span class="d-none d-md-inline">第一頁</span>
+                        <span class="d-md-none">&lt;&lt;</span>
+                    </a>
+                </li>
+                <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page-number="@(pageNumber - 1)">
+                        <span class="d-none d-md-inline">上一頁</span>
+                        <span class="d-md-none">&lt;</span>
+                    </a>
+                </li>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == pageNumber ? "active" : "") d-none d-sm-block">
+                        <a class="page-link" href="#" data-page-number="@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page-number="@(pageNumber + 1)">
+                        <span class="d-none d-md-inline">下一頁</span>
+                        <span class="d-md-none">&gt;</span>
+                    </a>
+                </li>
+                <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                    <a class="page-link" href="#" data-page-number="@totalPages">
+                        <span class="d-none d-md-inline">最後一頁</span>
+                        <span class="d-md-none">&gt;&gt;</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
@@ -103,7 +190,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="detailsModalLabel_@item.Id">機構詳情 - @organizationDetails.Name</h5>
-                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="container-fluid">
@@ -207,7 +294,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                     </div>
                 </div>
             </div>
@@ -220,9 +307,52 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
-            // 啟用/停用切換開關的邏輯 (使用 jQuery)
+            // 監聽每頁筆數變更
+            $('#pageSize').on('change', function () {
+                const newPageSize = $(this).val();
+                const currentKeyword = $('#searchQuery').val();
+                const url = `@Url.Action("Index", "ManagerOrganizations")?page=1&pageSize=${newPageSize}&keyword=${encodeURIComponent(currentKeyword)}`;
+                window.location.href = url;
+            });
+
+            // 監聽搜尋框 Enter 鍵
+            $('#searchQuery').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const newKeyword = $(this).val();
+                    const currentPageSize = $('#pageSize').val();
+                    const url = `@Url.Action("Index", "ManagerOrganizations")?page=1&pageSize=${currentPageSize}&keyword=${encodeURIComponent(newKeyword)}`;
+                    window.location.href = url;
+                }
+            });
+
+            // 監聽分頁按鈕點擊
+            $('.pagination').on('click', 'a.page-link', function (e) {
+                e.preventDefault();
+                const pageNumber = $(this).data('page-number');
+                if (pageNumber && !$(this).parent().hasClass('disabled')) {
+                    const currentPageSize = $('#pageSize').val();
+                    const currentKeyword = $('#searchQuery').val();
+                    const url = `@Url.Action("Index", "ManagerOrganizations")?page=${pageNumber}&pageSize=${currentPageSize}&keyword=${encodeURIComponent(currentKeyword)}`;
+                    window.location.href = url;
+                }
+            });
+
+            // 頁面載入時根據 URL 參數設定搜尋框和每頁筆數
+            const urlParams = new URLSearchParams(window.location.search);
+            const keyword = urlParams.get('keyword');
+            const pageSize = urlParams.get('pageSize');
+            if (keyword) {
+                $('#searchQuery').val(keyword);
+            }
+            if (pageSize) {
+                $('#pageSize').val(pageSize);
+            }
+
+            // 啟用/停用切換開關的邏輯 (使用 jQuery 和 Fetch API)
             $('.toggle-active-switch').on('change', function () {
                 const organizationId = $(this).data('id');
+                const organizationName = $(this).data('organization-name');
                 const isChecked = $(this).prop('checked');
                 const switchElement = $(this);
 
@@ -238,7 +368,7 @@
                         Swal.fire({
                             icon: 'success',
                             title: '操作成功',
-                            text: `${data.organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
+                            text: `${organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
                             showConfirmButton: false,
                             timer: 1500
                         });

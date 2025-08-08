@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using System.Linq;
+using Team1.VitalBridge.BackStage.Models.ViewModels;
 
 namespace Team1.VitalBridge.BackStage.Controllers.Orgs
 {
@@ -13,12 +14,47 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string searchQuery = "")
         {
-            var data = await _context.OrganizationTypes
-                .OrderBy(c => c.Id)
+            // 確保頁碼和每頁大小為有效值
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            // 取得所有組織類型資料的 IQueryable
+            var query = _context.OrganizationTypes.AsQueryable();
+
+            // 根據搜尋條件過濾資料
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(ot => ot.Name.Contains(searchQuery));
+            }
+
+            // 取得總筆數
+            var totalCount = await query.CountAsync();
+
+            // 計算總頁數
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            // 取得分頁後的資料
+            var items = await query
+                .OrderBy(ot => ot.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
-            return View(data);
+
+            // 建立分頁結果物件
+            var paginatedResult = new PaginatedResult<OrganizationType>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalPages = totalPages
+            };
+
+            // 返回分頁結果物件給 View
+            return View(paginatedResult);
         }
 
         [HttpPost]
