@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "商品類別";
 }
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
     <style>
@@ -64,10 +63,11 @@
             font-size: 12px;
             color: #6c757d;
             transition: transform 0.3s ease;
+            transform: rotate(-90deg); /* 預設是收合狀態（箭頭向右） */
         }
 
-        .parent-category.collapsed::after {
-            transform: rotate(-90deg);
+        .parent-category:not(.collapsed)::after {
+            transform: rotate(0deg); /* 展開時箭頭向下 */
         }
 
         .sub-categories {
@@ -142,38 +142,51 @@
         </div>
     </div>
 </div>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            // 處理展開/收合的箭頭動畫
-            $('.collapse').on('show.bs.collapse', function() {
-                var trigger = $('[data-bs-target="#' + this.id + '"]');
-                trigger.removeClass('collapsed');
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('頁面載入完成'); // 調試用
 
-            $('.collapse').on('hide.bs.collapse', function() {
-                var trigger = $('[data-bs-target="#' + this.id + '"]');
-                trigger.addClass('collapsed');
+            // 方法1: 完全使用 Bootstrap 的 collapse 功能
+            document.querySelectorAll('.collapse').forEach(function(collapseElement) {
+                // 當開始展開時
+                collapseElement.addEventListener('show.bs.collapse', function() {
+                    console.log('開始展開:', this.id); // 調試用
+                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
+                    if (trigger) {
+                        trigger.classList.remove('collapsed');
+                    }
+                });
+
+                // 當開始收合時
+                collapseElement.addEventListener('hide.bs.collapse', function() {
+                    console.log('開始收合:', this.id); // 調試用
+                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
+                    if (trigger) {
+                        trigger.classList.add('collapsed');
+                    }
+                });
             });
 
             // 子類別點擊效果
-            $('.sub-category').click(function() {
-                // 移除其他選中狀態
-                $('.sub-category').removeClass('selected');
+            document.querySelectorAll('.sub-category').forEach(function(element) {
+                element.addEventListener('click', function() {
+                    console.log('點擊子類別'); // 調試用
 
-                // 添加選中狀態
-                $(this).addClass('selected');
+                    // 移除其他選中狀態
+                    document.querySelectorAll('.sub-category').forEach(function(item) {
+                        item.classList.remove('selected');
+                    });
 
-                // 獲取類別名稱
-                var categoryName = $(this).data('category');
-                console.log('選中類別：', categoryName);
+                    // 添加選中狀態
+                    this.classList.add('selected');
 
-                // 可以在這裡添加 AJAX 請求或其他處理邏輯
-                // $.post('@Url.Action("SelectCategory", "Category")', { category: categoryName });
+                    // 獲取類別 ID
+                    var categoryId = this.getAttribute('data-id');
+                    console.log('選中類別 ID：', categoryId);
+                });
             });
         });
     </script>
