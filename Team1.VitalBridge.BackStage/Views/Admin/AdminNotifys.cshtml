@@ -13,14 +13,17 @@
 
 <!-- EditNotifyUsersModal -->
 <div class="modal fade" data-id="" id="EditNotifyUsers" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content w-100">
             <div class="modal-header">
                 <h5 class="modal-title" id="EditNotifyUsersLabel">編輯通知對象</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive table-rounded shadow-sm w-800">
+                <div class="mb-2">
+                    <button type="button" class="btn btn-secondary btn-pageUsersAllAdd">全部加入</button>
+                </div>
+                <div class="table-responsive table-rounded shadow-sm w-80">
                     <table id="EditNotifyUsersTable" class="table table-striped table-bordered table-hover align-middle bg-white w-100">
                         <thead class="table-info text-dark">
                             <tr>
@@ -122,6 +125,7 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -162,53 +166,56 @@
               }
             }
             ,
-          columns: [
-          { data: 'id' },
-          { data: 'title',
-            render: function (data, type, row) {
-              if(row.notifysUrl!=null)
-              {
-                  return `<a href="${row.notifysUrl}">
-                            ${data}
-                          </a>`;
-              }
-              else
-              {
-                return data;
-              }
-            }
-          },
-          { data: 'categoriesName' },
-          { data: 'sendDate' },
-          { data: 'validityDate' },
-          {
-            data: 'userCount',
-            render: function (data, type, row) {
-              return `<a class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm btn-detail" data-id="${row.id}">
-                        <i class="bi bi-people-fill" id="row-${row.id}" data-count="${data}">${data}</i>
-                      </a>`;
-            }
-          },
-          {
-            data: 'id',
-            render: function (data, type, row) {
-              return `<div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#staticBackdrop" data-id =${data}>
-                            編輯
-                        </button>
-                        <button type="button" class="btn btn-outline-danger rounded-pill btn-delete" data-id =${data}>
-                            刪除
-                        </button>
-                      </div>`;
-            },
-            className: "text-center"
-          }
-        ]
+              columns: [
+                  { data: 'id' },
+                  { data: 'title',
+                    render: function (data, type, row) {
+                      if(row.notifysUrl!=null)
+                      {
+                          return `<a href="${row.notifysUrl}">
+                                    ${data}
+                                  </a>`;
+                      }
+                      else
+                      {
+                        return data;
+                      }
+                    }
+                  },
+                  { data: 'categoriesName' },
+                  { data: 'sendDate' },
+                  { data: 'validityDate' },
+                  {
+                    data: 'userCount',
+                    render: function (data, type, row) {
+                      return `<a class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-sm btn-detail" data-id="${row.id}">
+                                <i class="bi bi-people-fill" id="row-${row.id}" data-count="${data}">${data}</i>
+                              </a>`;
+                    }
+                  },
+                  {
+                    data: 'id',
+                    render: function (data, type, row) {
+                      return `<div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#staticBackdrop" data-id =${data}>
+                                    編輯
+                                </button>
+                                <button type="button" class="btn btn-outline-danger rounded-pill btn-delete" data-id =${data}>
+                                    刪除
+                                </button>
+                              </div>`;
+                    },
+                    className: "text-center"
+                  }
+                ]
             });
 
 
             $('#notifysTable').on('click', '.btn-detail', function () {
-                const tr = $(this).closest('tr');
+                var tr = $(this).closest('tr');
+
+                //點擊的是收起通知對象按鈕的話 往上找到主列
+                tr = (tr.hasClass('even') || tr.hasClass('odd')) ? tr : tr.prev('tr');
                 const row = $('#notifysTable').DataTable().row(tr);
 
                 if (row.child.isShown()) {
@@ -245,6 +252,11 @@
                                         </div>
                                      </li>`;
                             }
+                             li += `<li class="list-group-item text-center">
+                                       <button type="button" class="btn btn-outline-secondary rounded-pill px-4 btn-collapseUsers btn-detail" data-id="${id}">
+                                         <i class="bi bi-chevron-up me-1"></i> 收起通知對象
+                                       </button>
+                                    </li>`;
                             var ul = `<ul class="list-group">
                                     ${li}
                                   </ul>`;
@@ -389,6 +401,52 @@
                     }
                   });
                 
+            });
+
+            $(document).on('click', '.btn-pageUsersAllAdd', function (e) {
+
+                const table = $('#EditNotifyUsersTable').DataTable();
+                const allData = table.data();
+
+                if (allData.length === 0) {
+                    Swal.fire('無符合使用者', '目前篩選條件下沒有可加入的使用者。', 'info');
+                    return;
+                }
+
+                let successCount = 0;
+                let failCount = 0;
+
+                const requests = [];
+
+                allData.each(function (row) {
+                    const id = row.id;
+                    const uid = row.userId;
+
+                    const req = $.ajax({
+                        url: `/api/NotifyUser/${id}/${uid}`,
+                        type: 'POST',
+                        success: function () {
+                            $('#users-' + id).remove();
+                            successCount++;
+                        },
+                        error: function () {
+                            failCount++;
+                        }
+                    });
+
+                    requests.push(req);
+                });
+
+                $.when.apply($, requests).then(function () {
+                    $('#EditNotifyUsersTable').DataTable().ajax.reload(null, false);
+                    $('#notifysTable').DataTable().ajax.reload(null, false);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '一鍵加入完成',
+                        html: `成功加入：${successCount}<br>失敗：${failCount}`,
+                    });
+                });
             });
 
             $(document).on('click','.btn-addUsers',function(e){
