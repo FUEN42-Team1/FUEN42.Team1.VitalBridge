@@ -7,16 +7,10 @@
 
 }
 
-
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機構註冊</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+
     <div class="container mt-5">
         <h2 class="mb-4">機構註冊</h2>
         <form asp-action="Register" method="post">
@@ -34,7 +28,7 @@
 
             <div class="mb-3">
                 <label asp-for="InstitutionEmail" class="form-label"></label>
-                <input asp-for="InstitutionEmail" class="form-control" type="email" required />
+                <input asp-for="InstitutionEmail" class="form-control" required />
                 <span asp-validation-for="InstitutionEmail" class="text-danger"></span>
             </div>
 
@@ -56,21 +50,21 @@
                 <span asp-validation-for="PrincipalPhone" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="CityId" class="form-label">縣市</label>
-                <select asp-for="CityId" class="form-select" asp-items="@ViewBag.Cities">
-                    <option value="">請選擇縣市</option>
-                </select>
-                <span asp-validation-for="CityId" class="text-danger"></span>
-            </div>
+        <div class="mb-3">
+            <label asp-for="CityId" class="form-label"></label>
+            <select asp-for="CityId" class="form-select" id="CityId">
+                <option value="">請選擇縣市</option>
+            </select>
+            <span asp-validation-for="CityId" class="text-danger"></span>
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="TownshipId" class="form-label">鄉鎮</label>
-                <select asp-for="TownshipId" class="form-select" asp-items="@ViewBag.Townships">
-                    <option value="">請選擇鄉鎮</option>
-                </select>
-                <span asp-validation-for="TownshipId" class="text-danger"></span>
-            </div>
+        <div class="mb-3">
+            <label asp-for="TownshipId" class="form-label"></label>
+            <select asp-for="TownshipId" class="form-select" id="TownshipId">
+                <option value="">請先選擇縣市</option>
+            </select>
+            <span asp-validation-for="TownshipId" class="text-danger"></span>
+        </div>
 
             <div class="mb-3">
                 <label asp-for="Address" class="form-label"></label>
@@ -78,9 +72,16 @@
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" type="email" required />
+                <input asp-for="Email" class="form-control" required />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
@@ -103,12 +104,51 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script asp-src-include="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script asp-src-include="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+     <script asp-src-include="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 
 
-    </script>
-</body>
-</html>
+
+<script>
+    $(function () {
+        const $city = $('#CityId');
+        const $township = $('#TownshipId');
+
+        // 回填用
+        const selectedCityId = '@(Model?.CityId.ToString() ?? "")';
+        const selectedTownshipId = '@(Model?.TownshipId.ToString() ?? "")';
+
+        // 載入縣市
+        $.getJSON('/api/locations/cities', function (cities) {
+            $city.html('<option value="">請選擇縣市</option>');
+            $.each(cities, function (_, c) {
+                $city.append(`<option value="${c.id}" ${selectedCityId == c.id ? 'selected' : ''}>${c.name}</option>`);
+            });
+            if (selectedCityId) {
+                loadTownships(selectedCityId, selectedTownshipId);
+            } else {
+                $township.html('<option value="">請先選擇縣市</option>');
+            }
+        });
+
+        // 縣市改變時載入鄉鎮
+        $city.on('change', function () {
+            loadTownships($(this).val(), null);
+        });
+
+        function loadTownships(cityId, preselect) {
+            if (!cityId) {
+                $township.html('<option value="">請先選擇縣市</option>');
+                return;
+            }
+            $.getJSON(`/api/locations/cities/${cityId}/townships`, function (townships) {
+                $township.html('<option value="">請選擇鄉鎮</option>');
+                $.each(townships, function (_, t) {
+                    $township.append(`<option value="${t.id}" ${preselect == t.id ? 'selected' : ''}>${t.name}</option>`);
+                });
+            });
+        }
+    });
+</script>
+
+
+

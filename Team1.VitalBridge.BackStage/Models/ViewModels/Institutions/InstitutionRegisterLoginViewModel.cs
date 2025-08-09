@@ -33,13 +33,13 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels.Institutions
         public string PrincipalPhone { get; set; }
 
         [Display(Name = "縣市")]
-        public int? CityId { get; set; } // 儲存選取的縣市 ID
+        public int CityId { get; set; } // 儲存選取的縣市 ID
 
         [Display(Name = "縣市名稱")]
         public string? CityName { get; set; } // 儲存縣市名稱，方便顯示
 
         [Display(Name = "鄉鎮")]
-        public int? TownshipId { get; set; } // 儲存選取的鄉鎮 ID
+        public int TownshipId { get; set; } // 儲存選取的鄉鎮 ID
 
         [Display(Name = "鄉鎮名稱")]
         public string? TownshipName { get; set; } // 儲存鄉鎮名稱，方便顯示
@@ -48,6 +48,12 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels.Institutions
         public string? Address { get; set; }
 
         //帳號/密碼/確認密碼
+
+
+        [Display(Name = "使用者名稱")]
+        [Required(ErrorMessage = "請輸入{0}")]
+        public string Name { get; set; } 
+
         [Display(Name = "帳號信箱")]
         [Required(ErrorMessage = "請輸入{0}")]
         //[EmailAddress(ErrorMessage = "請輸入有效的Email地址")]

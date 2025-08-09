@@ -1,7 +1,8 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Utilities;
@@ -18,13 +19,14 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly JwtService _jwtService;
+        private readonly LocationService _locationService;
 
-        public InstitutionAuthController(AppDbContext context, IConfiguration configuration, JwtService jwtService)
+        public InstitutionAuthController(AppDbContext context, IConfiguration configuration, JwtService jwtService , LocationService locationService)
         {
             this._context = context;
             this._configuration = configuration;
             this._jwtService = jwtService;
-
+            this._locationService = locationService;
         }
         public IActionResult Index()
         {
@@ -173,16 +175,150 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
         [HttpGet]
         public async Task<IActionResult> Register() {
 
-
             return View();
         }
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Register(InstitutionRegisterLoginViewModel vm) { 
-        
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(InstitutionRegisterLoginViewModel vm) {
 
-            return View(vm);
+
+            // 檢查機構代碼是否已存在
+            if (await _context.Institutions.AsNoTracking()
+                .AnyAsync(i => i.InstitutionCode == vm.InstitutionCode))
+            {
+                ModelState.AddModelError("InstitutionCode", "機構代碼已存在，請使用其他代碼。");
+            }
+
+            // 檢查機構 Email 是否已存在
+            if (await _context.Institutions.AsNoTracking()
+                .AnyAsync(i => i.Email == vm.InstitutionEmail))
+            {
+                ModelState.AddModelError("InstitutionEmail", "機構 Email 已存在，請使用其他 Email。");
+            }
+
+            // 檢查帳號 Email 是否已存在
+            if (await _context.Users.AsNoTracking()
+                .AnyAsync(u => u.Email == vm.Email))
+            {
+                ModelState.AddModelError("Email", "帳號 Email 已註冊，請使用其他 Email。");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            var orgOwnerRoleId = await _context.Roles
+        .Where(r => r.RoleCode == "OrgOwner")
+        .Select(r => r.Id)
+        .FirstOrDefaultAsync();
+
+            if (orgOwnerRoleId == 0)
+            {
+                ModelState.AddModelError(string.Empty, "系統尚未設定預設身分。請聯繫管理員。");
+                return View(vm);
+            }
+
+
+
+
+            //使用交易來確保資料一致性
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                
+                using var tx = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                //建立機構
+                var institution =  new Institution
+                {
+                    InstitutionCode = vm.InstitutionCode,
+                    Name = vm.InstitutionName,
+                    Email = vm.InstitutionEmail,
+                    Phone = vm.InstitutionPhone,
+                    PrincipalName = vm.PrincipalName,
+                    PrincipalPhone = vm.PrincipalPhone,
+                    CityId = vm.CityId,
+                    TownshipId = vm.TownshipId,
+                    Address = vm.Address,
+                    Status = "Pending", // 設定狀態為審核中
+                    IsPhysicalCheck= false, 
+                    IsBanned = false, // 預設不被停權
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
+                //建立使用者
+                var user = new User
+                {
+                    UserId = Guid.NewGuid().ToString("N"), // 使用 GUID 作為唯一識別碼
+                    Name = vm.Name, 
+                    Email = vm.Email,
+                    Password = HashUtility.HashPassword(vm.Password), 
+                    Status = "unverified", // 設定狀態為未驗證
+                    AccountType = "Institution",
+                    ConfirmCode = Guid.NewGuid().ToString("N"), // 生成確認碼
+                    ConfirmCodeExpiresAt = DateTime.Now.AddHours(24), // 確認碼有效期為24小時
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+
+                };
+
+                _context.Institutions.Add(institution);
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync(); // 先拿到 institution.Id 與 user.Id
+
+                //建立機構與使用者關聯
+                _context.InstitutionProfiles.Add(new InstitutionProfile
+                {
+                    UserId = user.Id,
+                    InstitutionId = institution.Id,
+                    IsResponsible = true, // 預設為機構系統負責人
+                    Position = "機構系統負責人", // 預設職位為機構負責人
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+
+                });
+
+                //帳號身分
+                _context.UserRoles.Add(new UserRole
+                {
+                    UserId = user.Id,
+                    //RoleCode = "Institution", // 預設角色為機構使用者
+                    RoleId = orgOwnerRoleId, // 預設角色為機構使用者
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                });
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+
+
+
+
+
+
+                
+            });
+
+
+
+
+
+
+            return RedirectToAction("RegisterSuccess");
         }
+
+
 
 
 
