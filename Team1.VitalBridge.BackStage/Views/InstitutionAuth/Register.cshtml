@@ -1,5 +1,13 @@
 ﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.Institutions.InstitutionRegisterLoginViewModel
 
+@{
+   ViewData["Title"] = "機構註冊";
+    Layout = null;//註冊不能用後台layout
+
+
+}
+
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -97,28 +105,10 @@
     <script asp-src-include="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script asp-src-include="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#CityId').change(function () {
-                var cityId = $(this).val();
-                if (cityId) {
-                    $.ajax({
-                        url: '@Url.Action("GetTownships", "Institution")',
-                        type: 'GET',
-                        data: { cityId: cityId },
-                        success: function (data) {
-                            $('#TownshipId').empty();
-                            $('#TownshipId').append('<option value="">請選擇鄉鎮</option>');
-                            $.each(data, function (index, township) {
-                                $('#TownshipId').append('<option value="' + township.id + '">' + township.name + '</option>');
-                            });
-                        }
-                    });
-                } else {
-                    $('#TownshipId').empty();
-                    $('#TownshipId').append('<option value="">請選擇鄉鎮</option>');
-                }
-            });
-        });
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+
     </script>
 </body>
 </html>

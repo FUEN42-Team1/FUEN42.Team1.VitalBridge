@@ -118,6 +118,11 @@
                 // 更新按鈕文字（顯示下一步操作）
                 const nextAction = res.isActive ? '停用' : '啟用';
                 btn.text(nextAction);
+                    if (res.isActive) {
+      btn.removeClass('btn-outline-success').addClass('btn-outline-danger');
+    } else {
+      btn.removeClass('btn-outline-danger').addClass('btn-outline-success');
+    }
 
                 // 更新狀態徽章
                 const badge = $('#status-' + roleCode);

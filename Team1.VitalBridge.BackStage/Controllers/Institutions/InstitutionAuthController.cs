@@ -165,21 +165,22 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
 
         }
 
-        //註冊
+        //申請機構帳號
+        //先顯示註冊頁面
+        //填入資料後驗證OK便先建立機構資料(狀態設為審核中)
+        //
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> Register() => View();
+        public async Task<IActionResult> Register() {
+
+
+            return View();
+        }
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(InstitutionRegisterLoginViewModel vm) { 
         
-        
-        
-        
-        
-        
-        
-        
+
             return View(vm);
         }
 
