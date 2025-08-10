@@ -421,10 +421,15 @@
             fatherId: parentCategory ? parseInt(parentCategory) : null,
             isActive: isActive
             };
-            
+
+            // 顯示載入中狀態
+            const createButton = document.getElementById('createCategory');
+            const originalText = createButton.textContent;
+            createButton.disabled = true;
+            createButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>處理中';
 
             // 呼叫API
-            fetch('api/ProductCategoryApi', {
+            fetch('/api/ProductCategoryApi', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -438,7 +443,7 @@
                 }
                     return response.json();
             })
-            then(data => {
+            .then(data => {
                 // 成功處理
                 console.log('新增成功:', data);
 
@@ -493,6 +498,19 @@
             document.getElementById('categoryName').value = '';
             document.getElementById('parentCategory').value = '';
             document.getElementById('categoryIsActive').checked = true;
+
+             // 清除圖片檔案選擇
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            // 清除圖片預覽
+            const showImage = document.getElementById('showimage');
+            if (showImage) {
+                showImage.src = '';      // 清空 src
+                showImage.style.display = 'none'; // 隱藏預覽
+            }
 
             // 清除任何錯誤訊息
             clearValidationErrors();
