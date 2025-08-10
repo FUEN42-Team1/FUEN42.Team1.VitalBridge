@@ -54,7 +54,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
         // GET: ContentArticles/Create
         public IActionResult Create()
         {
-            ViewData["ContentCategoryId"] = new SelectList(_context.ContentCategories, "Id", "Name");
             return View();
         }
 

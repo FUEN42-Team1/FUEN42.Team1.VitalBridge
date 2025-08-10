@@ -8,7 +8,7 @@
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public byte[] CoverPic { get; set; } // Base64 encoded image
+        public byte[]? CoverPic { get; set; } // Base64 encoded image
 
         public int ContentCategoryId { get; set; }
         public string CategoryName { get; set; }
