@@ -10,8 +10,8 @@
     }
 
     .add-category-btn {
-        background-color: #f8d7da;
-        color: #721c24;
+        background-color: #21AD5B;
+        color: #F2FFF7;
         padding: 8px 16px;
         border-radius: 4px;
         font-weight: 500;
@@ -21,9 +21,9 @@
         transition: background-color 0.2s ease;
     }
 
-        .add-category-btn:hover {
-            background-color: #f1b4b8;
-            color: #721c24;
+    .add-category-btn:hover {
+            background-color: #16763E;
+            color: #F2FFF7;
         }
 
     .category-content {
@@ -109,7 +109,7 @@
         color: #495057;
     }
 
-        .parent-category .category-name:hover {
+      .parent-category .category-name:hover {
             color: #007bff;
         }
 
@@ -126,9 +126,68 @@
 <div class="container">
     <div class="category-container">
         <!--新增商品類別按鈕-->
-        <button type="button" class="add-category-btn add-category-btn" onclick="lacation.href='@Url.Action("Create", "ProductCategory")'">
+        <button type="button" class="add-category-btn" data-bs-toggle="modal" data-bs-target="#CreateProductCategory">
             新增商品類別
         </button>
+
+        <div class="modal fade" id="CreateProductCategory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
+             aria-labelledby="modalTitleId" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitleId">
+                            新增商品類別
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="mb-3">
+                                    <label for="categoryName" class="form-label">類別名稱</label>
+                                    <input class="form-control" id="categoryName" placeholder="請輸入商品類別名稱">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" id="FatherId" name="FatherId">上層類別</label>
+                                <select class="form-select">
+                                    <option value="">--無上層類別--</option>
+                                    <!--這邊用JS載入-->  
+                                  
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" >啟用狀態</label>
+                                <div class="form-check form-switch " id="isActive" name=" isActive">
+                                    <input class="form-check-input" type="checkbox" id="categoryIsActive" checked>
+                                </div>
+                               
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <input type="file" class="form-control" id="fileInput">
+                                <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                            </div>
+                            <div>
+                                <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+                            </div>
+                            <div id="result"></div>
+                            <div class="form-group mb-3">
+                                <input class="form-control" id="image" readonly />
+                            </div>
+
+                            <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                        
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            關閉
+                        </button>
+                        <button type="button" class="btn btn-primary">新增</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- 類別列表容器 -->
         <div id="category-list">
@@ -146,15 +205,183 @@
             // 載入類別資料
             loadCategories();
 
-        }
+        })
         // 載入類別資料呼叫 API 這邊用fetch
-        function loadCategorie(){
-            fe
+        function loadCategories(){
+            fetch('/api/ProductCategoryApi')
+            .then(response => response.json())
+            .then(data => {
+                console.log('類別資料:', data); // 測試用
+                renderCategories(data);
+            })
+            .catch(error => {
+                console.error('載入類別資料失敗:', error);
+            });
 
+        }
+
+        // 渲染類別資料 (將程式碼轉化為畫面)
+        function renderCategories(categories){
+            // 清空現有的類別列表所有內容
+            const categoryList = document.getElementById('category-list');
+            categoryList.innerHTML = '';
+
+            //  計算level層級並轉換資料，屬於父類別還是子類別，並且分組
+            const categoriesWithLevel = categories.map(category => {
+                return {
+                    ...category,
+                    level: (category.fatherId != null) ? 1 : 0 // 假設 fatherId 存在表示是子類別
+                };
+            });
+
+            // 取得根類別
+            const rootCategories = categoriesWithLevel.filter(c=> c.level === 0);
+
+             rootCategories.forEach(parent => {
+                // 建立類別群組
+                const categoryGroup = document.createElement('div');
+                categoryGroup.className = 'category-group';
+
+                // 父類別標題
+                const parentDiv = document.createElement('div');
+                parentDiv.className = 'parent-category collapsed';
+                parentDiv.setAttribute('data-bs-toggle', 'collapse');
+                parentDiv.setAttribute('data-bs-target', `#category_${parent.id}`);
+                parentDiv.setAttribute('aria-expanded', 'false');
+
+                // 父類別名稱 (可點擊編輯)
+                const parentNameSpan = document.createElement('span');
+                parentNameSpan.className = 'category-name';
+                parentNameSpan.textContent = parent.name;
+                parentNameSpan.setAttribute('data-id', parent.id);
+
+                parentDiv.appendChild(parentNameSpan);
+                categoryGroup.appendChild(parentDiv);
+
+                // 取得該父類別的子類別
+                const children = categoriesWithLevel.filter(c => c.fatherId === parent.id);
+
+                if (children.length > 0) {
+                    // 建立收合容器
+                    const collapseDiv = document.createElement('div');
+                    collapseDiv.className = 'collapse collapse-transition';
+                    collapseDiv.id = `category_${parent.id}`;
+
+                    const subCategoriesDiv = document.createElement('div');
+                    subCategoriesDiv.className = 'sub-categories';
+
+                    children.forEach(child => {
+                        const childDiv = document.createElement('div');
+                        childDiv.className = 'sub-category';
+
+                        // 子類別名稱 (可點擊編輯)
+                        const childNameSpan = document.createElement('span');
+                        childNameSpan.className = 'category-name';
+                        childNameSpan.textContent = child.name;
+                        childNameSpan.setAttribute('data-id', child.id);
+
+                        childDiv.appendChild(childNameSpan);
+                        subCategoriesDiv.appendChild(childDiv);
+                    });
+                    
+                    collapseDiv.appendChild(subCategoriesDiv);
+                    categoryGroup.appendChild(collapseDiv);
+                }
+
+                categoryList.appendChild(categoryGroup);
+            });
+
+            // 綁定事件
+            bindEvents();
+
+                
+        }
+        // 綁定事件處理
+        function bindEvents() {
+            // 展開/收合的箭頭動畫
+            document.querySelectorAll('.collapse').forEach(function(collapseElement) {
+                collapseElement.addEventListener('show.bs.collapse', function() {
+                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
+                    if (trigger) {
+                        trigger.classList.remove('collapsed');
+                    }
+                });
+
+                collapseElement.addEventListener('hide.bs.collapse', function() {
+                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
+                    if (trigger) {
+                        trigger.classList.add('collapsed');
+                    }
+                });
+            });
+
+            // 類別名稱點擊事件 - 直接跳轉編輯頁面
+            document.querySelectorAll('.category-name').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止觸發展開/收合
+                    var categoryId = this.getAttribute('data-id');
+                    editCategory(categoryId);
+                });
+            });
+
+            // 保留子類別的選中效果（點擊空白區域）
+            document.querySelectorAll('.sub-category').forEach(function(element) {
+                element.addEventListener('click', function(e) {
+                    // 如果點擊的是類別名稱，不處理選中效果
+                    if (e.target.classList.contains('category-name')) {
+                        return;
+                    }
+
+                    // 移除其他選中狀態
+                    document.querySelectorAll('.sub-category').forEach(function(item) {
+                        item.classList.remove('selected');
+                    });
+
+                    // 添加選中狀態
+                    this.classList.add('selected');
+
+                    var categoryId = this.querySelector('.category-name').getAttribute('data-id');
+                    console.log('選中類別ID：', categoryId);
+                });
+            });
+        }
+        // 編輯類別
+        function editCategory(categoryId) {
+            window.location.href = `/ProductCategory/Edit/${categoryId}`;
+        }
+
+        // 重新載入資料的公用方法（新增或編輯完成後可呼叫）
+        function refreshCategories() {
+            document.getElementById('category-list').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+            loadCategories();
         }
 
 
 
+        // 暴露給全域使用
+        window.categoryManager = {
+            refresh: refreshCategories
+        };
+    </script>
 
+    <!--處理新增檔案的上傳圖片-->
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileInput = $("#fileInput");
+            var showImage = $("#showimage");
+            var resultDiv = $("#result");
+            var image = $("#image");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+        });
     </script>
 }
+

@@ -22,20 +22,27 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			return View();
 		}
 
-		/*
+
+		
+		
 		// Get:ProductCategory/Create
 		[HttpGet]
 		// 這是顯示新增表單
-		public async Task<IActionResult> Create()
-		{
-			var vm = new ProductCategoryFormViewModel();
-			await LoadParentOptions(vm);
-			return View(vm);
+		public IActionResult Create()
+        {
+            // 回傳空的 ViewModel
+            // 前端 JavaScript 會：
+            // 1. 呼叫 /api/ProductCategoryApi/parent-options 取得父類別選項
+            // 2. 動態填入下拉選單
+            // 3. 圖片上傳由組員的 UploadImage.js 處理
+            // 4. 表單提交時整合所有資料呼叫 API
+            var vm = new ProductCategoryFormViewModel();
+            return View(vm);
 		}
 
 
 		
-
+		/*
 		//Post :ProductCategory/CreateProductCategory
 		[HttpPost]
 		// 這是傳輸新增表單資料
@@ -89,7 +96,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			}
 
 		}
-
 		*/
+		
 	}
 }
