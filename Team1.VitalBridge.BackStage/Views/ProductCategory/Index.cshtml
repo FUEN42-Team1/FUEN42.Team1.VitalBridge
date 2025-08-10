@@ -1,60 +1,58 @@
-﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ProductCategoryTreeViewModel>
-
-@{
+﻿@{
     ViewData["Title"] = "商品類別";
 }
 
 
-    <style>
-        .category-container {
-            max-width: 400px;
-            margin: 20px auto;
-        }
+<style>
+    .category-container {
+        max-width: 600px;
+        margin: 20px auto;
+    }
 
-        .add-category-btn {
-            background-color: #f8d7da;
+    .add-category-btn {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: 500;
+        margin-bottom: 15px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+        .add-category-btn:hover {
+            background-color: #f1b4b8;
             color: #721c24;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 500;
-            margin-bottom: 15px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
         }
 
-            .add-category-btn:hover {
-                background-color: #f1b4b8;
-                color: #721c24;
-            }
+    .category-content {
+        border: 2px solid #6c757d;
+        border-radius: 6px;
+        padding: 20px;
+        background-color: #fff;
+    }
 
-        .category-content {
-            border: 2px solid #6c757d;
-            border-radius: 6px;
-            padding: 20px;
-            background-color: #fff;
-        }
+    .main-category {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #e9ecef;
+    }
 
-        .main-category {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e9ecef;
-        }
+    .category-group {
+        margin-bottom: 25px;
+    }
 
-        .category-group {
-            margin-bottom: 25px;
-        }
-
-        .parent-category {
-            font-weight: 500;
-            color: #495057;
-            margin-bottom: 8px;
-            position: relative;
-            cursor: pointer;
-            user-select: none;
-        }
+    .parent-category {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+    }
 
         .parent-category::after {
             content: '▼';
@@ -63,83 +61,80 @@
             font-size: 12px;
             color: #6c757d;
             transition: transform 0.3s ease;
-            transform: rotate(-90deg); /* 預設是收合狀態（箭頭向右） */
         }
 
-        .parent-category:not(.collapsed)::after {
-            transform: rotate(0deg); /* 展開時箭頭向下 */
+        .parent-category.collapsed::after {
+            transform: rotate(-90deg);
         }
 
-        .sub-categories {
-            margin-left: 20px;
-            margin-top: 8px;
-        }
+    .sub-categories {
+        margin-left: 20px;
+        margin-top: 8px;
+    }
 
-        .sub-category {
-            color: #6c757d;
-            margin-bottom: 6px;
-            padding: 4px 0;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
+    .sub-category {
+        color: #6c757d;
+        margin-bottom: 6px;
+        padding: 4px 0;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
 
         .sub-category:hover {
             color: #007bff;
             text-decoration: underline;
         }
 
-        .collapse-transition {
-            transition: all 0.3s ease;
+    .collapse-transition {
+        transition: all 0.3s ease;
+    }
+
+    .sub-category.selected {
+        color: #007bff;
+        font-weight: 500;
+    }
+
+    /* 類別名稱樣式 */
+    .category-name {
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .category-name:hover {
+            color: #007bff;
+            text-decoration: underline;
         }
 
-        .sub-category.selected {
+    .parent-category .category-name {
+        color: #495057;
+    }
+
+        .parent-category .category-name:hover {
             color: #007bff;
-            font-weight: 500;
         }
-    </style>
+
+    .sub-category .category-name {
+        color: #6c757d;
+    }
+
+        .sub-category .category-name:hover {
+            color: #007bff;
+        }
+</style>
 
 
 <div class="container">
     <div class="category-container">
-        <!-- 新增商品類別按鈕 -->
-        <button type="button" class="btn add-category-btn" onclick="location.href='@Url.Action("Create", "ProductCategory")'">
+        <!--新增商品類別按鈕-->
+        <button type="button" class="add-category-btn add-category-btn" onclick="lacation.href='@Url.Action("Create", "ProductCategory")'">
             新增商品類別
         </button>
 
-        <!-- 內容區域 -->
-        <div class="category-content">
-            <div class="main-category">目前類別</div>
-
-            @{
-                var parentCategories = Model.Where(m => m.Level == 0).ToList();
-            }
-
-            @foreach (var parent in parentCategories)
-            {
-                <div class="category-group">
-                    <div class="parent-category collapsed" data-bs-toggle="collapse"
-                         data-bs-target="#category_@parent.Id" aria-expanded="false">
-                        @parent.Name
-                    </div>
-                    @{
-                        var children = Model.Where(m => m.Level == 1 && m.FatherId == parent.Id).ToList();
-                    }
-
-                    <div class="collapse collapse-transition" id="category_@parent.Id">
-                        <div class="sub-categories">
-                            @foreach (var child in children)
-                            {
-                                <div class="sub-category" data-id="@child.Id">@child.Name</div>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                
-            }
-
-            
+        <!-- 類別列表容器 -->
+        <div id="category-list">
+            <!-- 動態生成的類別列表會放在這裡 -->
         </div>
+
     </div>
 </div>
 
@@ -147,47 +142,19 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('頁面載入完成'); // 調試用
+            console.log('頁面載入完成'); // 測試用
+            // 載入類別資料
+            loadCategories();
 
-            // 方法1: 完全使用 Bootstrap 的 collapse 功能
-            document.querySelectorAll('.collapse').forEach(function(collapseElement) {
-                // 當開始展開時
-                collapseElement.addEventListener('show.bs.collapse', function() {
-                    console.log('開始展開:', this.id); // 調試用
-                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
-                    if (trigger) {
-                        trigger.classList.remove('collapsed');
-                    }
-                });
+        }
+        // 載入類別資料呼叫 API 這邊用fetch
+        function loadCategorie(){
+            fe
 
-                // 當開始收合時
-                collapseElement.addEventListener('hide.bs.collapse', function() {
-                    console.log('開始收合:', this.id); // 調試用
-                    var trigger = document.querySelector('[data-bs-target="#' + this.id + '"]');
-                    if (trigger) {
-                        trigger.classList.add('collapsed');
-                    }
-                });
-            });
+        }
 
-            // 子類別點擊效果
-            document.querySelectorAll('.sub-category').forEach(function(element) {
-                element.addEventListener('click', function() {
-                    console.log('點擊子類別'); // 調試用
 
-                    // 移除其他選中狀態
-                    document.querySelectorAll('.sub-category').forEach(function(item) {
-                        item.classList.remove('selected');
-                    });
 
-                    // 添加選中狀態
-                    this.classList.add('selected');
 
-                    // 獲取類別 ID
-                    var categoryId = this.getAttribute('data-id');
-                    console.log('選中類別 ID：', categoryId);
-                });
-            });
-        });
     </script>
 }

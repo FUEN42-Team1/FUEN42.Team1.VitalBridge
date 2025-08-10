@@ -25,8 +25,12 @@ namespace Team1.VitalBridge.BackStage
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            // 獲取 appsettings.json 中名為 "DefaultConnection" 的連線字串
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+			// 註冊 IProductCategoryRepository,ProductCategoryService>到DI
+			builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
+			builder.Services.AddScoped<ProductCategoryService>();
+
+			// 獲取 appsettings.json 中名為 "DefaultConnection" 的連線字串
+			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
             //// 註冊 AppDbContext 服務
             //// 使用 SQL Server 資料庫，並傳入連線字串
@@ -47,10 +51,11 @@ namespace Team1.VitalBridge.BackStage
                     )
                 )
             );
+			
 
-            // Johnny start
-            // 註冊 ContentCategoryService 和 ContentCategoryRepository
-            builder.Services.AddScoped<IContentCategoryRepository, ContentCategoryRepository>();
+			// Johnny start
+			// 註冊 ContentCategoryService 和 ContentCategoryRepository
+			builder.Services.AddScoped<IContentCategoryRepository, ContentCategoryRepository>();
             builder.Services.AddScoped<IContentCategoryService, ContentCategoryService>();
             // 註冊 ContentArticleService 和 ContentArticleRepository
             builder.Services.AddScoped<IContentArticleRepository, ContentArticleRepository>();

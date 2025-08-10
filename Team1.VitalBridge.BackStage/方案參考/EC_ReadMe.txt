@@ -4,8 +4,14 @@
 	-註冊 AppDbContext 到 DI 容器
 	-設定 _Layout 的 html_lang value 為 zh-tw
 [todo] 實作 商品分類管理ProductCategory
+	-採用前後端分離寫法：
+	CategoryController → 只負責顯示表單畫面（符合原設計）
+	CategoryApiController → 處理所有資料操作（符合原設計）
 	[V]-add ProductCategoryFormViewModel 商品分類
-	-add ProductCategoryController
+	-目前已經先把顯示樹狀圖的部分，改為三層式架構
+	-還缺 API Controller 的 CRUD 功能，要優先把 樹狀圖顯示出來
+	-[進行中]目前在寫Index 顯示類別採用fetch API 的方式，動態載入資料 (回去複習)
+
 	-add 商品全分類頁action &View Page
 	-add 新增分類 action & View Page
 	-add Service (判斷是否重複名稱、自己不能選自己、自己不能選自己子分類)

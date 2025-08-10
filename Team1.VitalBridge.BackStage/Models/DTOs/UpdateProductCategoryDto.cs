@@ -1,4 +1,4 @@
-﻿namespace Team1.VitalBridge.BackStage.Models.Dto
+﻿namespace Team1.VitalBridge.BackStage.Models.DTOs
 {
     public class UpdateProductCategoryDto
     {
@@ -6,7 +6,6 @@
         public int Id { get; set; }
         public int? FatherId { get; set; }
         public string Name { get; set; }
-        public bool IsActive { get; set; } = true;
-        public int FileId { get; set; } // 圖片檔案ID
+        public bool IsActive { get; set; } 
     }
 }
