@@ -1,0 +1,8 @@
+﻿@{
+    Layout = "_LayoutAuth";
+    var isIframe = Context.Request.Query["isIframe"].ToString().ToLower() == "true";
+    if (isIframe)
+    {
+        Layout = "_Layout3";
+    }
+}

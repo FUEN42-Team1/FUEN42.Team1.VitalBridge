@@ -40,6 +40,17 @@
     </a>
 </div>
 
+@* 檢查權限用 找你要的地方去插入 *@
+@* @using System.Security.Claims *@
+@* <p>目前使用者角色: @User.FindFirstValue(ClaimTypes.Role)</p> *@
+@* <ul> *@
+@*     @foreach (var role in User.FindAll(ClaimTypes.Role)) *@
+@*     { *@
+@*         <li>@role.Value</li> *@
+@*     } *@
+@* </ul> *@
+
+
 <style>
     /***** Neon gradient *****/
     .neon-btn {
