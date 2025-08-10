@@ -30,6 +30,16 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string Status { get; set; } // efmodel is int , but view model is string for display purposes
 
     }
+    public class ContentArticleEditViewModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public int ContentCategoryId { get; set; }
+        public IFormFile? CoverPic { get; set; } 
+        public string Status { get; set; } // efmodel is int , but view model is string for display purposes
+    }
+
     public enum ContentArticleStatus
     {
         Drafted = 0,

@@ -34,7 +34,8 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            Console.WriteLine("service ok");
+            // todo If CoverPic is provided, set it
+
             // Save to repository
             await _repository.AddAsync(entity);
         }
@@ -44,7 +45,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<ContentDTO>> GetAllArticlesListAsync()
+        public async Task<IEnumerable<ContentArticleDTO>> GetAllArticlesListAsync()
         {
             throw new NotImplementedException();
         }
@@ -52,6 +53,27 @@ namespace Team1.VitalBridge.BackStage.Models.Services
         public async Task<ContentArticleDTO> GetArticleByIdAsync(int id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ContentArticleEditDTO> GetArticleForEditByIdAsync(int id)
+        {
+            var query = _repository.GetAllWithIncludes();
+            var dto  = await query
+                .Where(c => c.Id == id)
+                .Select(c => new ContentArticleEditDTO
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Content = c.Content1, // Assuming Content1 is the content field
+                    ContentCategoryId = c.ContentCategoryId,
+                    //CoverPic = null, // Assuming CoverPic is not needed for edit
+                    Status = c.Status
+                }).FirstOrDefaultAsync();
+            if (dto == null)
+            {   
+                throw new KeyNotFoundException($"Article with ID {id} not found.");
+            }
+            return dto;
         }
 
         public async Task<List<ContentArticleListDTO>> SearchArticlesAsync(ContentArticleListCritriaDTO criteria)
@@ -126,7 +148,28 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
         public async Task UpdateArticleAsync(ContentArticleEditDTO article)
         {
-            throw new NotImplementedException();
+            if (article == null)
+            {
+                throw new ArgumentNullException(nameof(article), "Article cannot be null");
+            }
+
+            // Map DTO to Entity
+            var entity = new Content
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Content1 = article.Content,
+                ContentCategoryId = article.ContentCategoryId,
+                //CoverPic = article.CoverPic, CoverPic MediaId
+                Status = article.Status,
+                ViewCount = 0, // Initial view count
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            // todo If CoverPic is provided, set it
+
+            // Save to repository
+            await _repository.UpdateAsync(entity);
         }
     }
 }

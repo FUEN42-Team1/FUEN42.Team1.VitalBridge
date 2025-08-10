@@ -90,13 +90,23 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return NotFound();
             }
 
-            var content = await _context.Contents.FindAsync(id);
-            if (content == null)
+            var dto = await _service.GetArticleForEditByIdAsync(id.Value);
+            if (dto == null)
             {
                 return NotFound();
             }
-            ViewData["ContentCategoryId"] = new SelectList(_context.ContentCategories, "Id", "Name", content.ContentCategoryId);
-            return View();
+            // Map the DTO to the ViewModel
+            var vm = new ContentArticleEditViewModel
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Content = dto.Content,
+                ContentCategoryId = dto.ContentCategoryId,
+                //CoverPic = null, // Handle file upload separately
+                Status = ((ContentArticleStatus)dto.Status).ToString() // Convert int to string for display
+            };
+
+            return View(vm);
         }
 
         // POST: ContentArticles/Edit/5
@@ -104,14 +114,25 @@ namespace Team1.VitalBridge.BackStage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,MemberId,ContentCategoryId,Title,CoverPic,Content1,Status,ViewCount,UpdatedAt,CreatedAt")] Content content)
+        public async Task<IActionResult> Edit(ContentArticleEditViewModel vm)
         {
-            if (id != content.Id)
-            {
-                return NotFound();
-            }
+            if (!ModelState.IsValid) return View(vm);
 
-            if (!ModelState.IsValid) return View();
+            // Map the ViewModel to the DTO
+            var dto = new ContentArticleEditDTO
+            {
+                Id = vm.Id,
+                Title = vm.Title,
+                Content = vm.Content,
+                ContentCategoryId = vm.ContentCategoryId,
+                CoverPic = vm.CoverPic, // Handle file upload separately
+                Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
+            };
+
+            // Call the service to update the article
+            await _service.UpdateArticleAsync(dto);
+
+            // Redirect to the Search action after successful update
             return RedirectToAction(nameof(Search));
         }
 

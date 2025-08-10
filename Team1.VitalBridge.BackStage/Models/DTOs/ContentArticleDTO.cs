@@ -76,5 +76,11 @@
     }
     public class ContentArticleEditDTO
     {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public int ContentCategoryId { get; set; }
+        public IFormFile? CoverPic { get; set; } // Base64 encoded image
+        public int Status { get; set; } // efmodel is int , but view model is string for display purposes
     }
 }
