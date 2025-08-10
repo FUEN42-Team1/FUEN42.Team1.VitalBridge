@@ -120,6 +120,20 @@
         .sub-category .category-name:hover {
             color: #007bff;
         }
+
+    /* Toast 樣式 */
+    .toast {
+        min-width: 300px;
+    }
+
+    .validation-alert {
+        margin-bottom: 1rem;
+    }
+
+        .validation-alert ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
 </style>
 
 
@@ -130,6 +144,7 @@
             新增商品類別
         </button>
 
+        <!--新增商品類別的 Modal-->
         <div class="modal fade" id="CreateProductCategory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
              aria-labelledby="modalTitleId" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
@@ -142,13 +157,16 @@
                     </div>
                     <div class="modal-body">
                         <div class="container">
+                            <!-- 隱藏的 ID 欄位 -->
+                            <input type="hidden" id="categoryId">
+
                             <div class="mb-3">
                                     <label for="categoryName" class="form-label">類別名稱</label>
                                     <input class="form-control" id="categoryName" placeholder="請輸入商品類別名稱">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" id="FatherId" name="FatherId">上層類別</label>
-                                <select class="form-select">
+                                <label for="parentCategory" class="form-label" >上層類別</label>
+                                <select class="form-select" id="parentCategory" name="FatherId">
                                     <option value="">--無上層類別--</option>
                                     <!--這邊用JS載入-->  
                                   
@@ -162,6 +180,7 @@
                                
                             </div>
 
+                            <!--處理圖片區塊-->
                             <div class="input-group mb-3">
                                 <input type="file" class="form-control" id="fileInput">
                                 <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
@@ -183,7 +202,7 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             關閉
                         </button>
-                        <button type="button" class="btn btn-primary">新增</button>
+                        <button type="button" class="btn btn-primary" id="createCategory">新增</button>
                     </div>
                 </div>
             </div>
@@ -208,7 +227,7 @@
         })
         // 載入類別資料呼叫 API 這邊用fetch
         function loadCategories(){
-            fetch('/api/ProductCategoryApi')
+            fetch('/api/ProductCategoryApi', { method: 'GET' })
             .then(response => response.json())
             .then(data => {
                 console.log('類別資料:', data); // 測試用
@@ -345,11 +364,14 @@
                 });
             });
         }
-        // 編輯類別
+        
+        // 【一定會改】編輯類別
         function editCategory(categoryId) {
             window.location.href = `/ProductCategory/Edit/${categoryId}`;
         }
 
+        
+        
         // 重新載入資料的公用方法（新增或編輯完成後可呼叫）
         function refreshCategories() {
             document.getElementById('category-list').style.display = 'none';
@@ -364,6 +386,240 @@
         window.categoryManager = {
             refresh: refreshCategories
         };
+    </script>
+
+    <script>
+        // 監聽 Modal 開啟事件
+        document.getElementById('CreateProductCategory').addEventListener('shown.bs.modal', function(){
+
+            loadParentOptions();
+            document.getElementById('categoryName').focus();
+        })
+
+        // 提交新增表單
+        document.getElementById('createCategory').addEventListener('click', submitCreateForm);
+
+        function submitCreateForm() {
+
+            
+
+            // 取得表單資料
+            const categoryName = document.getElementById('categoryName').value.trim();
+            const parentCategory= document.getElementById('parentCategory').value;
+            const isActive = document.getElementById('categoryIsActive').checked;
+            
+            // 前端驗證
+            const validationErrors = validateForm(categoryName, parentCategory);
+            if (validationErrors.length > 0) {
+               showValidationErrors(validationErrors);
+               return;
+            }
+
+            // 準備送出資料
+            const createDto = {
+            name: categoryName,
+            fatherId: parentCategory ? parseInt(parentCategory) : null,
+            isActive: isActive
+            };
+            
+
+            // 呼叫API
+            fetch('api/ProductCategoryApi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // 傳送資料
+                body: JSON.stringify(createDto)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                    return response.json();
+            })
+            then(data => {
+                // 成功處理
+                console.log('新增成功:', data);
+
+                // 顯示成功訊息
+                showSuccessMessage('商品類別新增成功！');
+
+                // 關閉 Modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('CreateProductCategory'));
+                modal.hide();
+
+                // 清空表單
+                resetCreateForm();
+
+                // 重新載入類別列表
+                loadCategories();
+            })
+            .catch(error => {
+                // 錯誤處理
+                console.error('新增失敗:', error);
+
+                // 顯示錯誤訊息
+                if (error && error.error) {
+                    showErrorMessage(error.error);
+                } else if (error && error.message) {
+                    showErrorMessage(error.message);
+                } else {
+                    showErrorMessage('新增商品類別失敗，請稍後再試');
+                }
+            })
+            .finally(() => {
+                // 恢復按鈕狀態
+                createButton.disabled = false;
+                createButton.textContent = originalText;
+            });
+        }    
+
+        // 前端表單驗證
+        function validateForm(name, parentId) {
+            const errors = [];
+
+            // 驗證名稱
+            if (!name) {
+                errors.push('請輸入類別名稱');
+            } else if (name.length > 50) {
+                errors.push('類別名稱不能超過50個字元');
+            }
+            return errors;
+        }
+
+        // 重置表單
+        function resetCreateForm() {
+            document.getElementById('categoryName').value = '';
+            document.getElementById('parentCategory').value = '';
+            document.getElementById('categoryIsActive').checked = true;
+
+            // 清除任何錯誤訊息
+            clearValidationErrors();
+
+        }
+
+        // 顯示驗證錯誤
+        function showValidationErrors(errors) {
+            // 移除舊的錯誤訊息
+            clearValidationErrors();
+
+            // 建立錯誤訊息容器
+            const modalBody = document.querySelector('#CreateProductCategory .modal-body');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show validation-alert';
+            alertDiv.role = 'alert';
+            // 加入錯誤訊息
+            let errorHtml = '<strong>請修正以下錯誤：</strong><ul class="mb-0">';
+            errors.forEach(error => {
+                errorHtml += `<li>${error}</li>`;
+            });
+            errorHtml += '</ul>';
+
+            alertDiv.innerHTML = errorHtml +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+            // 插入到 modal-body 的最前面
+            modalBody.insertBefore(alertDiv, modalBody.firstChild);
+
+        }
+        // 清除驗證錯誤訊息
+        function clearValidationErrors() {
+            const alerts = document.querySelectorAll('#CreateProductCategory .validation-alert');
+            alerts.forEach(alert => alert.remove());
+        }   
+
+
+        // 顯示成功訊息
+        function showSuccessMessage(message) {
+            // 使用 Toast 或其他方式顯示成功訊息
+            const toastHtml = `
+                <diV class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-success text-white">
+                            <strong class="me-auto">成功</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                    </div>
+            `;
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+
+            // 3秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 3000);
+
+
+        }
+            
+
+        // 顯示錯誤訊息
+        function showErrorMessage(message) {
+            const toastHtml = `
+                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-danger text-white">
+                            <strong class="me-auto">錯誤</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+
+            // 5秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 5000);
+        }
+
+
+        // Modal 關閉時清空表單
+        document.getElementById('CreateProductCategory').addEventListener('hidden.bs.modal', function () {
+            resetCreateForm();
+        });
+
+        
+
+        // 開啟新增表單Model後要JS 載入父類別
+        function loadParentOptions(){
+            fetch('api/ProductCategoryApi/ParentOptions', { method: 'GET' })
+                .then(response => response.json())
+                .then(data=>{
+                    const select = document.getElementById('parentCategory');
+
+                    // 保留預設，清空其他
+                    select.innerHTML = '<option value="">--無上層類別--</option>';
+
+                    // 動態加入選項
+                    data.forEach( category=>{
+
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+
+                    }
+
+                    );
+
+                })
+                .catch(error=> console.log('載入父類別選項失敗:', error));
+
+
+        }
     </script>
 
     <!--處理新增檔案的上傳圖片-->

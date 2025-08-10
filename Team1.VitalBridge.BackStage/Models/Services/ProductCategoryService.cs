@@ -74,23 +74,23 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 			await ValidateCreateDtoAsync(createDto);
 
             // 驗證階層規則
+			
             var validationError = await ValidateHierarchyAsync(null, createDto.FatherId);
             if (!string.IsNullOrEmpty(validationError))
             {
                 throw new InvalidOperationException(validationError);
             }
 
-
-
-            // 2. 將 DTO 轉換為 EF 模型
+            // 2. 將 DTO 的資料轉換為 EF 模型
             var newCategory = new Category
 			{
 				Name = createDto.Name,
 				FatherId = createDto.FatherId,
 				IsActive = createDto.IsActive
 			};
-			// 3. 呼叫儲存庫方法新增類別
+			// 3. 呼叫儲存庫方法新增類別 (補儲存庫方法 CreateAsync)
 			var createdCategory = await _repository.CreateAsync(newCategory);
+
 			// 4. 將 EF 模型轉換為 DTO 並返回
 			return new ProductCategoryDto
 			{
@@ -111,12 +111,42 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             if (!fatherId.HasValue) return "";
 
             // 不能選擇自己作為父類別
-			
+			if (categoryId.HasValue && categoryId.Value == fatherId.Value)
+			{
+				return "不能將自己設為父類別";
+			}
+
+			// 檢查父類別是否存在 用儲存庫方法
+			var parent = await _repository.GetByIdAsync(fatherId.Value);
+			// 如果父類別不存在，則返回錯誤訊息
+			if (parent == null)
+			{
+				return "選擇的父類別不存在";
+			}
 
 
-        }
+			// 檢查父類別是否已經是第二層 (不允許3層)
+			//HasValue 是可為 null 的數值型別，用來判斷這個變數目前有沒有實際的值
+			if (parent.FatherId.HasValue)
+			{
+				// parent 在上面宣告已經有賦值
+				// 判斷parent.FatherId.HasValue 是否實的值，有的話進入這裡
+				// 如果父類別已經有父類別，則表示這個父類別已經是第二層
+				return "不允許選擇第二層以上的父類別";
+			}
 
-        private async Task ValidateCreateDtoAsync(CreateProductCategoryDto createDto)
+
+			// 如果是編輯，檢查是否選擇了自己的子類別作為父類別 (等寫編輯再來寫)
+
+
+
+			return ""; // 驗證通過
+
+		}
+
+
+		// 驗證新增商品類別的 DTO
+		private async Task ValidateCreateDtoAsync(CreateProductCategoryDto createDto)
         {
             var errors = new List<string>();
 
@@ -130,9 +160,10 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 errors.Add("名稱不能超過50個字元");
             }
 
-            // 檢查名稱是否重複 -- 用
-            // string.IsNullOrWhiteSpace 靜態方法檢查一個字串是否，是 null、空字串、包含空白字元
-            if (!string.IsNullOrWhiteSpace(createDto.Name))
+
+			// 檢查名稱是否重複  使用 Repository 的IsNameExistsAsync方法 為True的時候會進行
+			// string.IsNullOrWhiteSpace 靜態方法檢查一個字串是否，是 null、空字串、包含空白字元
+			if (!string.IsNullOrWhiteSpace(createDto.Name))
             {
                 if (await _repository.IsNameExistsAsync(createDto.Name))
                 {
@@ -147,5 +178,43 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             }
         }
 
-    }
+		// 取得父類別選項
+		public async Task<List<ProductCategoryDto>> GetParentOptionsAsync()
+		{
+			// 1. 從資料庫查詢所有啟用的類別 
+			var parentCategories = await _repository.GetActiveParentOptionAsync();
+
+			var result = new List<ProductCategoryDto>();
+
+			// 2. 只取根類別作為父類別選項 (因為只允許2層)
+			var rootCategories = parentCategories
+				.Where(c => c.FatherId == null);
+
+
+			// 3. 不再過濾，回傳所有根類別選項
+			// 前端會自行判斷哪些要 disable
+			foreach (var category in rootCategories)
+			{
+				// 將每個根類別轉換為 DTO
+				result.Add(new ProductCategoryDto
+				{
+					Id = category.Id,
+					Name = category.Name,
+					FatherId = category.FatherId,
+					IsActive = category.IsActive,
+					Level = 0 // 根類別層級為0
+				});
+			}
+
+			
+			return result;
+
+
+		}
+
+
+
+
+
+	}
 }

@@ -32,8 +32,11 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 				return StatusCode(500, new { message = "取得商品列表失敗", error = ex.Message });
 			}
 		}
-		
 
+
+		// 待編輯
+		// 取得指定類別的子類別
+		// 提供給編輯表的JS使用
 		// GET api/<ProductCategoryApiController>/5
 		[HttpGet("{id}")]
 		public string Get(int id)
@@ -41,10 +44,26 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			return "value";
 		}
 
-		// POST api/<ProductCategoryApiController>
+		// 新增商品類別資料
+		// POST:api/ProductCategoryApi
 		[HttpPost]
-		public void Post([FromBody] string value)
+		public async Task<ActionResult<ProductCategoryDto>> CreateCategory([FromBody] CreateProductCategoryDto createDto)
 		{
+			try
+			{
+				var newCategory = await _service.CreateAsync(createDto);
+				return CreatedAtAction(nameof(Get), new { id = newCategory.Id }, newCategory);
+			}
+			catch (ArgumentException ex)
+			{
+				// 如果是驗證錯誤，返回400 Bad Request
+				return BadRequest(new { message = "新增商品類別失敗", error = ex.Message });
+			}
+			catch (Exception ex)
+			{
+				// 其他錯誤返回500 Internal Server Error
+				return StatusCode(500, new { message = "新增商品類別失敗", error = ex.Message });
+			}
 		}
 
 		// PUT api/<ProductCategoryApiController>/5
@@ -58,5 +77,26 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 		public void Delete(int id)
 		{
 		}
+
+		// 取得父類別選項
+		// GET: api/ProductCategoryApi/ParentOptions
+		[HttpGet("ParentOptions")]
+	    public async Task<ActionResult<List<ProductCategoryDto>>> GetParentOptions()
+		{
+			try
+			{
+				var parentOptions = await _service.GetParentOptionsAsync();
+				return Ok(parentOptions);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new { message = "取得父類別選項失敗", error = ex.Message });
+			}
+		}
+
+		/// <summary>
+		/// 驗證更新 DTO - 手動驗證取代 DataAnnotations
+		/// </summary>
+
 	}
 }
