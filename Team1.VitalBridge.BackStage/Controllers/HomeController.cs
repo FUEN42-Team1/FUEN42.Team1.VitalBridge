@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Team1.VitalBridge.BackStage.Models;
 
@@ -15,6 +16,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         public IActionResult Index()
         {
+
+
+
             return View();
         }
 

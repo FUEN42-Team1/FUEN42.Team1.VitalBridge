@@ -1,0 +1,112 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels.Admin
+@model IEnumerable<AdminInstitutionListVM>
+
+@{
+    ViewData["Title"] = "機構法人清單";
+}
+
+<div class="container-fluid px-2">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+
+
+
+        <!-- 簡單搜尋（可選） -->
+        <form class="d-flex gap-2" method="get" asp-action="Index" asp-controller="AdminInstitutions">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="搜尋代碼 / 名稱 / Email" value="@(Context.Request.Query["q"].ToString())" />
+            <button type="submit" class="btn btn-sm btn-primary">搜尋</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">清除</a>
+        </form>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            目前沒有任何機構法人資料。
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">機構代碼</th>
+                        <th scope="col">機構名稱</th>
+                        <th scope="col">機構 Email / 電話</th>
+                        <th scope="col">負責人</th>
+                        <th scope="col">狀態</th>
+                        <th scope="col">地區</th>
+                        <th scope="col">地址</th>
+                        <th scope="col" style="width:150px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in (Model ?? Enumerable.Empty<AdminInstitutionListVM>()))
+                    {
+                        
+                            // 狀態對應 badge
+                            var status = (item.Status ?? "Pending").Trim();
+                            string statusText;
+                            string statusClass;
+                            switch (status)
+                            {
+                                case "Approved":
+                                    statusText = "核可";
+                                    statusClass = "bg-success";
+                                    break;
+                                case "Rejected":
+                                    statusText = "駁回";
+                                    statusClass = "bg-danger";
+                                    break;
+                                case "Pending":
+                                default:
+                                    statusText = "審核中";
+                                    statusClass = "bg-warning text-dark";
+                                    break;
+                            }
+                        
+
+                        <tr>
+                            <td class="text-monospace">@((item.InstitutionCode ?? "").Trim().Length > 0 ? item.InstitutionCode : "-")</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.InstitutionName) ? "-" : item.InstitutionName)</td>
+                            <td>
+                                <div>@(string.IsNullOrWhiteSpace(item.InstitutionEmail) ? "-" : item.InstitutionEmail)</div>
+                                <div class="text-muted small">@(string.IsNullOrWhiteSpace(item.InstitutionPhone) ? "-" : item.InstitutionPhone)</div>
+                            </td>
+                            <td>
+                                <div>@(string.IsNullOrWhiteSpace(item.PrincipalName) ? "-" : item.PrincipalName)</div>
+                                <div class="text-muted small">@(string.IsNullOrWhiteSpace(item.PrincipalPhone) ? "-" : item.PrincipalPhone)</div>
+                            </td>
+                            <td><span class="badge @statusClass">@statusText</span></td>
+                            <td>@($"{item.CityName ?? "-"} {(item.TownshipName ?? "").Trim()}".Trim())</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.Address) ? "-" : item.Address)</td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a class="btn btn-outline-primary"
+                                       asp-action="Details"
+                                       asp-controller="AdminInstitutions"
+                                       asp-route-institutionCode="@item.InstitutionCode">
+                                        詳細
+                                    </a>
+                                    <a class="btn btn-outline-secondary"
+                                       asp-action="Edit"
+                                       asp-controller="AdminInstitutions"
+                                       asp-route-institutionCode="@item.InstitutionCode">
+                                        編輯
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // 目前本頁不需要任何 JS；若後續新增 Ajax 操作可放在這裡。
+    </script>
+}

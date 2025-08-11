@@ -1,0 +1,201 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.Institutions.InstitutionRegisterLoginViewModel
+
+@{
+   ViewData["Title"] = "機構註冊";
+    //Layout = null;//註冊不能用後台layout
+	Layout = "_LayoutAuth"; //使用認證專用的layout
+
+
+}
+
+    <title>機構註冊</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <div class="container mt-5">
+        <h2 class="mb-4">機構註冊</h2>
+        <form asp-action="Register" method="post">
+            <div class="mb-3">
+                <label asp-for="InstitutionCode" class="form-label"></label>
+                <input asp-for="InstitutionCode" class="form-control" required />
+                <span asp-validation-for="InstitutionCode" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="InstitutionName" class="form-label"></label>
+                <input asp-for="InstitutionName" class="form-control" required />
+                <span asp-validation-for="InstitutionName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="InstitutionEmail" class="form-label"></label>
+                <input asp-for="InstitutionEmail" class="form-control" required />
+                <span asp-validation-for="InstitutionEmail" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="InstitutionPhone" class="form-label"></label>
+                <input asp-for="InstitutionPhone" class="form-control" required />
+                <span asp-validation-for="InstitutionPhone" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PrincipalName" class="form-label"></label>
+                <input asp-for="PrincipalName" class="form-control" required />
+                <span asp-validation-for="PrincipalName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PrincipalPhone" class="form-label"></label>
+                <input asp-for="PrincipalPhone" class="form-control" required />
+                <span asp-validation-for="PrincipalPhone" class="text-danger"></span>
+            </div>
+
+        <div class="mb-3">
+            <label asp-for="CityId" class="form-label"></label>
+            <select asp-for="CityId" class="form-select" id="CityId">
+                <option value="">請選擇縣市</option>
+            </select>
+            <span asp-validation-for="CityId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="TownshipId" class="form-label"></label>
+            <select asp-for="TownshipId" class="form-select" id="TownshipId">
+                <option value="">請先選擇縣市</option>
+            </select>
+            <span asp-validation-for="TownshipId" class="text-danger"></span>
+        </div>
+
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" type="password" required />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" required />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">提交註冊</button>
+        </form>
+
+        <div class="input-group mb-3">
+            <input type="file" class="form-control" id="fileInput">
+            <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+        </div>
+        <div>
+            <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+        </div>
+        <div id="result"></div>
+        <div class="form-group mb-3">
+            <input class="form-control" id="image" readonly />
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script asp-src-include="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+     <script asp-src-include="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileInput = $("#fileInput");
+            var showImage = $("#showimage");
+            var resultDiv = $("#result");
+            var image = $("#image");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+        });
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    $(function () {
+        const $city = $('#CityId');
+        const $township = $('#TownshipId');
+
+        // 回填用
+        const selectedCityId = '@(Model?.CityId.ToString() ?? "")';
+        const selectedTownshipId = '@(Model?.TownshipId.ToString() ?? "")';
+
+        // 載入縣市
+        $.getJSON('/api/locations/cities', function (cities) {
+            $city.html('<option value="">請選擇縣市</option>');
+            $.each(cities, function (_, c) {
+                $city.append(`<option value="${c.id}" ${selectedCityId == c.id ? 'selected' : ''}>${c.name}</option>`);
+            });
+            if (selectedCityId) {
+                loadTownships(selectedCityId, selectedTownshipId);
+            } else {
+                $township.html('<option value="">請先選擇縣市</option>');
+            }
+        });
+
+        // 縣市改變時載入鄉鎮
+        $city.on('change', function () {
+            loadTownships($(this).val(), null);
+        });
+
+        function loadTownships(cityId, preselect) {
+            if (!cityId) {
+                $township.html('<option value="">請先選擇縣市</option>');
+                return;
+            }
+            $.getJSON(`/api/locations/cities/${cityId}/townships`, function (townships) {
+                $township.html('<option value="">請選擇鄉鎮</option>');
+                $.each(townships, function (_, t) {
+                    $township.append(`<option value="${t.id}" ${preselect == t.id ? 'selected' : ''}>${t.name}</option>`);
+                });
+            });
+        }
+    });
+</script>
+
+
+

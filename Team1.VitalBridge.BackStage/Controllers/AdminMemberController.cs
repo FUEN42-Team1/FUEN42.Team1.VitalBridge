@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
@@ -27,41 +28,41 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         public IActionResult Index()
         {
-            var users = _context.Users
+            var viewModelList = _context.Users
                 .Where(u => u.AccountType == "Member")
-                .Include(u => u.MemberProfile)
-                    .ThenInclude(mp => mp.City)
-                .Include(u => u.MemberProfile)
-                    .ThenInclude(mp => mp.Township)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .Select(u => new UserViewModel
+                {
+                    Id = u.Id,
+                    UserId = u.UserId,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone,
+
+                    CityId = u.MemberProfile.CityId,
+                    TownshipId = u.MemberProfile.TownshipId,
+                    Address = u.MemberProfile.Address,
+                    CityName = _context.Citys
+                        .Where(c => c.Id == u.MemberProfile.CityId)
+                        .Select(c => c.Name)
+                        .FirstOrDefault() ?? "-",
+                    TownshipName = _context.Townships
+                        .Where(t => t.Id == u.MemberProfile.TownshipId)
+                        .Select(t => t.Name)
+                        .FirstOrDefault() ?? "-",
+
+                    Status = u.Status,
+                    CreatedAt = u.CreatedAt,
+                    UpdatedAt = u.UpdatedAt,
+                    LastLoginAt = u.LastLoginAt,
+
+                    RoleDisplay = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                })
                 .AsNoTracking()
                 .ToList();
 
-            var viewModelList = users.Select(u => new UserViewModel
-            {
-                Id = u.Id,
-                UserId = u.UserId,
-                Name = u.Name,
-                Email = u.Email,
-                Phone = u.Phone,
-
-                CityId = u.MemberProfile?.CityId,
-                TownshipId = u.MemberProfile?.TownshipId,
-                Address = u.MemberProfile?.Address,
-                CityName = u.MemberProfile?.City?.Name ?? "-",
-                TownshipName = u.MemberProfile?.Township?.Name ?? "-",
-
-                Status = u.Status,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt,
-                LastLoginAt = u.LastLoginAt,
-
-                RoleDisplay = u.UserRoles?.Select(ur => ur.Role.Name).ToList() ?? new List<string>()
-            }).ToList();
-
             return View(viewModelList);
         }
+
 
         //編輯會員
         [HttpGet]
@@ -70,12 +71,11 @@ namespace Team1.VitalBridge.BackStage.Controllers
             var user = await _context.Users
                 .Where(u => u.UserId == userId && u.AccountType == "Member")
                 .Include(u => u.MemberProfile)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
             var vm = new UserViewModel
             {
@@ -87,28 +87,25 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 CityId = user.MemberProfile?.CityId,
                 TownshipId = user.MemberProfile?.TownshipId,
                 Address = user.MemberProfile?.Address,
-                CityName = user.MemberProfile?.City?.Name,
-                TownshipName = user.MemberProfile?.Township?.Name,
                 Status = user.Status,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
                 LastLoginAt = user.LastLoginAt,
-                Roles = user.UserRoles?.Select(ur => ur.Role.RoleCode).ToArray()
+                Roles = user.UserRoles?.Select(ur => ur.Role.RoleCode).ToArray() ?? Array.Empty<string>()
             };
 
-            ViewBag.AllCities = _locationService.GetAllCities();
-            ViewBag.AllTownships = _locationService.GetTownshipsByCityId(vm.CityId ?? 0);
+            // 不用塞城市、鄉鎮資料，全由前端 AJAX 載入
             ViewBag.AllRoles = _context.Roles
                 .Where(r => r.RoleType == "Member")
-                .Select(r => new SelectListItem
-                {
-                    Value = r.RoleCode,
-                    Text = r.Name
-                }).ToList();
+                .Select(r => new SelectListItem { Value = r.RoleCode, Text = r.Name })
+                .ToList();
 
-            //return View(vm);
             return PartialView("_EditMemberPartial", vm);
         }
+
+
+
+
 
 
 
@@ -195,22 +192,19 @@ namespace Team1.VitalBridge.BackStage.Controllers
         //詳細資訊
         public async Task<IActionResult> Detail(string userId)
         {
-
             var user = await _context.Users
                 .Where(u => u.AccountType == "Member" && u.UserId == userId)
                 .Include(u => u.MemberProfile)
-                    .ThenInclude(mp => mp.City)
-                .Include(u => u.MemberProfile)
-                    .ThenInclude(mp => mp.Township)
-                .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
+
+            var names = _locationService.ResolveNames(
+                user.MemberProfile?.CityId,
+                user.MemberProfile?.TownshipId
+            );
 
             var vm = new UserViewModel
             {
@@ -223,8 +217,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 CityId = user.MemberProfile?.CityId,
                 TownshipId = user.MemberProfile?.TownshipId,
                 Address = user.MemberProfile?.Address,
-                CityName = user.MemberProfile?.City?.Name ?? "-",
-                TownshipName = user.MemberProfile?.Township?.Name ?? "-",
+                CityName = names.CityName ?? "-",
+                TownshipName = names.TownshipName ?? "-",
 
                 Status = user.Status,
                 CreatedAt = user.CreatedAt,
@@ -234,9 +228,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 RoleDisplay = user.UserRoles?.Select(ur => ur.Role.Name).ToList() ?? new List<string>()
             };
 
-            //return View(vm);
-            return PartialView("_UserDetailPartial",vm);
+            return PartialView("_UserDetailPartial", vm);
         }
+
 
 
         public IActionResult Delete(int id)

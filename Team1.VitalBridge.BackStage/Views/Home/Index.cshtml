@@ -35,10 +35,21 @@
     <a asp-controller="Admin" asp-action="Index" class="btn neon-btn float-btn">
         進入管理員後台
     </a>
-    <a asp-controller="Institution" asp-action="Index" class="btn neon-btn float-btn">
+    <a asp-controller="InstitutionHome" asp-action="Index" class="btn neon-btn float-btn">
         進入機構後台
     </a>
 </div>
+
+@* 檢查權限用 找你要的地方去插入 *@
+@* @using System.Security.Claims *@
+@* <p>目前使用者角色: @User.FindFirstValue(ClaimTypes.Role)</p> *@
+@* <ul> *@
+@*     @foreach (var role in User.FindAll(ClaimTypes.Role)) *@
+@*     { *@
+@*         <li>@role.Value</li> *@
+@*     } *@
+@* </ul> *@
+
 
 <style>
     /***** Neon gradient *****/

@@ -1,5 +1,80 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+@using static Team1.VitalBridge.BackStage.Models.ViewModels.RoleViewModel
+@model RoleViewModel
+
 @{
+    ViewData["Title"] = "編輯身分";
+    var isEdit = true; // 這頁就是給 Edit 用
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h2 class="card-title mb-4 text-primary">編輯身分</h2>
+
+                <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-4">
+                        <!-- RoleCode -->
+                        <div class="col-12">
+                            <label asp-for="RoleCode" class="form-label fw-semibold"></label>
+
+                            <!-- 顯示唯讀輸入框 -->
+                            <input asp-for="RoleCode" class="form-control" readonly />
+
+                            <!-- 重要：唯讀/disabled 不會回傳，補一個 hidden 讓 POST 能拿到值 -->
+                            <input type="hidden" asp-for="RoleCode" />
+
+                            <span asp-validation-for="RoleCode" class="text-danger small"></span>
+                        </div>
+
+                        <!-- RoleType -->
+                        <div class="mb-3">
+                            <label asp-for="RoleType" class="form-label"></label>
+                            <!-- 用文字顯示 Enum 的名稱 -->
+                            <input class="form-control" value="@Model.RoleType.ToString()" readonly />
+                            <!-- 隱藏欄位確保 POST 時有值 -->
+                            <input type="hidden" asp-for="RoleType" />
+                        </div>
+
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="col-12">
+                            <label asp-for="Info" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Info" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Info" class="text-danger small"></span>
+                        </div>
+
+                        <!-- IsActive -->
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" role="switch" />
+                                <label asp-for="IsActive" class="form-check-label fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="IsActive" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex justify-content-end">
+                        <a asp-action="Index" class="btn btn-outline-secondary me-2">返回列表</a>
+                        <button type="submit" class="btn btn-primary">💾 儲存變更</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

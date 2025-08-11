@@ -85,6 +85,16 @@
                         <a class="collapse-item" asp-area="" asp-controller="Home" asp-action="Index">
                            緊急聯絡人清單
                         </a>
+
+                        <a class="collapse-item" asp-area="" asp-controller="AdminInstitutions" asp-action="Index">
+                            機構法人清單
+                        </a>
+                        <a class="collapse-item" asp-area="" asp-controller="Home" asp-action="Index">
+                            機構帳號清單
+                        </a>
+                        <a class="collapse-item" asp-area="" asp-controller="Home" asp-action="Index">
+                            管理員清單
+                        </a>
                         <a class="collapse-item" asp-area="" asp-controller="AdminRoles" asp-action="Index">
                             身分權限管理
                         </a>
@@ -539,8 +549,8 @@
 
     <!-- 廣告 後台管理不看廣告可刪除 -->
     <script src="~/js/LoadPlate.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous"> *@
+    @* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
     <script>
         $(document).ready(function () {
             LoadPlateByNow();
