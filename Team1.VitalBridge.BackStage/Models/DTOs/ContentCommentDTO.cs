@@ -13,4 +13,13 @@
         public bool IsPinned { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+
+    public class ContentCommentListCritriaDTO
+    {
+        public string? ContentTitle { get; set; }
+        public bool? IsPinned { get; set; }
+        public DateTime? CreatedAtFrom { get; set; }
+        public DateTime? CreatedAtTo { get; set; }
+    }
+
 }

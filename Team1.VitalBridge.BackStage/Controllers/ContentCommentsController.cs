@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
@@ -32,6 +33,38 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 ParentCommentId = c.ParentCommentId,
                 Content = c.Content.Length > 10
                  ? c.Content.Substring(0, 7)+ "..."
+                 : c.Content.PadRight(10),
+                IsPinned = c.IsPinned,
+                CreatedAt = c.CreatedAt
+            }).ToList();
+
+            return View(vm);
+        }
+
+        // GET: ContentCommentsController/Search
+        public async Task<ActionResult> Search([FromQuery] ContentCommentSearchViewModel? SearchVM)
+        {
+            if (SearchVM == null)
+            {
+                SearchVM = new ContentCommentSearchViewModel();
+            }
+
+            var criteria = new ContentCommentListCritriaDTO
+            {
+                //ContentTitle = SearchVM.ContentTitle
+
+            };
+
+            var results = await _service.SearchCommentAsync(criteria);
+
+            var vm = results.Select(c => new ContentCommentListViewModel
+            {
+                Id = c.Id,
+                //MemberName = c.MemberName,
+                ContentTitle = c.ContentTitle,
+                ParentCommentId = c.ParentCommentId,
+                Content = c.Content.Length > 10
+                 ? c.Content.Substring(0, 7) + "..."
                  : c.Content.PadRight(10),
                 IsPinned = c.IsPinned,
                 CreatedAt = c.CreatedAt

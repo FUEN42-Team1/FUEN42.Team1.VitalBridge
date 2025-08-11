@@ -26,5 +26,10 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             }).ToList();
             return dto;
         }
+
+        public async Task<List<ContentCommentDisplayDTO>> SearchCommentAsync(ContentCommentListCritriaDTO criteria)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
