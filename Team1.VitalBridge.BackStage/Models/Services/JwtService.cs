@@ -18,7 +18,9 @@ namespace Team1.VitalBridge.BackStage.Models.Services
         {
             var secretKey = _configuration["JwtSettings:Secret"];
             var issuer = _configuration["JwtSettings:Issuer"];
-            var audience = _configuration[$"JwtSettings:{audienceKey}"];
+            var audience = _configuration[$"JwtSettings:Audiences:{audienceKey}"]
+             ?? _configuration[$"JwtSettings:{audienceKey}"];
+
 
             if (string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience))
             {

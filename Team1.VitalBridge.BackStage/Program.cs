@@ -87,8 +87,11 @@ namespace Team1.VitalBridge.BackStage
 
 
 
-            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["Secret"]; // 從 appsettings.json 讀取秘密金鑰
+            var jwtSection = builder.Configuration.GetSection("JwtSettings");
+            var secret = jwtSection["Secret"]; // 從 appsettings.json 讀取秘密金鑰
+            var issuer = jwtSection["Issuer"];
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
 
             builder.Services.AddAuthentication(options =>
             {
@@ -100,15 +103,14 @@ namespace Team1.VitalBridge.BackStage
             })
            .AddCookie("ExternalCookie")
            // --- 使用輔助方法配置 JWT-in-Cookie 驗證 ---
-           .AddJwtBearer("MemberJwtScheme", ConfigureJwtBearerOptions("member_auth_token", jwtSettings["MemberAudience"], jwtSettings))
-           .AddJwtBearer("InstitutionJwtScheme", ConfigureJwtBearerOptions("institution_auth_token", jwtSettings["InstitutionAudience"], jwtSettings))
-           .AddJwtBearer("AdminJwtScheme", ConfigureJwtBearerOptions("admin_auth_token", jwtSettings["AdminAudience"], jwtSettings))
+           .AddJwtBearer("MemberJwtScheme",ConfigureJwtBearerOptions("member_auth_token", "MemberJwtScheme", jwtSection, signingKey, issuer))
+           .AddJwtBearer("InstitutionJwtScheme",ConfigureJwtBearerOptions("institution_auth_token", "InstitutionJwtScheme", jwtSection, signingKey, issuer))
+           .AddJwtBearer("AdminJwtScheme",ConfigureJwtBearerOptions("admin_auth_token", "AdminJwtScheme", jwtSection, signingKey, issuer))
            .AddGoogle(options =>
            {
                options.SignInScheme = "ExternalCookie";
                options.ClientId = builder.Configuration["GoogleLogin:ClientId"];
                options.ClientSecret = builder.Configuration["GoogleLogin:ClientSecret"];
-
 
                options.Events.OnRemoteFailure = (context) =>
                {
@@ -172,21 +174,29 @@ namespace Team1.VitalBridge.BackStage
         }
 
 
-        static Action<JwtBearerOptions> ConfigureJwtBearerOptions(string cookieName, string validAudience, IConfigurationSection jwtSettings)
+        static Action<JwtBearerOptions> ConfigureJwtBearerOptions(string cookieName,string audienceKey,IConfigurationSection jwtSettings, SymmetricSecurityKey signingKey,string issuer                          
+)
         {
             return options =>
             {
+                // 從 Audiences 字典讀取對應的 audience
+                var validAudience = jwtSettings[$"Audiences:{audienceKey}"];
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = issuer,
+
                     ValidateAudience = true,
+                    ValidAudience = validAudience,   //  走 Audiences:<key>
+
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingKey,
 
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = validAudience, // 從參數傳入
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"])),
-                    ClockSkew = TimeSpan.Zero,
+                    // 建議保留一點 clock skew，避免極端邊界誤差
+                    ClockSkew = TimeSpan.FromMinutes(1),
+
                     NameClaimType = ClaimTypes.Name,
                     RoleClaimType = ClaimTypes.Role
                 };
@@ -195,52 +205,59 @@ namespace Team1.VitalBridge.BackStage
                 {
                     OnMessageReceived = context =>
                     {
-                        // 從參數傳入的 cookieName 中讀取 Token 並作驗證
-                        context.Token = context.Request.Cookies[cookieName];
+                        // 只有當 Header 沒有 Bearer token 時，才從 Cookie 補
+                        if (string.IsNullOrWhiteSpace(context.Token))
+                        {
+                            if (context.Request.Cookies.TryGetValue(cookieName, out var token) && !string.IsNullOrWhiteSpace(token))
+                            {
+                                context.Token = token;
+                            }
+                        }
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
-                    {   // 驗證失敗時的處理
+                    {
                         Console.WriteLine($"JWT Authentication for {cookieName} failed: {context.Exception.Message}");
                         return Task.CompletedTask;
                     },
                     OnTokenValidated = context =>
                     {
-                        // 驗證成功時的處理
                         Console.WriteLine($"JWT Token for {cookieName} successfully validated!");
                         return Task.CompletedTask;
                     },
                     OnChallenge = async context =>
                     {
+                        // 若是 API 請求（接收 JSON），給 401 JSON；否則導去對應登入頁
                         context.HandleResponse();
-                        // 直接進行重定向，不區分請求類型
-                        var loginPath = "";
-                        // ... (您的 loginPath 判斷邏輯保持不變) ...
-                        if (cookieName == "member_auth_token")
+
+                        var acceptsJson = context.Request.Headers["Accept"].ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase)
+                                          || string.Equals(context.Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+                        if (acceptsJson)
                         {
-                            loginPath = "/Auth/Login";
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            context.Response.ContentType = "application/json; charset=utf-8";
+                            await context.Response.WriteAsync("{\"error\":\"unauthorized\"}");
+                            return;
                         }
-                        else if (cookieName == "institution_auth_token")
+
+                        string loginPath = cookieName switch
                         {
-                            loginPath = "/Institution/InstitutionAuth/Login";
-                        }
-                        else if (cookieName == "admin_auth_token")
-                        {
-                            loginPath = "/Admin/AdminAuth/Login";
-                        }
-                        else
-                        {
-                            loginPath = "/Auth/Login";
-                        }
-                        context.Response.Redirect(loginPath);
-                        // context.Response.Redirect(loginPath + "?ReturnUrl=" + context.Request.Path + context.Request.QueryString);
+                            "member_auth_token" => "/Auth/Login",
+                            "institution_auth_token" => "/Institution/InstitutionAuth/Login",
+                            "admin_auth_token" => "/Admin/AdminAuth/Login",
+                            _ => "/Auth/Login"
+                        };
+
+                        // 帶回 ReturnUrl（可視需求決定是否加）
+                        var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                        context.Response.Redirect($"{loginPath}?ReturnUrl={returnUrl}");
                     }
-
-
-
                 };
             };
         }
+
+
 
 
 

@@ -119,7 +119,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
             // 生成 JWT Token
             // 確保 Expires 時間一致
             var expiresMinutes = double.Parse(_configuration["JwtSettings:ExpirationMinutes"]);
-            var jwtToken = _jwtService.GenerateToken(claims, expiresMinutes, "AdminAudience");// 生成 JWT Token
+            var jwtToken = _jwtService.GenerateToken(claims, expiresMinutes, "AdminJwtScheme");// 生成 JWT Token
             _jwtService.SetTokenCookie(jwtToken, expiresMinutes, Response, "admin_auth_token", "/Admin");// 將 JWT 存入 HttpOnly Cookie
 
             return RedirectToAction("Index", "Admin");
