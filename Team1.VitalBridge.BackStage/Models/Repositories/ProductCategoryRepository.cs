@@ -79,12 +79,15 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 			throw new NotImplementedException();
 		}
 
-		public Task<Category> UpdateAsync(Category category)
+
+        // 更新商品類別資料
+        public Task<Category> UpdateAsync(Category category)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Task<bool> DeleteAsync(int id)
+        // 刪除商品類別資料 ，boolean表示是否成功
+        public Task<bool> DeleteAsync(int id)
 		{
 			throw new NotImplementedException();
 		}
