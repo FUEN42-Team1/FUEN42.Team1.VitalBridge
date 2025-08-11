@@ -31,4 +31,12 @@
         public bool Orderable { get; set; } // 是否可排序
         public Search Search { get; set; } // 欄位搜尋條件
     }
+
+    public class DataTableResponse<T>
+    {
+        public int Draw { get; set; }
+        public int RecordsTotal { get; set; }
+        public int RecordsFiltered { get; set; }
+        public List<T> Data { get; set; }
+    }
 }

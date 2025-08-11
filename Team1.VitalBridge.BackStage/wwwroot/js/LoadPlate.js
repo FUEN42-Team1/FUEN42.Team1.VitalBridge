@@ -22,7 +22,7 @@ function loadAdsByDate(dateStr) {
                     const fileUrl = `/api/UploadFile/GetFile?fileName=${encodeURIComponent(fileName)}`;
                     html += `
                     <div class="carousel-item active">
-                        <img src="${fileUrl}" title="${p.defualImageIntroduct}" class="d-block w-100" alt="...">
+                        <img src="${fileUrl}" title="${p.defaultImageIntroduct}" class="d-block w-100" alt="...">
                     </div>`;
                 } else {
                     let count = 0;

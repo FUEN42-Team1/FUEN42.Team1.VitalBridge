@@ -22,12 +22,12 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             PlateImage image = new PlateImage
             {
                 PlateId = vm.PlateId,
-                Introduct = vm.Introduct,
+                Introduct = string.IsNullOrEmpty(vm.Introduct) ? null : vm.Introduct,
                 ImageFileId = FileId,
                 StartDate = vm.StartDate,
                 EndDate = vm.EndDate,
                 DisplayOrder = null,
-                ClickUrl = vm.ClickUrl,
+                ClickUrl = string.IsNullOrEmpty(vm.ClickUrl) ? null : vm.ClickUrl,
                 ClickNumber = null
             };
             _context.PlateImages.Add(image);
@@ -78,10 +78,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
         {
             var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == data.ImageFileName).Id;
             PlateImage plateImage = _context.PlateImages.Find(data.Id);
-            plateImage.ClickUrl = data.ClickUrl;
+            plateImage.ClickUrl = string.IsNullOrEmpty(data.ClickUrl) ? null : data.ClickUrl;
             plateImage.EndDate = data.EndDate;
             plateImage.StartDate = data.StartDate;
-            plateImage.Introduct = data.Introduct;
+            plateImage.Introduct = string.IsNullOrEmpty(data.Introduct) ? null : data.Introduct;
             plateImage.ImageFileId = FileId;
             _context.Update(plateImage);
             _context.SaveChanges();

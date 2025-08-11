@@ -63,9 +63,9 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             var defualImageFileId = _context.FileStreams.FirstOrDefault(f => f.FileName == defualImageUrl).Id;
             if (plate == null) return NotFound();
             plate.Name = name;
-            plate.DefaultImageClickUrl = defualImageClickUrl;
+            plate.DefaultImageClickUrl = string.IsNullOrEmpty(defualImageClickUrl) ? null : defualImageClickUrl;
             plate.DefaultImageFileId = defualImageFileId;
-            plate.DefaultImageIntroduct = defualImageIntroduct;
+            plate.DefaultImageIntroduct = string.IsNullOrEmpty(defualImageIntroduct) ? null : defualImageIntroduct;
             _context.Plates.Update(plate);
             _context.SaveChanges();
 

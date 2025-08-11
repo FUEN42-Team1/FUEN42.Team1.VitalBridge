@@ -69,19 +69,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
             return View(plateImage);
         }
-        //[HttpPost]
-        //public IActionResult EditPlateImage(PlateImage data)
-        //{
-            
-        //    int? plateId = _imageService.UpdatePlateImage(data);
-        //    return RedirectToAction("EditPlate", new { id = plateId });
-        //}
-        public IActionResult CreatePlateImage(int Plateid)
-        {
-            ViewBag.PlateId = Plateid;
-            return View();
-
-        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreatePlateImage(CreatePlateImageViewModel vm)

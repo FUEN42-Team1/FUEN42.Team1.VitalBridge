@@ -1,7 +1,59 @@
 ﻿@model Team1.VitalBridge.BackStage.Models.EFModels.Plate
 <link href="~/dist/css/lightbox.min.css" rel="stylesheet" />
 <div class="editor-page">
-    <!-- Modal -->
+
+    <!-- CreateModal -->
+    <div class="modal fade" id="CreatePlateImageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="CreateCategoryLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="CreatePlateImageLabel">新增廣告</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="CreatePlateImageForm">
+                        <input type="hidden" id="CreateId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label for="CreateIntroduct" class="form-label">介紹</label>
+                            <input id="CreateIntroduct" class="form-control" placeholder="輸入介紹內容" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="CreateFileName" class="form-label">圖片名稱</label>
+                            <input id="CreateFileName" class="form-control" readonly />
+                        </div>
+                        <div class="row">
+                            <div class="mb-3">
+                                <label for="CreateStartDate" class="form-label">開始時間</label>
+                                <input id="CreateStartDate" class="form-control" type="date" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="CreateEndDate" class="form-label">結束時間</label>
+                                <input id="CreateEndDate" class="form-control" type="date" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="CreateClickUrl" class="form-label">點擊連結</label>
+                            <input id="CreateClickUrl" class="form-control" />
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" id="createFileInput">
+                            <button type="button" class="btn btn-outline-primary" id="createImage">上傳圖片</button>
+                        </div>
+                        <div id="createResult"></div>
+                        <div>
+                            <img src="" alt="" id="createShowImage" class="img-fluid rounded shadow-sm" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="CreatePlateImageBtn">新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EditModal -->
     <div class="modal fade" id="editPlateImageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editCategoryLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -111,7 +163,6 @@
                     </div>
 
                     <div class="ms-auto btn-group btn-group-sm">
-                        @* <a href="@Url.Action("EditPlateImage", new { id = image.Id })" class="btn btn-outline-warning">編輯</a> *@
                         <a href="#" class="btn btn-outline-warning btn-sm edit-btn" data-id="@image.Id">編輯</a>
                         <a href="#" class="btn btn-outline-danger delete-btn" data-id="@image.Id">刪除</a>
                     </div>
@@ -121,12 +172,10 @@
     </div>
     <div class="d-flex justify-content-between mt-3 gap-2">
         <div>
-            <a href="@Url.Action("CreatePlateImage" ,new {Plateid = @Model.Id})" class="btn btn-outline-success btn-lg fw-bold">
-                <i class="bi bi-plus-circle me-2"></i> 新增廣告
-            </a>
+            <a href="#" class="btn btn-outline-success btn-lg fw-bold create-btn"><i class="bi bi-plus-circle me-2"></i> 新增廣告</a>
         </div>
         <div>
-            <button type="button" class="btn btn-danger" onclick="window.history.back()">取消</button>
+            <a class="btn btn-danger" href="@Url.Action("AdminPlate", "Admin")">取消</a>
             <button type="button" id="success" class="btn btn-success">儲存</button>
         </div>
     </div>
@@ -183,25 +232,80 @@
             $("#editImage").on('click',function(){
                 uploadFile(fileInput2,resultDiv2,image2,showImage2);
             });
+
+            var fileInput3 = $("#createFileInput");
+            var showImage3 = $("#createShowImage");
+            var resultDiv3 = $("#createResult");
+            var image3 = $("#CreateFileName");
+            ready(fileInput3,showImage3);
+            $("#createImage").on('click',function(){
+                uploadFile(fileInput3,resultDiv3,image3,showImage3);
+            });
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function(){
+
+              $(".create-btn").on("click", function () {
+                $("#CreatePlateImageForm")[0].reset();
+                $("#CreatePlateImageModal").modal("show");
+            });
+
+            $("#CreatePlateImageBtn").click(function () {
+                    const pid = $("#CreateId").val();
+                    const introduct = $("#CreateIntroduct").val();
+                    const fileName = $("#CreateFileName").val();
+                    const startDate = $("#CreateStartDate").val(); // 格式為 yyyy-mm-dd
+                    const endDate = $("#CreateEndDate").val();     // 格式為 yyyy-mm-dd
+                    const clickUrl = $("#CreateClickUrl").val();
+
+                    const data = {
+                        PlateId : pid,
+                        Introduct: introduct,
+                        ImageUrl: fileName,
+                        StartDate: startDate,
+                        EndDate: endDate,
+                        ClickUrl: clickUrl
+                    };
+
+
+                    $.ajax({
+                        url: '/Api/AdvImage',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function () {
+                            Swal.fire({
+                                icon: "success",
+                                title: "新增成功",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                $("#CreatePlateImageModal").modal("hide");
+                                location.reload();
+                            });
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: "error",
+                                title: "新增失敗",
+                                text: "請稍後再試"
+                            });
+                        }
+                    });
+                });
+
               $(".edit-btn").on("click", function () {
                 const id = $(this).data("id");
 
-                // 清空表單（避免殘留資料）
                 $("#editPlateImageForm")[0].reset();
-                $("#editFileName").val(""); // readonly 欄位不會被 reset 清空
 
-                // AJAX 取得資料
                 $.ajax({
-                    url: `/api/AdvImage/${id}`, // 根據你的後端 API 調整路徑
+                    url: `/api/AdvImage/${id}`,
                     method: "GET",
                     dataType: "json",
                     success: function (data) {
-                        // 填入資料
                         $("#editId").val(data.id);
                         $("#editDisplayOrder").val(data.displayOrder);
                         $("#editIntroduct").val(data.introduct);
@@ -210,7 +314,6 @@
                         $("#editEndDate").val(data.endDate); // 格式需為 yyyy-mm-dd
                         $("#editClickUrl").val(data.clickUrl);
 
-                        // 顯示模態框
                         $("#editPlateImageModal").modal("show");
                     },
                     error: function () {
@@ -251,7 +354,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                $("#editCategoryModal").modal("hide");
+                                $("#editPlateImageModal").modal("hide");
                                 location.reload();
                             });
                         },

@@ -4,6 +4,7 @@ using Team1.VitalBridge.BackStage.Models.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.BackStage.Models.ViewModels;
 
 namespace Team1.VitalBridge.BackStage.Controllers.APIs
 {
@@ -33,6 +34,13 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         public IActionResult Delete([FromForm] int id)
         {
             _service.DeletePlateImage(id);
+            return Ok();
+        }
+
+        [HttpPost]
+        public IActionResult CreatePlateImage(CreatePlateImageViewModel data)
+        {
+            _service.CreatePlateImage(data);
             return Ok();
         }
 

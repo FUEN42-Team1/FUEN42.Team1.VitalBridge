@@ -91,7 +91,6 @@
                         // 注入 getUniqueSelector 與 click 事件
                         
                         const script = iframeDoc.createElement("script");
-                        //if (classList) selector += "." + classList; 取消這段
                         script.text = `
                             function getUniqueSelector(el) {
                                 if (!el) return "";

@@ -23,8 +23,8 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             Notify notify = new Notify
             {
                 Title = notifyDTO.Title,
-                Text = notifyDTO.Text,
-                NotifysUrl = notifyDTO.NotifysUrl,
+                Text = string.IsNullOrEmpty(notifyDTO.Text) ? null : notifyDTO.Text,
+                NotifysUrl = string.IsNullOrEmpty(notifyDTO.NotifysUrl) ? null : notifyDTO.NotifysUrl,
                 CategoriesId = notifyDTO.CategoriesId,
                 SendDate = notifyDTO.SendDate,
                 ValidityDate = notifyDTO.ValidityDate
@@ -83,12 +83,12 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
         public void UpdateNotify(int id, Notify newnotify)
         {
             var Notify = _context.Notifys.Find(id);
-            Notify.Text = newnotify.Text;
+            Notify.Text = string.IsNullOrEmpty(newnotify.Text) ? null : newnotify.Text;
             Notify.Title = newnotify.Title;
             Notify.SendDate = newnotify.SendDate;
             Notify.ValidityDate = newnotify.ValidityDate;
             Notify.CategoriesId = newnotify.CategoriesId;
-            Notify.NotifysUrl = newnotify.NotifysUrl;
+            Notify.NotifysUrl = string.IsNullOrEmpty(newnotify.NotifysUrl) ? null : newnotify.NotifysUrl;
             _context.Update(Notify);
             _context.SaveChanges();
         }

@@ -23,8 +23,8 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
                 Route = vm.Route,
                 Location = vm.Location,
                 Enable = true,
-                DefaultImageClickUrl = vm.DefualImageClickUrl,
-                DefaultImageIntroduct = vm.DefualImageIntroduct,
+                DefaultImageClickUrl = string.IsNullOrEmpty(vm.DefualImageClickUrl) ? null : vm.DefualImageClickUrl,
+                DefaultImageIntroduct = string.IsNullOrEmpty(vm.DefualImageIntroduct) ? null : vm.DefualImageIntroduct,
                 DefaultImageFileId = FileId
             };
             _context.Plates.Add(plate);
