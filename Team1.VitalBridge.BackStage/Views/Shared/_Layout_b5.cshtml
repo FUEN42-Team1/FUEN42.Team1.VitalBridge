@@ -204,7 +204,8 @@
             <div class="sidepanel-inner d-flex flex-column">
                 <a href="#" id="sidepanel-close" class="sidepanel-close d-xl-none">&times;</a>
                 <div class="app-branding">
-                    <a class="app-logo" href="index.html">
+                    <!-- 左上icon導向 -->
+                    <a class="app-logo" href="/">
                         <img class="logo-icon me-2" src="~/portal-theme-bs5/assets/images/app-logo.svg" alt="logo"><span class="logo-text">樂齡橋 後台管理系統</span>
                     </a>
 
@@ -241,13 +242,25 @@
                                         <a class="submenu-link" asp-area="" asp-controller="AdminMember"
                                            asp-action="Index"> 會員清單</a>
                                     </li>
+                                    @* <li class="submenu-item"> *@
+                                    @*     <a class="submenu-link" asp-area="" asp-controller="Home" *@
+                                    @*        asp-action="Index">受照顧者清單</a> *@
+                                    @* </li> *@
+                                    @* <li class="submenu-item"> *@
+                                    @*     <a class="submenu-link" asp-area="" asp-controller="AdminRoles" *@
+                                    @*        asp-action="Index">緊急聯絡人清單</a> *@
+                                    @* </li> *@
                                     <li class="submenu-item">
-                                        <a class="submenu-link" asp-area="" asp-controller="Home"
-                                           asp-action="Index">受照顧者清單</a>
+                                        <a class="submenu-link" asp-area="" asp-controller="AdminInstitutions" asp-action="Index">
+                                        機構法人清單</a>
                                     </li>
                                     <li class="submenu-item">
-                                        <a class="submenu-link" asp-area="" asp-controller="AdminRoles"
-                                           asp-action="Index">緊急聯絡人清單</a>
+                                        <a class="submenu-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                        機構帳號清單</a>
+									</li>
+                                    <li class="submenu-item">
+                                        <a class="submenu-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                        管理員清單</a>
                                     </li>
                                     <li class="submenu-item">
                                         <a class="submenu-link" asp-area="" asp-controller="AdminRoles"

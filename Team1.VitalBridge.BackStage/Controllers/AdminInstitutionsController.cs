@@ -79,6 +79,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 .AsNoTracking()
                 .Include(i => i.City)
                 .Include(i => i.Township)
+                .Include(i => i.InstitutionAuditImages)
                 .Where(i => i.InstitutionCode == institutionCode)
                 .Select(i => new AdminInstitutionDetailVM
                 {
@@ -99,8 +100,15 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     TownshipName = i.Township != null ? (i.Township.Name ?? "-") : "-",
                     Address = i.Address ?? string.Empty,
 
-                    PermitImageUrl = $"/uploads/institutions/{i.InstitutionCode}/permit.jpg",
-                    PermitUploadedAt = i.UpdatedAt
+                    //PermitImageUrl = $"/uploads/institutions/{i.InstitutionCode}/permit.jpg"
+                    PermitImageUrl = i.InstitutionAuditImages
+                        .Select(ai => "/api/UploadFile/GetFile?fileName=" + ai.ImgName)
+                        .FirstOrDefault()
+
+
+
+
+
                 })
                 .FirstOrDefaultAsync();
 

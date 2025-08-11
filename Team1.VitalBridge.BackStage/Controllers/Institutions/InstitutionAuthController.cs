@@ -180,7 +180,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(InstitutionRegisterLoginViewModel vm) {
+        public async Task<IActionResult> Register(InstitutionRegisterViewModel vm) {
 
 
             // 檢查機構代碼是否已存在
@@ -202,6 +202,12 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
                 .AnyAsync(u => u.Email == vm.Email))
             {
                 ModelState.AddModelError("Email", "帳號 Email 已註冊，請使用其他 Email。");
+            }
+
+            if (string.IsNullOrWhiteSpace(vm.ImageName) || string.IsNullOrWhiteSpace(vm.ImageUrl))
+            {
+                ModelState.AddModelError(string.Empty, "請先上傳圖片，再提交註冊。");
+                return View(vm);
             }
 
             if (!ModelState.IsValid)
@@ -293,6 +299,16 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
                     UpdatedAt = DateTime.Now
                 });
 
+
+                    _context.InstitutionAuditImages.Add(new InstitutionAuditImage
+                    {
+                        InstitutionId = institution.Id,
+                        ImgName = vm.ImageName,     // 隱藏欄位傳上來的檔名
+                        MimeType = vm.MimeType,     // 隱藏欄位傳上來的 MIME
+                        CreatedAt = DateTime.Now
+                        //FileId = vm.ImageUrl
+                    });
+
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
             }
@@ -302,20 +318,18 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
                 throw;
             }
 
-
-
-
-
-
                 
             });
 
-
-
-
-
-
             return RedirectToAction("RegisterSuccess");
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult RegisterSuccess()
+        {
+            return View();
         }
 
 
