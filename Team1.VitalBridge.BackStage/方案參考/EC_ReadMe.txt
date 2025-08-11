@@ -11,9 +11,9 @@
 	[V]目前已經先把顯示樹狀圖的部分，改為三層式架構
 	[V]目前在寫Index 顯示類別採用fetch API 的方式，動態載入資料 ，顯示樹狀圖
 	[V]新增商品類別畫面樣子已做，在Index.cshtml
-	[working]API Controller Create
-	[todo]新增分類 action & View Page
-	[todo]API Controller Update
+	[V]PI Controller Create
+	[V]新增分類 action & View Page
+	[進行中- 預計要和]API Controller Update
 	[todo]API Controller Delete
 	-add 新增分類 action & View Page
 	-add Service (判斷是否重複名稱、自己不能選自己、自己不能選自己子分類)

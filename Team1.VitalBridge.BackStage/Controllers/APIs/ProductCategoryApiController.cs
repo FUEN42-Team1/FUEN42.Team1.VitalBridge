@@ -34,10 +34,10 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 		}
 
 
-		// 待編輯
-		// 取得指定類別的子類別
+
+		// 根據ID取得單一類別
 		// 提供給編輯表的JS使用
-		// GET api/<ProductCategoryApiController>/5
+		// GET: api/ProductCategory/5
 		[HttpGet("{id}")]
 		public string Get(int id)
 		{
@@ -57,7 +57,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			catch (ArgumentException ex)
 			{
 				// 如果是驗證錯誤，返回400 Bad Request
-				return BadRequest(new { message = "新增商品類別失敗", error = ex.Message });
+				return BadRequest(new { message = "新增商品類別失敗",  error = ex.Message });
 			}
 			catch (Exception ex)
 			{
@@ -70,6 +70,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 		[HttpPut("{id}")]
 		public void Put(int id, [FromBody] string value)
 		{
+
+
 		}
 
 		// DELETE api/<ProductCategoryApiController>/5

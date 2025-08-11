@@ -21,7 +21,7 @@
         transition: background-color 0.2s ease;
     }
 
-    .add-category-btn:hover {
+        .add-category-btn:hover {
             background-color: #16763E;
             color: #F2FFF7;
         }
@@ -109,7 +109,7 @@
         color: #495057;
     }
 
-      .parent-category .category-name:hover {
+        .parent-category .category-name:hover {
             color: #007bff;
         }
 
@@ -161,29 +161,33 @@
                             <input type="hidden" id="categoryId">
 
                             <div class="mb-3">
-                                    <label for="categoryName" class="form-label">類別名稱</label>
-                                    <input class="form-control" id="categoryName" placeholder="請輸入商品類別名稱">
+                                <label for="categoryName" class="form-label">類別名稱</label>
+                                <input class="form-control" id="categoryName" placeholder="請輸入商品類別名稱" maxlength="50">
                             </div>
                             <div class="mb-3">
-                                <label for="parentCategory" class="form-label" >上層類別</label>
+                                <label for="parentCategory" class="form-label">上層類別</label>
                                 <select class="form-select" id="parentCategory" name="FatherId">
                                     <option value="">--無上層類別--</option>
-                                    <!--這邊用JS載入-->  
-                                  
+                                    <!--這邊用JS載入-->
+
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label" >啟用狀態</label>
+                                <label class="form-label">啟用狀態</label>
                                 <div class="form-check form-switch " id="isActive" name=" isActive">
+
                                     <input class="form-check-input" type="checkbox" id="categoryIsActive" checked>
                                 </div>
-                               
+
                             </div>
 
                             <!--處理圖片區塊-->
                             <div class="input-group mb-3">
-                                <input type="file" class="form-control" id="fileInput">
-                                <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                                <label class="form-label">類別圖片</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="fileInput" accept="image/*">
+                                    <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                                </div>
                             </div>
                             <div>
                                 <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
@@ -192,9 +196,6 @@
                             <div class="form-group mb-3">
                                 <input class="form-control" id="image" readonly />
                             </div>
-
-                            <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
-                        
                         </div>
 
                     </div>
@@ -207,6 +208,71 @@
                 </div>
             </div>
         </div>
+
+        <!--編輯商品類別的 Modal-->
+        <div class="modal fade" id="EditProductCategory" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
+             aria-labelledby="editModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle">
+                            編輯商品類別
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <!-- 隱藏的 ID 欄位 -->
+                            <input type="hidden" id="editCategoryId">
+
+                            <div class="mb-3">
+                                <label for="editCategoryName" class="form-label">類別名稱</label>
+                                <input class="form-control" id="editCategoryName" placeholder="請輸入商品類別名稱" maxlength="50">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editParentCategory" class="form-label">上層類別</label>
+                                <select class="form-select" id="editParentCategory" name="FatherId">
+                                    <option value="">--無上層類別--</option>
+                                    <!--這邊用JS載入-->
+
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">啟用狀態</label>
+                                <div class="form-check form-switch " id="editIsActive">
+                                    <input class="form-check-input" type="checkbox" id="editCategoryIsActive" checked>
+                                </div>
+
+                            </div>
+
+                            <!--處理圖片區塊-->
+                            <div class="input-group mb-3">
+                                <label class="form-label">類別圖片</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="editFileInput" accept="image/*">
+                                    <button id="editUpload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+                                </div>
+                            </div>
+                            <div>
+                                <img src="" alt="" id="editShowimage" class="img-fluid rounded shadow-sm" />
+                            </div>
+                            <div id="editResult"></div>
+                            <div class="form-group mb-3">
+                                <input class="form-control" id="editImage" readonly />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            關閉
+                        </button>
+                        <button type="button" class="btn btn-primary" id="updateCategory">確認修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- 類別列表容器 -->
         <div id="category-list">
@@ -302,7 +368,7 @@
                         childDiv.appendChild(childNameSpan);
                         subCategoriesDiv.appendChild(childDiv);
                     });
-                    
+
                     collapseDiv.appendChild(subCategoriesDiv);
                     categoryGroup.appendChild(collapseDiv);
                 }
@@ -313,7 +379,7 @@
             // 綁定事件
             bindEvents();
 
-                
+
         }
         // 綁定事件處理
         function bindEvents() {
@@ -334,12 +400,12 @@
                 });
             });
 
-            // 類別名稱點擊事件 - 直接跳轉編輯頁面
+            // 點擊類別名稱開啟編輯 Modal
             document.querySelectorAll('.category-name').forEach(function(element) {
                 element.addEventListener('click', function(e) {
                     e.stopPropagation(); // 阻止觸發展開/收合
                     var categoryId = this.getAttribute('data-id');
-                    editCategory(categoryId);
+                    openEditModal(categoryId);
                 });
             });
 
@@ -364,14 +430,10 @@
                 });
             });
         }
-        
-        // 【一定會改】編輯類別
-        function editCategory(categoryId) {
-            window.location.href = `/ProductCategory/Edit/${categoryId}`;
-        }
 
-        
-        
+
+
+
         // 重新載入資料的公用方法（新增或編輯完成後可呼叫）
         function refreshCategories() {
             document.getElementById('category-list').style.display = 'none';
@@ -386,9 +448,8 @@
         window.categoryManager = {
             refresh: refreshCategories
         };
-    </script>
 
-    <script>
+        // ========== 新增功能相關程式碼 ==========
         // 監聽 Modal 開啟事件
         document.getElementById('CreateProductCategory').addEventListener('shown.bs.modal', function(){
 
@@ -400,14 +461,15 @@
         document.getElementById('createCategory').addEventListener('click', submitCreateForm);
 
         function submitCreateForm() {
+            // 在一開始就清除舊的錯誤
+            clearAllFieldErrors('create');
 
-            
 
             // 取得表單資料
             const categoryName = document.getElementById('categoryName').value.trim();
             const parentCategory= document.getElementById('parentCategory').value;
             const isActive = document.getElementById('categoryIsActive').checked;
-            
+
             // 前端驗證
             const validationErrors = validateForm(categoryName, parentCategory);
             if (validationErrors.length > 0) {
@@ -464,21 +526,17 @@
                 // 錯誤處理
                 console.error('新增失敗:', error);
 
-                // 顯示錯誤訊息
-                if (error && error.error) {
-                    showErrorMessage(error.error);
-                } else if (error && error.message) {
-                    showErrorMessage(error.message);
-                } else {
-                    showErrorMessage('新增商品類別失敗，請稍後再試');
-                }
+                handleApiError(error, 'create'); // 這裡改成呼叫共用錯誤處理
             })
             .finally(() => {
                 // 恢復按鈕狀態
                 createButton.disabled = false;
                 createButton.textContent = originalText;
             });
-        }    
+        }
+
+
+
 
         // 前端表單驗證
         function validateForm(name, parentId) {
@@ -493,7 +551,7 @@
             return errors;
         }
 
-        // 重置表單
+        // 重置新增表單
         function resetCreateForm() {
             document.getElementById('categoryName').value = '';
             document.getElementById('parentCategory').value = '';
@@ -545,71 +603,17 @@
         function clearValidationErrors() {
             const alerts = document.querySelectorAll('#CreateProductCategory .validation-alert');
             alerts.forEach(alert => alert.remove());
-        }   
-
-
-        // 顯示成功訊息
-        function showSuccessMessage(message) {
-            // 使用 Toast 或其他方式顯示成功訊息
-            const toastHtml = `
-                <diV class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="toast-header bg-success text-white">
-                            <strong class="me-auto">成功</strong>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                    </div>
-                    </div>
-            `;
-            const toastContainer = document.createElement('div');
-            toastContainer.innerHTML = toastHtml;
-            document.body.appendChild(toastContainer);
-
-            // 3秒後自動關閉
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 3000);
-
-
-        }
-            
-
-        // 顯示錯誤訊息
-        function showErrorMessage(message) {
-            const toastHtml = `
-                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="toast-header bg-danger text-white">
-                            <strong class="me-auto">錯誤</strong>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            const toastContainer = document.createElement('div');
-            toastContainer.innerHTML = toastHtml;
-            document.body.appendChild(toastContainer);
-
-            // 5秒後自動關閉
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 5000);
         }
 
 
+        
+        
         // Modal 關閉時清空表單
         document.getElementById('CreateProductCategory').addEventListener('hidden.bs.modal', function () {
             resetCreateForm();
         });
 
-        
+
 
         // 開啟新增表單Model後要JS 載入父類別
         function loadParentOptions(){
@@ -638,7 +642,332 @@
 
 
         }
+
+
+        // ========== 編輯功能相關程式碼 ==========
+        // 開啟編輯 Modal
+        function openEditModal(categoryId) {
+            // 先載入類別詳細資料
+            fetch(`/api/ProductCategoryApi/${categoryId}`, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('載入類別資料:', data);
+
+                    // 設定表單值
+                    document.getElementById('editCategoryId').value = data.id;
+                    document.getElementById('editCategoryName').value = data.name;
+                    document.getElementById('editCategoryIsActive').checked = data.isActive;
+
+                    // 載入父類別選項並設定選中值
+                    loadEditParentOptions(data.fatherId, data.id);
+
+                    // 開啟 Modal
+                    const modal = new bootstrap.Modal(document.getElementById('EditProductCategory'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('載入類別資料失敗:', error);
+                    showErrorMessage('載入類別資料失敗');
+                });
+        }
+
+        // 載入編輯用的父類別選項
+        function loadEditParentOptions(selectedFatherId, currentCategoryId) {
+            fetch('/api/ProductCategoryApi/ParentOptions', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('editParentCategory');
+                    select.innerHTML = '<option value="">--無上層類別--</option>';
+
+                    data.forEach(category => {
+                        // 排除自己
+                        if (category.id == currentCategoryId) {
+                            return;
+                        }
+
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+
+                        // 設定選中值
+                        if (selectedFatherId && category.id == selectedFatherId) {
+                            option.selected = true;
+                        }
+
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.log('載入父類別選項失敗:', error));
+        }
+
+         // 監聽編輯 Modal 開啟事件
+        document.getElementById('EditProductCategory').addEventListener('shown.bs.modal', function() {
+            document.getElementById('editCategoryName').focus();
+        });
+
+         // 編輯 Modal 關閉時清空表單
+        document.getElementById('EditProductCategory').addEventListener('hidden.bs.modal', function() {
+            resetEditForm();
+        });
+
+        //提交編輯表單
+        document.getElementById('updateCategory').addEventListener('click', submitEditForm);
+
+        // 即時清除錯誤狀態（編輯）
+        // 清除名字錯誤
+        document.getElementById('editCategoryName').addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                clearFieldValidation('editCategoryName');
+            }
+        });
+        // 清除選項錯誤
+        document.getElementById('editParentCategory').addEventListener('change', function() {
+            if (this.classList.contains('is-invalid')) {
+                clearFieldValidation('editParentCategory');
+            }
+        });
+
+        // 提交編輯表單方法
+        function submitEditForm() {
+            clearAllValidation();
+            clearAllFieldErrors('edit');
+            const categoryId = document.getElementById('editCategoryId').value;
+            const categoryName = document.getElementById('editCategoryName').value.trim();
+            const parentCategory = document.getElementById('editParentCategory').value;
+            const isActive = document.getElementById('editCategoryIsActive').checked;
+
+            let hasError = false;
+
+            if (!categoryName) {
+                showFieldError('editCategoryName', '請輸入類別名稱');
+                hasError = true;
+            } else if (categoryName.length > 50) {
+                showFieldError('editCategoryName', '類別名稱不能超過50個字元');
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            const updateDto = {
+                id: parseInt(categoryId),
+                name: categoryName,
+                fatherId: parentCategory ? parseInt(parentCategory) : null,
+                isActive: isActive
+            };
+
+            const updateButton = document.getElementById('updateCategory');
+            const originalText = updateButton.textContent;
+            updateButton.disabled = true;
+            updateButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>處理中...';
+
+            fetch(`/api/ProductCategoryApi/${categoryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateDto)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('更新成功:', data);
+                showSuccessMessage('商品類別更新成功！');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EditProductCategory'));
+                modal.hide();
+                resetEditForm();
+                loadCategories();
+            })
+            .catch(error => {
+                console.error('更新失敗:', error);
+                // 呼叫handleApiError
+                handleApiError(error, 'edit');
+            })
+            .finally(() => {
+                updateButton.disabled = false;
+                updateButton.textContent = originalText;
+            });
+        }
+
+
+        // 重置編輯表單
+        function resetEditForm() {
+            document.getElementById('editCategoryId').value = '';
+            document.getElementById('editCategoryName').value = '';
+            document.getElementById('editParentCategory').value = '';
+            document.getElementById('editCategoryIsActive').checked = true;
+            document.getElementById('editImage').value = '';
+            document.getElementById('editShowimage').src = '';
+            document.getElementById('editShowimage').style.display = 'none';
+            document.getElementById('editFileInput').value = '';
+            clearAllValidation();
+        }
+
+        
+        
+
+        // ========== 共用功能 ==========
+
+        // 提交表單前，先清除所有欄位的舊錯誤訊息
+        function clearAllFieldErrors(mode) {
+            const formSelector = mode === 'edit' ? '#EditProductCategory' : '#CreateProductCategory';
+            // 移除所有 class 為 'invalid-feedback' 的錯誤提示
+            document.querySelectorAll(`${formSelector} .invalid-feedback`).forEach(el => el.remove());
+            // 移除所有 input 的 is-invalid 紅色框線
+            document.querySelectorAll(`${formSelector} .is-invalid`).forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        // 處理API錯誤
+        function handleApiError (error, mode){
+           // 在處理新錯誤前，先清除舊的
+            clearAllFieldErrors(mode);
+
+            // 檢查錯誤物件是否有特定結構
+            const prefix = mode === 'edit' ? 'edit' : '';
+            // 情況1: 處理後端回傳的「結構化驗證錯
+            if(error && error.errors){
+                // 將後端欄位名映射到前端元素 ID (不含前綴)
+                const fieldMap = {
+                    'Name': 'categoryName',
+                    'FatherId': 'parentCategory'
+                };
+
+            for (const fieldName in error.errors){
+                const errorMessages = error.errors[fieldName];
+                const elementId = prefix + (fieldMap[fieldName] || fieldName.toLowerCase());
+                const element = document.getElementById(elementId);
+
+                if (element && errorMessages.length > 0) {
+                // 為輸入框加上 Bootstrap 的紅色框線
+                        element.classList.add('is-invalid');
+
+                        // 建立並插入錯誤訊息提示
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback'; // Bootstrap 的標準錯誤提示 class
+                        errorDiv.textContent = errorMessages.join(' '); // 將該欄位的所有錯誤訊息顯示出來
+
+                        // 將錯誤訊息插入到元素的後面
+                        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+                }
+            }
+        }
+            // 情況2: 處理通用的、非結構化的錯誤 (作為備用方案)
+            else {
+                const message = (error && (error.message || error.error))
+                    ? (error.message || error.error)
+                    : (mode === 'edit' ? '更新商品類別失敗，請稍後再試' : '新增商品類別失敗，請稍後再試');
+
+                showErrorMessage(message); // 呼叫您已有的 Toast 函式
+            }
+
+
+        }
+        // 顯示個別欄位錯誤
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const formGroup = field.closest('.mb-3');
+
+            field.classList.add('is-invalid');
+
+            let errorDiv = formGroup.querySelector('.invalid-feedback');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                formGroup.appendChild(errorDiv);
+            }
+            errorDiv.textContent = message;
+        }
+
+        // 清除個別欄位驗證
+        function clearFieldValidation(fieldId) {
+            const field = document.getElementById(fieldId);
+            const formGroup = field.closest('.mb-3');
+
+            field.classList.remove('is-invalid');
+
+            const errorDiv = formGroup.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+
+        //清除所有驗證
+        function clearAllValidation() {
+            document.querySelectorAll('.is-invalid').forEach(element => {
+                element.classList.remove('is-invalid');
+            });
+
+            document.querySelectorAll('.invalid-feedback').forEach(element => {
+                element.remove();
+            });
+        }
+
+        // 顯示成功訊息
+        function showSuccessMessage(message) {
+            // 使用 Toast 或其他方式顯示成功訊息
+            const toastHtml = `
+                <diV class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-success text-white">
+                            <strong class="me-auto">成功</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                    </div>
+            `;
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+
+            // 3秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 3000);
+
+
+        }
+
+        // 顯示錯誤訊息
+        function showErrorMessage(message) {
+            const toastHtml = `
+                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-danger text-white">
+                            <strong class="me-auto">錯誤</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+
+            // 5秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 5000);
+        }
+
+
+
+
+
     </script>
+
+
 
     <!--處理新增檔案的上傳圖片-->
     @{
@@ -646,6 +975,8 @@
     }
     <script src="~/js/UploadImage.js"></script>
     <script>
+
+        // 新增表單的圖片上傳
         $(document).ready(function () {
             var fileInput = $("#fileInput");
             var showImage = $("#showimage");
@@ -655,7 +986,18 @@
             $("#upload").on('click',function(){
                 uploadFile(fileInput,resultDiv,image,showimage);
             });
+            // 編輯表單的圖片上傳
+            var editFileInput = $("#editFileInput");
+            var editShowImage = $("#editShowimage");
+            var editResultDiv = $("#editResult");
+            var editImage = $("#editImage");
+            ready(editFileInput,editShowImage);
+            $("#editUpload").on('click',function(){
+                uploadFile(editFileInput,editResultDiv,editImage,editShowImage);
+            });
         });
+        
+
     </script>
 }
 
