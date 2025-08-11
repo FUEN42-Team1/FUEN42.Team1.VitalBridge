@@ -60,9 +60,12 @@ namespace Team1.VitalBridge.BackStage
             // µù¥U ContentArticleService ©M ContentArticleRepository
             builder.Services.AddScoped<IContentArticleRepository, ContentArticleRepository>();
             builder.Services.AddScoped<IContentArticleService, ContentArticleService>();
+            // µù¥U ContentCommentService ©M ContentCommentRepository
+            builder.Services.AddScoped<IContentCommentRepository, ContentCommentRepository>();
+            builder.Services.AddScoped<IContentCommentService, ContentCommentService>();
             //Johnny end
 
-             
+
 
 
 

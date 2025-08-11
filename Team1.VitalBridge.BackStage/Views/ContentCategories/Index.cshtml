@@ -84,7 +84,8 @@
 			@foreach (var category in Model)
 			{
 				<li class="category-item" data-id="@category.Id">
-					<span class="category-toggle fa-solid fa-plus-square" data-id="@category.Id" data-expanded="false"></span>
+					<span class="category-toggle" data-id="@category.Id" data-expanded="false"></span>
+					<i class="category-toggle-sign fa-solid fa-solid fa-chevron-right me-2"></i>
 					<span class="category-name">@category.Name</span>
 					<span class="category-actions">
 						<a href="@Url.Action("Edit", "ContentCategories", new { id = category.Id })">Edit</a>
@@ -115,6 +116,7 @@
 			$(document).on('click', '.category-item', function (e) {
 				const itemElement = $(this);
 				const toggleElement = itemElement.find('.category-toggle');
+				const toggleSign = itemElement.find('.category-toggle-sign')
 				// const toggleElement = $(this);
 				const categoryId = toggleElement.data('id');
 				const isExpanded = toggleElement.data('expanded');
@@ -125,7 +127,7 @@
 
 				if (isExpanded === false) {
 					// Not expanded, so fetch subcategories via AJAX
-					toggleElement.removeClass('fa-plus-square').addClass('fa-minus-square');
+					toggleSign.removeClass('fa-solid fa-chevron-right').addClass('fa-solid fa-chevron-down');
 					subcategoriesContainer.show();
 					toggleElement.data('expanded', true);
 
@@ -143,7 +145,8 @@
 									$.each(subcategories, function (index, subcategory) {
 										html += `
 											<li class="category-item" data-id="${subcategory.id}">
-												<span class="category-toggle fa-solid fa-plus-square" data-id="${subcategory.id}" data-expanded="false"></span>
+												<span class="category-toggle " data-id="${subcategory.id}" data-expanded="false"></span>
+												<i class="category-toggle-sign fa-solid fa-solid fa-chevron-right me-2"></i>
 												<span class="category-name ">${subcategory.name}</span>
 												<span class="category-actions">
 													<a href="@Url.Action("Edit", "ContentCategories")?id=${subcategory.id}">Edit</a>
@@ -170,7 +173,7 @@
 					}
 				} else {
 					// Already expanded, so collapse
-					toggleElement.removeClass('fa-minus-square').addClass('fa-plus-square');
+					toggleSign.removeClass('fa-solid fa-chevron-down').addClass('fa-solid fa-chevron-right');
 					subcategoriesContainer.hide();
 					toggleElement.data('expanded', false);
 				}

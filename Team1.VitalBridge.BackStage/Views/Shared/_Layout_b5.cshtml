@@ -13,11 +13,19 @@
     <meta name="author" content="Xiaoying Riley at 3rd Wave Media">
     @* <link rel="shortcut icon" href="favicon.ico"> *@
 
-    <!-- FontAwesome JS-->
-    <script defer src="~/portal-theme-bs5/assets/plugins/fontawesome/js/all.min.js"></script>
 
     <!-- App CSS -->
     <link id="theme-style" rel="stylesheet" href="~/portal-theme-bs5/assets/css/portal.css">
+
+    <!-- Johnny Start -->
+    <!--ckeditor -->
+    <link rel="stylesheet" href="~/ckeditor5/css/style.css">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.0.0/ckeditor5.css" crossorigin>
+    <!-- js datatable -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css" />
+    <!-- font awsome css -->
+    @* <script defer src="~/portal-theme-bs5/assets/plugins/fontawesome/css/all.css"></script> *@
+    <!-- Johnny End -->
 
     <!-- 自己用的css-->
     @RenderSection("Styles", required: false)
@@ -495,6 +503,10 @@
                                         <a class="submenu-link" asp-area="" asp-controller="ContentArticles"
                                            asp-action="Search">文章管理</a>
                                     </li>
+                                    <li class="submenu-item">
+                                        <a class="submenu-link" asp-area="" asp-controller="ContentComments"
+                                           asp-action="Index">留言管理</a>
+                                    </li>
 
 
                                 </ul>
@@ -552,6 +564,16 @@
     <!-- Page Specific JS -->
     <script src="~/portal-theme-bs5/assets/js/app.js"></script>
 
+    <!-- FontAwesome JS-->
+     <script defer src="~/portal-theme-bs5/assets/plugins/fontawesome/js/all.min.js"></script> 
+    <!-- Johnny Start -->
+    <!--bootstrap -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ckeditor -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.0.0/ckeditor5.umd.js" crossorigin></script>
+    <!-- js datatable -->
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+    <!-- Johnny End -->
 
     <!-- 廣告 後台管理不看廣告可刪除 -->
     <script src="~/js/LoadPlate.js"></script>

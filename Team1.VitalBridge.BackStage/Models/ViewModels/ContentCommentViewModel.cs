@@ -19,12 +19,11 @@
     public class ContentCommentListViewModel
     {
         public int Id { get; set; }
-        public string MemberName { get; set; }
+        //public string MemberName { get; set; }
         public string ContentTitle { get; set; }
         public int? ParentCommentId { get; set; }
         public string Content { get; set; }
         public bool IsPinned { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
     }
 }

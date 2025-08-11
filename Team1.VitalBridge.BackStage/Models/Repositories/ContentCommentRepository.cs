@@ -39,6 +39,15 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             return comments;
         }
 
+        public async Task<IEnumerable<Comment>> GetAllIncludeAsync()
+        {
+            var comments = await _context.Comments
+                .Include(c => c.ContentNavigation) // Assuming Comment has a navigation property to Content
+                //.Include(c => c.Member) // Assuming Comment has a navigation property to Member
+                .ToListAsync();
+            return comments;
+        }
+
         public async Task<IEnumerable<Comment>> GetByArticleIdAsync(int articleId)
         {
             if (articleId <= 0)

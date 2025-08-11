@@ -6,6 +6,7 @@ namespace Team1.VitalBridge.BackStage.Models.Interfaces
     {
         // Define methods for managing content comments
         Task<IEnumerable<Comment>> GetAllAsync();
+        Task<IEnumerable<Comment>> GetAllIncludeAsync();
         Task<Comment?> GetByIdAsync(int id);
         Task AddAsync(Comment contentComment);
         Task UpdateAsync(Comment contentComment);

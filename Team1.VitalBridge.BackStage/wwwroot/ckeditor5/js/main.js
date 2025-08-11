@@ -216,13 +216,22 @@ const editorConfig = {
     extraPlugins: [MyCustomUploadAdapterPlugin]
 };
 
-ClassicEditor.create(document.querySelector('#ContentEditor'), editorConfig)
-    .then(editor => {
-        editorInstance = editor;
-    })
-    .catch(error => {
-        console.error(error);
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    const editorElement = document.querySelector('#ContentEditor');
+    
+
+    if (editorElement) {
+        ClassicEditor.create(editorElement, editorConfig)
+            .then(editor => {
+                editorInstance = editor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    } else {
+        console.error("The element with ID 'ContentEditor' was not found.");
+    }
+});
 
 
 function MyCustomUploadAdapterPlugin(editor) {
