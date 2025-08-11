@@ -1,4 +1,5 @@
 ﻿using Team1.VitalBridge.BackStage.Models.DTOs;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 
 namespace Team1.VitalBridge.BackStage.Models.Interfaces
 {
