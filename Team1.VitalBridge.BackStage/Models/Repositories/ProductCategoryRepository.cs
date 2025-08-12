@@ -81,15 +81,22 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 
 
         // 更新商品類別資料
-        public Task<Category> UpdateAsync(Category category)
+        public async Task<Category> UpdateAsync(Category category)
 		{
-			throw new NotImplementedException();
-		}
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+            return category;
+        }
 
         // 刪除商品類別資料 ，boolean表示是否成功
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
 		{
-			throw new NotImplementedException();
-		}
+            var category = await GetByIdAsync(id);
+            if (category == null) return false;
+
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+            return true;
+        }
 	}
 }

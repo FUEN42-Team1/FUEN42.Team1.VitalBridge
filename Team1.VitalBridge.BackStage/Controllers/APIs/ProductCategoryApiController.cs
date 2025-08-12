@@ -34,25 +34,35 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 		}
 
 
-		// 待編輯
-		// 取得指定類別的子類別
-		// 提供給編輯表的JS使用
-		// GET api/<ProductCategoryApiController>/5
-		[HttpGet("{id}")]
-		public string Get(int id)
-		{
-			return "value";
-		}
-
-		// 新增商品類別資料
-		// POST:api/ProductCategoryApi
-		[HttpPost]
+        // 根據ID取得單一類別
+        // 供編輯表單的 JavaScript 呼叫
+        // GET: api/ProductCategory/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductCategoryDto>> GetCategory(int id)
+        {
+            try
+            {
+                var category = await _service.GetByIdAsync(id);
+                if (category == null)
+                {
+                    return NotFound(new { message = $"找不到ID為 {id} 的類別" });
+                }
+                return Ok(category);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "取得類別失敗", error = ex.Message });
+            }
+        }
+        // 新增商品類別資料
+        // POST:api/ProductCategoryApi
+        [HttpPost]
 		public async Task<ActionResult<ProductCategoryDto>> CreateCategory([FromBody] CreateProductCategoryDto createDto)
 		{
 			try
 			{
 				var newCategory = await _service.CreateAsync(createDto);
-				return CreatedAtAction(nameof(Get), new { id = newCategory.Id }, newCategory);
+				return CreatedAtAction(nameof(GetCategory), new { id = newCategory.Id }, newCategory);
 			}
 			catch (ArgumentException ex)
 			{
@@ -66,14 +76,49 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			}
 		}
 
-		// PUT api/<ProductCategoryApiController>/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
+        // 更新商品類別資料
+        // PUT: api/ProductCategoryApi/5
+        [HttpPut("{id}")]
+		public async Task<ActionResult<ProductCategoryDto>> UpdateCategory(int id, [FromBody] UpdateProductCategoryDto updateDto)
 		{
-		}
+			try
+			{
+				if(id != updateDto.Id)
+				{
+					return BadRequest(new { message = "URL中的ID與資料中的ID不同" });
+                }
 
-		// DELETE api/<ProductCategoryApiController>/5
-		[HttpDelete("{id}")]
+				var updatedCategory = await _service.UpdateAsync(updateDto);
+				return Ok(updatedCategory);
+            }
+            // 如果驗證失敗
+            catch (ArgumentException ex)
+            {
+                if (ex.Message.Contains("找不到"))
+                {
+                    return NotFound(new { message = ex.Message });
+                }
+                return BadRequest(new { message = ex.Message });
+            }
+            // 如果階層規則違反
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "更新類別失敗", error = ex.Message });
+            }
+
+
+
+
+        }
+
+
+
+        // DELETE api/<ProductCategoryApiController>/5
+        [HttpDelete("{id}")]
 		public void Delete(int id)
 		{
 		}
@@ -94,9 +139,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			}
 		}
 
-		/// <summary>
-		/// 驗證更新 DTO - 手動驗證取代 DataAnnotations
-		/// </summary>
+		
 
 	}
 }

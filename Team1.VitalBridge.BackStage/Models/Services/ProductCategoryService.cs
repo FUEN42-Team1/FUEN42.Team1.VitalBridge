@@ -67,8 +67,38 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 		}
 
 
+		// 根據ID取得單一類別
+		public async Task<ProductCategoryDto> GetByIdAsync(int id) { 
+		
+		
+			var category = await _repository.GetByIdAsync(id);
+			if (category == null) return null;
+
+            //取得父類別
+            string? fatherName = null;
+            if (category.FatherId.HasValue)
+            {
+                var parent = await _repository.GetByIdAsync(category.FatherId.Value);
+                fatherName = parent?.Name;
+            }
+
+            // 將 EF 模型轉換為 DTO
+			return new ProductCategoryDto
+			{
+				Id = category.Id,
+				Name = category.Name,
+				FatherId = category.FatherId,
+				IsActive = category.IsActive,
+				Level = category.FatherId == null ? 0 : 1, // 根據是否有父類別設定層級
+				FatherName = fatherName // 設定父類別名稱
+			};
+
+
+
+        }
+
         // 新增商品類別
-		public async Task<ProductCategoryDto> CreateAsync(CreateProductCategoryDto createDto)
+        public async Task<ProductCategoryDto> CreateAsync(CreateProductCategoryDto createDto)
 		{
 			// 1. 手動驗證輸入資料
 			await ValidateCreateDtoAsync(createDto);
@@ -88,7 +118,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 				FatherId = createDto.FatherId,
 				IsActive = createDto.IsActive
 			};
-			// 3. 呼叫儲存庫方法新增類別 (補儲存庫方法 CreateAsync)
+			// 3. 呼叫儲存庫方法新增類別
 			var createdCategory = await _repository.CreateAsync(newCategory);
 
 			// 4. 將 EF 模型轉換為 DTO 並返回
@@ -213,8 +243,80 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 		}
 
 
+        // 更新商品類別
+		public async Task<ProductCategoryDto> UpdateAsync(UpdateProductCategoryDto updateDto)
+		{
+			// 1. 驗證輸入資料
+			await ValidateUpdateDtoAsync(updateDto);
+			// 2. 檢查階層規則
+			var validationError = await ValidateHierarchyAsync(updateDto.Id, updateDto.FatherId);
+			if (!string.IsNullOrEmpty(validationError))
+			{
+				throw new InvalidOperationException(validationError);
+			}
+			// 3. 取得現有類別資料
+			var category = await _repository.GetByIdAsync(updateDto.Id);
+			if (category == null)
+			{
+                //KeyNotFoundException 是從字典或集合中取得不存在的鍵時拋出的異常
+                throw new KeyNotFoundException($"類別 ID {updateDto.Id} 不存在");
+			}
+			// 4. 更新類別資料
+			category.Name = updateDto.Name;
+			category.FatherId = updateDto.FatherId;
+			category.IsActive = updateDto.IsActive;
+			// 5. 呼叫儲存庫方法更新類別
+			var updateCatefory =  await _repository.UpdateAsync(category);
+
+            // 6. 將 EF 模型轉換為 DTO 並返回
+            return new ProductCategoryDto
+            {
+                Id = updateCatefory.Id,
+                Name = updateCatefory.Name,
+                FatherId = updateCatefory.FatherId,
+                IsActive = updateCatefory.IsActive,
+                Level = updateCatefory.FatherId == null ? 0 : 1 // 根據是否有父類別設定層級
+            };
 
 
+        }
 
-	}
+
+        // 檢查更新商品類別的 DTO的驗證
+        private async Task ValidateUpdateDtoAsync(UpdateProductCategoryDto updateDto)
+        {
+            var errors = new List<string>();
+
+            // 檢查 ID
+            if (updateDto.Id <= 0)
+            {
+                errors.Add("類別ID無效");
+            }
+
+            // 檢查名稱
+            if (string.IsNullOrWhiteSpace(updateDto.Name))
+            {
+                errors.Add("類別名稱為必填欄位");
+            }
+            else if (updateDto.Name.Length > 50)
+            {
+                errors.Add("類別名稱不能超過50個字元");
+            }
+
+            // 檢查名稱是否重複 - 使用 Repository 的方法 (排除自己)
+            if (!string.IsNullOrWhiteSpace(updateDto.Name))
+            {
+                if (await _repository.IsNameExistsAsync(updateDto.Name, updateDto.Id))
+                {
+                    errors.Add("類別名稱已存在");
+                }
+            }
+
+            if (errors.Any())
+            {
+                throw new ArgumentException(string.Join("; ", errors));
+            }
+
+        }
+    }
 }
