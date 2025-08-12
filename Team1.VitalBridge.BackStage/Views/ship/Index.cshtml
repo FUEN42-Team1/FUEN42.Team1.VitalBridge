@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.shipViewModel>
+
+@{
+    ViewData["Title"] = "物流設定";
+}
+
+<h1>物流設定</h1>
+
+
+
+<div class="container">
+    <div>
+        <a class="btn btn-primary" asp-controller="Ship" asp-action="CreateShipMethod">
+            新增物流選項
+        </a>
+    </div>
+<table class="table">
+    <thead>
+        <tr>
+            
+            <th>
+                @Html.DisplayNameFor(model => model.ShipMethodName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShipCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                操作
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@item.Id</td>
+            <td >@item.ShipMethodName</td>
+           <td>@item.ShipCost</td>
+            <td>@item.IsActive</td>
+            <td>
+                    
+                    <div class="form-check form-switch " >
+
+                        <input 
+                        class="form-check-input" 
+                        type="checkbox" 
+                        data-id="@item.Id"
+                        
+                        @(item.IsActive ==true? "checked" : "")>
+                    </div>
+                   
+               
+            </td>
+
+            <td>
+                <div class="edit">
+                    編輯
+                </div>
+
+            </td>
+
+                
+        </tr>
+}
+    </tbody>
+</table>
+
+    
+
+    <!-- Modal -->
+    <!--
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">新增物流</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ShipMethodName" class="form-label">物流方式</label>
+                        <input class="form-control" id="ShipMethodName" maxlength="50">
+                    </div>
+                    <div class="mb-3">
+                        <label for="ShipCost" class="form-label">運費</label>
+                        <input type="number" class="form-control" id="ShipCost">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">啟用狀態</label>
+                        <div class="form-check form-switch " >
+
+                            <input class="form-check-input" type="checkbox" id="CreateIsActive" checked>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    -->
+
+</div>

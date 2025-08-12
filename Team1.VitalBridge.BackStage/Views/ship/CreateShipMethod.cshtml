@@ -1,0 +1,80 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.CreateShipMethodViewModel
+
+@{
+    ViewData["Title"] = "新增物流方式";
+}
+@section Styles {
+
+}
+
+<div class="container py-4">
+    <h3 class="mb-4 text-center fw-bold ">新增物流方式</h3>
+
+    <div class="col-md-5 mx-auto border p-4 rounded-3 shadow-sm bg-white">
+        <form asp-action="CreateShipMethod" novalidate class="needs-validation">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="ShipMethodName" class="form-label fw-bold"></label>
+                <input asp-for="ShipMethodName" class="form-control" placeholder="請輸入運送方式" />
+                <span asp-validation-for="ShipMethodName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ShipCost" class="form-label fw-bold"></label>
+                <input asp-for="ShipCost" type="number" class="form-control" placeholder="請輸入運費" />
+                <span asp-validation-for="ShipCost" class="text-danger"></span>
+            </div>
+
+            <div class="form-check form-switch mb-4 ">
+                <label asp-for="IsActive" class="form-check-label fw-bold "></label>
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" id="IsActive" />
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+            
+
+            <div class="d-flex justify-content-end gap-3">
+                <a asp-controller="ship" asp-action="Index" class="btn btn-outline-danger">取消</a>
+                <input type="submit" value="新增" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@* <div class="container">
+    <div class="mb-3">新增物流方式</div>
+    <div class="col-md-4 border-dark">
+        <form asp-action="CreateShipMethod">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="ShipMethodName" class="control-label"></label>
+                <input asp-for="ShipMethodName" class="form-control" placeholder="請輸入運送方式" />
+                <span asp-validation-for="ShipMethodName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ShipCost" class="control-label"></label>
+                <input asp-for="ShipCost" class="form-control" type="number" placeholder="請輸入運費"/>
+                <span asp-validation-for="ShipCost" class="text-danger"></span>
+            </div>
+            <div class="form-check form-switch  mb-3">
+                <label asp-for="IsActive" class="form-check-label"></label>
+                <input asp-for="IsActive" class="form-check-input" type="checkbox" id="IsActive" />
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+
+            </div>
+            <div class="mb-3">
+                <a asp-controller="ship" asp-action="Index" class="btn btn-danger">取消</a>
+                <input type="submit" value="新增" class="btn btn-primary" />
+
+            </div>
+            
+        </form>
+    </div>
+</div> *@
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+   
+
+}

@@ -19,6 +19,12 @@
 	-add Service (判斷是否重複名稱、自己不能選自己、自己不能選自己子分類)
 	-add Interface,Repository 實際CRUD對資料庫操作
 
+[todo] 物流設定
+	[v] 列表顯示
+	[working] 新增物流方式
+	[todo] 編輯物流方式
+
+
 [todo] 實作 商品照ProductImage
 	-add ProductImageViewModel
 	-add ProductImageService (排序邏輯、驗證、CRUD Repository 的業務邏輯)

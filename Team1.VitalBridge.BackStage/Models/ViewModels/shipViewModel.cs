@@ -13,10 +13,11 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string ShipMethodName { get; set; }
 
         [Required]
-        [Display(Name = "運費")]
+		[DataType(DataType.Currency)]
+		[Display(Name = "運費")]
         public decimal ShipCost { get; set; }
 
         [Display(Name = "啟用狀態")]
-        public bool? IsActive { get; set; } = false;
+        public bool? IsActive { get; set; }
     }
 }
