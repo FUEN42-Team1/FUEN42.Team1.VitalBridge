@@ -41,7 +41,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 {
                     savedFileInfo.FileName,
                     savedFileInfo.Length,
-                    FilePath = Url.Action("GetFile", "UploadFile", new { fileName = savedFileInfo.FileName })
+                    FilePath = Url.Action("GetFile", "UploadFile/"+ savedFileInfo.FileName)
                 });
             }
 
@@ -59,7 +59,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             //});
         }
 
-        [HttpGet("GetFile")]
+        [HttpGet("GetFile/{fileName}")]
         public IActionResult GetFile(string fileName)
         {
             var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越
@@ -73,6 +73,10 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
                 var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
                 var fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+
+                Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
+
                 return File(fileBytes, contentType);
             }
 
