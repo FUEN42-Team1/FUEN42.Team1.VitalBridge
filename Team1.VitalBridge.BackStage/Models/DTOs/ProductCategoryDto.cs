@@ -13,9 +13,12 @@
 
 		// FatherName 用來顯示父類別的名稱
 		public string? FatherName { get; set; }
+        
+        // 儲存FildeTable圖片名稱
+        public string? ImageFileName { get; set; } // 這邊要去接fileName名字
 
 
-	}
+    }
     
 
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
@@ -68,11 +69,12 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
 
 		// 根據ID取得單一類別
-		public async Task<ProductCategoryDto> GetByIdAsync(int id) { 
-		
-		
-			var category = await _repository.GetByIdAsync(id);
+		public async Task<ProductCategoryDto> GetByIdAsync(int id) {
+
+
+            var category = await _repository.GetByIdAsync(id);
 			if (category == null) return null;
+
 
             //取得父類別
             string? fatherName = null;
@@ -111,15 +113,22 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 throw new InvalidOperationException(validationError);
             }
 
-            // 2. 將 DTO 的資料轉換為 EF 模型
-            var newCategory = new Category
+
+			// 2. 將 DTO 的資料轉換為 EF 模型
+			var newCategory = new Category
 			{
-				Name = createDto.Name,
+                
+                Name = createDto.Name,
 				FatherId = createDto.FatherId,
-				IsActive = createDto.IsActive
+				IsActive = createDto.IsActive,
+				File = new Team1.VitalBridge.BackStage.Models.EFModels.FileStream
+				{
+					FileName = createDto.ImageFileName
+                }
 			};
 			// 3. 呼叫儲存庫方法新增類別
 			var createdCategory = await _repository.CreateAsync(newCategory);
+
 
 			// 4. 將 EF 模型轉換為 DTO 並返回
 			return new ProductCategoryDto
@@ -129,6 +138,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 				FatherId = createdCategory.FatherId,
 				IsActive = createdCategory.IsActive,
 				Level = createdCategory.FatherId == null ? 0 : 1 // 根據是否有父類別設定層級
+
 			};
         }
 
@@ -243,8 +253,9 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 		}
 
 
-        // 更新商品類別
-		public async Task<ProductCategoryDto> UpdateAsync(UpdateProductCategoryDto updateDto)
+
+        // 編輯商品類別
+        public async Task<ProductCategoryDto> UpdateAsync(UpdateProductCategoryDto updateDto)
 		{
 			// 1. 驗證輸入資料
 			await ValidateUpdateDtoAsync(updateDto);
@@ -256,7 +267,8 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 			}
 			// 3. 取得現有類別資料
 			var category = await _repository.GetByIdAsync(updateDto.Id);
-			if (category == null)
+
+            if (category == null)
 			{
                 //KeyNotFoundException 是從字典或集合中取得不存在的鍵時拋出的異常
                 throw new KeyNotFoundException($"類別 ID {updateDto.Id} 不存在");
@@ -265,8 +277,11 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 			category.Name = updateDto.Name;
 			category.FatherId = updateDto.FatherId;
 			category.IsActive = updateDto.IsActive;
-			// 5. 呼叫儲存庫方法更新類別
-			var updateCatefory =  await _repository.UpdateAsync(category);
+
+            
+
+            // 5. 呼叫儲存庫方法更新類別
+            var updateCatefory =  await _repository.UpdateAsync(category);
 
             // 6. 將 EF 模型轉換為 DTO 並返回
             return new ProductCategoryDto
@@ -276,6 +291,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 FatherId = updateCatefory.FatherId,
                 IsActive = updateCatefory.IsActive,
                 Level = updateCatefory.FatherId == null ? 0 : 1 // 根據是否有父類別設定層級
+
             };
 
 
@@ -317,6 +333,25 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 throw new ArgumentException(string.Join("; ", errors));
             }
 
+        }
+
+        // 刪除商品類別
+        public async Task<bool> DeleteAsync(int id)
+        {
+            // 檢查是否有子類別
+            if (await HasChildrenAsync(id))
+            {
+                throw new InvalidOperationException("此類別底下還有子類別，無法刪除");
+            }
+
+            return await _repository.DeleteAsync(id);
+        }
+
+        // 檢查是否有子類別
+        private async Task<bool> HasChildrenAsync(int categoryId)
+        {
+            var children = await _repository.GetChildrenAsync(categoryId);
+            return children.Any();
         }
     }
 }

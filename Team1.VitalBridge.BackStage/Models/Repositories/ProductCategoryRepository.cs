@@ -32,9 +32,18 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 		public async Task<Category> CreateAsync(Category category)
 		{
 			
-			_context.Categories.Add(category);
+			var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName==category.File.FileName).Id;
+			var newCategory = new Category
+			{
+				FileId = FileId, // 取得圖片檔案ID
+                Name = category.Name,
+				FatherId = category.FatherId,
+				IsActive = category.IsActive
+
+			};
+            _context.Categories.Add(newCategory);
 			await _context.SaveChangesAsync();
-			return category;
+			return newCategory;
 		}
 
 		// 檢查類別是否存在
@@ -65,22 +74,24 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 		}
 
 		// 檢查類別名稱是否已存在 (新增使用)
-		public Task<bool> IsNameExistsAsync(string name)
+		public async  Task<bool> IsNameExistsAsync(string name)
 		{
 			// 使用 AnyAsync 方法檢查是否有任何類別的名稱匹配
 			// 如果名稱已存在，則返回 true
-			return _context.Categories
+			return await _context.Categories
 				.AnyAsync(c => c.Name == name);
 		}
 
-		// 檢查類別名稱是否已存在 (更新使用，排除自己) -- 待補
-		public Task<bool> IsNameExistsAsync(string name, int excludeId)
+		// 檢查類別名稱是否已存在 (更新使用，排除自己)
+		public async Task<bool> IsNameExistsAsync(string name, int excludeId)
 		{
-			throw new NotImplementedException();
-		}
+			// 
+            return await _context.Categories
+                .AnyAsync(c => c.Id != excludeId && c.Name.ToLower() == name.ToLower());
+        }
 
 
-        // 更新商品類別資料
+        // 更新編輯商品類別資料
         public async Task<Category> UpdateAsync(Category category)
 		{
             _context.Categories.Update(category);
@@ -98,5 +109,7 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
-	}
+
+       
+    }
 }

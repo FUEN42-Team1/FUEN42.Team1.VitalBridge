@@ -36,8 +36,10 @@ namespace Team1.VitalBridge.BackStage.Models.Interfaces
 		// 檢查類別名稱是否已存在 (更新使用，排除自己)
 		Task<bool> IsNameExistsAsync(string name, int excludeId);
 
+        
 
 
 
-	}
+
+    }
 }

@@ -432,16 +432,6 @@
         }
 
 
-
-
-        }
-
-        
-        
-        }
-
-        
-        
         // 重新載入資料的公用方法（新增或編輯完成後可呼叫）
         function refreshCategories() {
             document.getElementById('category-list').style.display = 'none';
@@ -449,7 +439,6 @@
             document.getElementById('error-message').style.display = 'none';
             loadCategories();
         }
-
 
 
         // 暴露給全域使用
@@ -465,19 +454,22 @@
             document.getElementById('categoryName').focus();
         })
 
+        // 提交新增表單
         document.getElementById('createCategory').addEventListener('click', submitCreateForm);
 
         function submitCreateForm() {
             // 在一開始就清除舊的錯誤
             clearAllFieldErrors('create');
 
-            
-
             // 取得表單資料
             const categoryName = document.getElementById('categoryName').value.trim();
             const parentCategory= document.getElementById('parentCategory').value;
             const isActive = document.getElementById('categoryIsActive').checked;
+            const fileName = document.getElementById('image').value;
+            console.log(fileName)
+            // const fileName = $('#image').val();
 
+            // console.log(fileName);  這邊抓到的是fileName 是名字 不是id
             // 前端驗證
             const validationErrors = validateForm(categoryName, parentCategory);
             if (validationErrors.length > 0) {
@@ -489,7 +481,9 @@
             const createDto = {
             name: categoryName,
             fatherId: parentCategory ? parseInt(parentCategory) : null,
-            isActive: isActive
+            isActive: isActive,
+            ImageFileName: fileName // 把上面抓到的id名稱放到這裡
+            
             };
 
             // 顯示載入中狀態
@@ -535,9 +529,6 @@
                 console.error('新增失敗:', error);
 
                 handleApiError(error, 'create'); // 這裡改成呼叫共用錯誤處理
-
-
-
             })
             .finally(() => {
                 // 恢復按鈕狀態
@@ -545,6 +536,9 @@
                 createButton.textContent = originalText;
             });
         }
+
+
+
 
         // 前端表單驗證
         function validateForm(name, parentId) {
@@ -603,11 +597,19 @@
             alertDiv.innerHTML = errorHtml +
             '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
 
+            // 插入到 modal-body 的最前面
+            modalBody.insertBefore(alertDiv, modalBody.firstChild);
+
+        }
+        // 清除驗證錯誤訊息
+        function clearValidationErrors() {
+            const alerts = document.querySelectorAll('#CreateProductCategory .validation-alert');
+            alerts.forEach(alert => alert.remove());
         }
 
 
-        
-        
+
+
         // Modal 關閉時清空表單
         document.getElementById('CreateProductCategory').addEventListener('hidden.bs.modal', function () {
             resetCreateForm();
@@ -657,6 +659,8 @@
                     document.getElementById('editCategoryId').value = data.id;
                     document.getElementById('editCategoryName').value = data.name;
                     document.getElementById('editCategoryIsActive').checked = data.isActive;
+                    fileName = $('editImage').val();
+                    console.log('載入圖片檔名:', fileName);
 
                     // 載入父類別選項並設定選中值
                     loadEditParentOptions(data.fatherId, data.id);
@@ -735,6 +739,7 @@
             const categoryName = document.getElementById('editCategoryName').value.trim();
             const parentCategory = document.getElementById('editParentCategory').value;
             const isActive = document.getElementById('editCategoryIsActive').checked;
+      
 
             let hasError = false;
 
@@ -755,6 +760,7 @@
                 name: categoryName,
                 fatherId: parentCategory ? parseInt(parentCategory) : null,
                 isActive: isActive
+
             };
 
             const updateButton = document.getElementById('updateCategory');
@@ -808,8 +814,8 @@
             clearAllValidation();
         }
 
-        
-        
+
+
 
         // ========== 共用功能 ==========
 
@@ -864,14 +870,6 @@
 
                 showErrorMessage(message); // 呼叫您已有的 Toast 函式
             }
-            modalBody.insertBefore(alertDiv, modalBody.firstChild);
-
-        }
-        // 清除驗證錯誤訊息
-        function clearValidationErrors() {
-            const alerts = document.querySelectorAll('#CreateProductCategory .validation-alert');
-            alerts.forEach(alert => alert.remove());
-        }   
 
 
         }
@@ -935,13 +933,13 @@
             toastContainer.innerHTML = toastHtml;
             document.body.appendChild(toastContainer);
 
+            // 3秒後自動關閉
             setTimeout(() => {
                 toastContainer.remove();
             }, 3000);
 
 
         }
-            
 
         // 顯示錯誤訊息
         function showErrorMessage(message) {
@@ -963,21 +961,19 @@
             toastContainer.innerHTML = toastHtml;
             document.body.appendChild(toastContainer);
 
-
-        // Modal 關閉時清空表單
-        document.getElementById('CreateProductCategory').addEventListener('hidden.bs.modal', function () {
-            resetCreateForm();
-        });
-
-
-                })
-                .catch(error=> console.log('載入父類別選項失敗:', error));
-
-
+            // 5秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 5000);
         }
+
+
+
+
+
     </script>
 
- 
+
 
     <!--處理新增檔案的上傳圖片-->
     @{
@@ -1006,7 +1002,7 @@
                 uploadFile(editFileInput,editResultDiv,editImage,editShowImage);
             });
         });
-        
+
 
     </script>
 }

@@ -54,7 +54,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 return StatusCode(500, new { message = "取得類別失敗", error = ex.Message });
             }
         }
-        // 新增商品類別資料
+        
+		// 新增商品類別資料
         // POST:api/ProductCategoryApi
         [HttpPost]
 		public async Task<ActionResult<ProductCategoryDto>> CreateCategory([FromBody] CreateProductCategoryDto createDto)
@@ -76,10 +77,11 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			}
 		}
 
-        // 更新商品類別資料
+		
+        // 更新編輯商品類別資料
         // PUT: api/ProductCategoryApi/5
         [HttpPut("{id}")]
-		public async Task<ActionResult<ProductCategoryDto>> UpdateCategory(int id, [FromBody] UpdateProductCategoryDto updateDto)
+		public async Task<ActionResult<ProductCategoryDto>> UpdateCategory(int id, [FromBody] UpdateProductCategoryDto updateDto )
 		{
 			try
 			{
@@ -116,12 +118,31 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         }
 
 
-
-        // DELETE api/<ProductCategoryApiController>/5
+        // 刪除商品類別
+        // ELETE: api/ProductCategory/5
         [HttpDelete("{id}")]
-		public void Delete(int id)
-		{
-		}
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+			try
+			{
+				var success = await _service.DeleteAsync(id);
+				if(!success)
+				{ return NotFound(new { message = $"找不到ID為 {id} 的類別" }); }
+
+				return Ok(new { message = "刪除成功" });
+            }
+			
+			catch (InvalidOperationException ex) 
+			{
+                return BadRequest(new { message = ex.Message });
+            }
+            // 捕捉其他可能的錯誤
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "刪除類別失敗", error = ex.Message });
+            }
+
+        }
 
 		// 取得父類別選項
 		// GET: api/ProductCategoryApi/ParentOptions
@@ -139,7 +160,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			}
 		}
 
-		
+        
 
-	}
+
+    }
 }

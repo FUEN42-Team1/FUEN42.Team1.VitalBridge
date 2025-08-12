@@ -6,5 +6,10 @@
         public int? FatherId { get; set; }
         public string Name { get; set; }
         public bool IsActive { get; set; } = true;
+
+        // 儲存FildeTable圖片名稱
+        public string? ImageFileName { get; set; }
+
+
     }
 }
