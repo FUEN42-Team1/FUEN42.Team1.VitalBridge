@@ -35,6 +35,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             RoleCode = r.RoleCode,
             Name = r.Name,
+            RoleTypeShowName = r.RoleType,
             Info = r.Info,
             IsActive = r.IsActive,
             IsSystemDefault = r.IsSystemDefault,

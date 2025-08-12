@@ -6,6 +6,7 @@ using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Services;
 using Team1.VitalBridge.BackStage.Models.Utilities;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
+using Team1.VitalBridge.BackStage.Models.ViewModels.Admin;
 
 namespace Team1.VitalBridge.BackStage.Controllers
 {
@@ -18,22 +19,54 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly JwtService _jwtService;
 
         //管理會員相關
-        public AdminUsersController(AppDbContext context, IConfiguration configuration, JwtService jwtService)
+        public AdminUsersController(AppDbContext context, IConfiguration configuration)
         {
             this._context = context;
             this._configuration = configuration;
-            this._jwtService = jwtService;
 
         }
 
 
-        public IActionResult Index()
+
+
+
+        //取得所有管理員使用者
+        //這個方法會取得所有的管理員使用者
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var adminlist = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.AccountType == "Admin")
+                .Include(u => u.AdminProfile)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Select(u => new AdminUserListVM
+                {
+                    UserId = u.UserId,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    Status = u.Status,
+                    Note = u.AdminProfile != null ? u.AdminProfile.Note : null,
+                    lastLoginAt = u.LastLoginAt,
+                    lastAdminActionAt = u.AdminProfile != null
+                                        ? u.AdminProfile.LastAdminActionAt
+                                        : null,
+                    Roles = u.UserRoles != null
+                        ? u.UserRoles
+                            .Where(ur => ur.Role != null)
+                            .Select(ur => ur.Role.Name)
+                            .ToArray()
+                        : Array.Empty<string>()
+                })
+                .OrderByDescending(x => x.lastAdminActionAt ?? x.lastLoginAt)
+                .ToListAsync();
+
+            return View(adminlist);
         }
+
 
 
 

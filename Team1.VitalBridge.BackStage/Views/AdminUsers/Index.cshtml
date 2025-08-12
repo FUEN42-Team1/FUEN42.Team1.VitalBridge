@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.Admin.AdminUserListVM>
+@{
+    ViewData["Title"] = "管理員帳號清單";
+}
+
+<div class="container-xxl py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <a class="btn btn-primary btn-sm" asp-action="Create">新增管理員</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.First().Name)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Email)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Phone)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Roles)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Status)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Note)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().lastLoginAt)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().lastAdminActionAt)</th>
+                    <th class="text-end">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var x in Model)
+                {
+                    <tr>
+                        <td>@(string.IsNullOrWhiteSpace(x.Name) ? "-" : x.Name)</td>
+                        <td>@(string.IsNullOrWhiteSpace(x.Email) ? "-" : x.Email)</td>
+                        <td>@(string.IsNullOrWhiteSpace(x.Phone) ? "-" : x.Phone)</td>
+                        <td>
+                            @(x.Roles != null && x.Roles.Any()
+                                ? string.Join(", ", x.Roles)
+                                : "-")
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(x.Status) ? "-" : x.Status)</td>
+                        <td>@(string.IsNullOrWhiteSpace(x.Note) ? "-" : x.Note)</td>
+                        <td>@(x.lastLoginAt.HasValue ? x.lastLoginAt.Value.ToString("yyyy/MM/dd HH:mm") : "-")</td>
+                        <td>@(x.lastAdminActionAt.HasValue ? x.lastAdminActionAt.Value.ToString("yyyy/MM/dd HH:mm") : "-")</td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-userId="@x.UserId">編輯</a>
+                            <a class="btn btn-outline-secondary btn-sm" asp-action="Details" asp-route-userId="@x.UserId">檢視</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
