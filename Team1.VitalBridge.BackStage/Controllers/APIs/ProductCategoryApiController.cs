@@ -67,7 +67,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 			catch (ArgumentException ex)
 			{
 				// 如果是驗證錯誤，返回400 Bad Request
-				return BadRequest(new { message = "新增商品類別失敗", error = ex.Message });
+				return BadRequest(new { message = "新增商品類別失敗",  error = ex.Message });
 			}
 			catch (Exception ex)
 			{
