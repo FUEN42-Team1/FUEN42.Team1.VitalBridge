@@ -17,6 +17,7 @@ public partial class SubsidyInfo
     [Required]
     [Column("description")]
     [StringLength(100)]
+    [Display(Name = "補助描述")]
     public string Description { get; set; }
 
     [InverseProperty("SubsidyInfo")]
