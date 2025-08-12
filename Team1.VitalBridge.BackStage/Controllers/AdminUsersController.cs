@@ -50,8 +50,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     Phone = u.Phone,
                     Status = u.Status,
                     Note = u.AdminProfile != null ? u.AdminProfile.Note : null,
-                    lastLoginAt = u.LastLoginAt,
-                    lastAdminActionAt = u.AdminProfile != null
+                    LastLoginAt = u.LastLoginAt,
+                    LastAdminActionAt = u.AdminProfile != null
                                         ? u.AdminProfile.LastAdminActionAt
                                         : null,
                     Roles = u.UserRoles != null
@@ -61,11 +61,66 @@ namespace Team1.VitalBridge.BackStage.Controllers
                             .ToArray()
                         : Array.Empty<string>()
                 })
-                .OrderByDescending(x => x.lastAdminActionAt ?? x.lastLoginAt)
+                .OrderByDescending(x => x.LastAdminActionAt ?? x.LastLoginAt)
                 .ToListAsync();
 
             return View(adminlist);
         }
+
+        //取得單一管理員使用者的詳細資料
+        //這個方法會取得指定管理員使用者的詳細資料
+        [HttpGet]
+        public async Task<IActionResult> Details(string userId)
+        {
+            var adminUser = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.AdminProfile)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.AccountType == "Admin");
+            if (adminUser == null) return NotFound();
+            var vm = new AdminUserDetailsVM
+            {
+                UserId = adminUser.UserId,
+                Name = adminUser.Name,
+                Email = adminUser.Email,
+                Phone = adminUser.Phone,
+                Status = adminUser.Status,
+                Note = adminUser.AdminProfile != null ? adminUser.AdminProfile.Note : null,
+                CreatedAt = adminUser.CreatedAt,
+                UpdatedAt = adminUser.UpdatedAt,
+                LastLoginAt = adminUser.LastLoginAt,
+                LastAdminActionAt = adminUser.AdminProfile != null ? adminUser.AdminProfile.LastAdminActionAt : null,
+                FailedLoginCount = adminUser.FailedLoginCount,
+                LockedUntil = adminUser.LockedUntil,
+                Roles = adminUser.UserRoles != null
+                    ? adminUser.UserRoles
+                        .Where(ur => ur.Role != null)
+                        .Select(ur => ur.Role.Name)
+                        .ToArray()
+                    : Array.Empty<string>()
+            };
+            return View(vm);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
