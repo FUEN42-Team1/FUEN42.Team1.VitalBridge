@@ -114,6 +114,13 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             }
 
 
+			// 這邊是從 DTO 中取得圖片檔案名稱
+			var fileName = createDto.ImageFileName;
+			// 從儲存庫取得圖片檔案ID
+			var fileId = await _repository.GetFileIdByFileNameAsync(fileName);
+
+
+
 			// 2. 將 DTO 的資料轉換為 EF 模型
 			var newCategory = new Category
 			{
@@ -121,10 +128,12 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 Name = createDto.Name,
 				FatherId = createDto.FatherId,
 				IsActive = createDto.IsActive,
-				File = new Team1.VitalBridge.BackStage.Models.EFModels.FileStream
-				{
-					FileName = createDto.ImageFileName
-                }
+				//File = new Team1.VitalBridge.BackStage.Models.EFModels.FileStream
+				//{
+				//	FileName = createDto.ImageFileName
+				//}
+				// 這裡直接使用從儲存庫取得的 FileId
+				FileId = fileId
 			};
 			// 3. 呼叫儲存庫方法新增類別
 			var createdCategory = await _repository.CreateAsync(newCategory);

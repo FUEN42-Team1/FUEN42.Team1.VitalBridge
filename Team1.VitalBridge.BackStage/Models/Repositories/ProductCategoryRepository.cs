@@ -32,10 +32,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 		public async Task<Category> CreateAsync(Category category)
 		{
 			
-			var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName==category.File.FileName).Id;
+			//var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName==category.File.FileName).Id;
 			var newCategory = new Category
 			{
-				FileId = FileId, // 取得圖片檔案ID
+				FileId = category.FileId, // 取得圖片檔案ID
                 Name = category.Name,
 				FatherId = category.FatherId,
 				IsActive = category.IsActive
@@ -110,6 +110,21 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             return true;
         }
 
-       
-    }
+		public async Task<int?> GetFileIdByFileNameAsync(string fileName)
+		{
+			// 如果 FileName 為空 則返回 null
+
+			if (string.IsNullOrWhiteSpace(fileName))
+			{
+				return null;
+			}
+			// 從 FileStreams 中查找對應的 FileId，這邊直接取的FileId
+			// 這裡使用 FirstOrDefaultAsync 來取得第一個符合條件的結果
+			return await _context.FileStreams
+				.Where(f => f.FileName == fileName) //過濾條件（WHERE 子句）
+				.Select(f=>f.Id) //選擇需要的欄位（SELECT 子句）
+				.FirstOrDefaultAsync();
+			
+		}
+	}
 }
