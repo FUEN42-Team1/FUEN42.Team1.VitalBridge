@@ -96,6 +96,7 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
         // 更新編輯商品類別資料
         public async Task<Category> UpdateAsync(Category category)
 		{
+
             _context.Categories.Update(category);
             await _context.SaveChangesAsync();
             return category;

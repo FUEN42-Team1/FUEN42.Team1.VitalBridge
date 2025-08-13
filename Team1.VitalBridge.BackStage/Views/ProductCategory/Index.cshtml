@@ -482,7 +482,7 @@
             name: categoryName,
             fatherId: parentCategory ? parseInt(parentCategory) : null,
             isActive: isActive,
-            ImageFileName: fileName // 把上面抓到的id名稱放到這裡
+            ImageFileName: fileName // 把從createDto抓到的圖片名稱給前端
             
             };
 
@@ -751,7 +751,7 @@
             const categoryName = document.getElementById('editCategoryName').value.trim();
             const parentCategory = document.getElementById('editParentCategory').value;
             const isActive = document.getElementById('editCategoryIsActive').checked;
-      
+            const fileName = document.getElementById('editImage').value;
 
             let hasError = false;
 
@@ -771,7 +771,8 @@
                 id: parseInt(categoryId),
                 name: categoryName,
                 fatherId: parentCategory ? parseInt(parentCategory) : null,
-                isActive: isActive
+                isActive: isActive,
+                ImageFileName:fileName  /* 在冒號左邊是dto名字，右邊是前端取得的值 */
 
             };
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
@@ -294,15 +295,20 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 //KeyNotFoundException 是從字典或集合中取得不存在的鍵時拋出的異常
                 throw new KeyNotFoundException($"類別 ID {updateDto.Id} 不存在");
 			}
+
+			// 這邊是從 DTO 中取得圖片檔案名稱
+			var fileName = updateDto.ImageFileName;
+			// 從儲存庫取得圖片檔案ID
+			var fileId = await _repository.GetFileIdByFileNameAsync(fileName);
+
 			// 4. 更新類別資料
 			category.Name = updateDto.Name;
 			category.FatherId = updateDto.FatherId;
 			category.IsActive = updateDto.IsActive;
+			category.FileId = fileId; // 更新圖片檔案ID
 
-            
-
-            // 5. 呼叫儲存庫方法更新類別
-            var updateCatefory =  await _repository.UpdateAsync(category);
+			// 5. 呼叫儲存庫方法更新類別
+			var updateCatefory =  await _repository.UpdateAsync(category);
 
             // 6. 將 EF 模型轉換為 DTO 並返回
             return new ProductCategoryDto
