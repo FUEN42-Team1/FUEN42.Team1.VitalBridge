@@ -3,6 +3,17 @@
 @{
     ViewData["Title"] = "物流設定";
 }
+@if (TempData["SuccessMessage"] != null)
+{
+    {
+        <div class="d-flex justify-content-end">
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show w-25" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+}
 
 <h1>物流設定</h1>
 
@@ -107,3 +118,20 @@
     -->
 
 </div>
+@section Scripts {
+
+    <script>
+        // 新增淡出的效果
+        window.addEventListener('DOMContentLoaded', function () {
+            var alert = document.getElementById('success-alert');
+            if (alert) {
+                setTimeout(function () {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }, 5000);
+            }
+        });
+    </script>
+
+}
+

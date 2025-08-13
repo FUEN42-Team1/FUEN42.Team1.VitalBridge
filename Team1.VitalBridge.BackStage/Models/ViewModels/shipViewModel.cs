@@ -15,7 +15,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Required]
 		[DataType(DataType.Currency)]
 		[Display(Name = "運費")]
-        public decimal ShipCost { get; set; }
+        public int ShipCost { get; set; }
 
         [Display(Name = "啟用狀態")]
         public bool? IsActive { get; set; }

@@ -25,7 +25,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 {
                     Id = s.Id,
                     ShipMethodName = s.ShipMethodName,
-                    ShipCost = s.ShipCost,
+                    ShipCost = (int)s.ShipCost,
                     IsActive = s.IsActive
 				}
 				)
@@ -43,7 +43,18 @@ namespace Team1.VitalBridge.BackStage.Controllers
 		{
 			// 驗證模型狀態
             if(ModelState.IsValid == false) return View(vm);
-            
+
+			// 檢查運送方式名稱是否已存在
+
+			bool exists= _context.Ships
+				.Any(s => s.ShipMethodName == vm.ShipMethodName);
+			// 如果已存在，則返回錯誤
+			if (exists)
+			{
+				ModelState.AddModelError(nameof(vm.ShipMethodName), "運送方式名稱已存在");
+				return View(vm);
+			}
+
 			var ship = new Ship
 			{
 				ShipMethodName = vm.ShipMethodName,
@@ -53,10 +64,29 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			_context.Ships.Add(ship);
 			_context.SaveChanges();
 
-			return View();
+			// 重定向到索引頁面
+
+			TempData["SuccessMessage"] = "新增運送方式成功";
+			return RedirectToAction(nameof(Index));
 		}
 
 
+		[HttpGet]
+		public async Task <IActionResult> Edit(int? id)
+		{
+			if(id==null)
+			{
+				return NotFound();
+			}
+			var ship = await _context.Ships.FindAsync(id);
+
+			if(ship == null)
+			{
+				return NotFound();
+			}
+			return View();
+
+		}
 
 
 	}
