@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using Team1.VitalBridge.BackStage.Models.EFModels;
@@ -107,7 +108,107 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
 
 
+        //編輯管理員身分
+        //需要超管
+        public async Task<IActionResult> EditRoles(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return BadRequest("缺少 UserId");
 
+            var user = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.AccountType == "Admin");
+
+            if (user == null) return NotFound("找不到此管理員帳號");
+
+            // 只抓「管理員類型」且啟用中的角色清單
+            var allAdminRoles = await _context.Roles
+                .AsNoTracking()
+                .Where(r => r.RoleType == "Admin" && r.IsActive)
+                .Select(r => new RoleOptionVM { Code = r.RoleCode, Name = r.Name })
+                .OrderBy(r => r.Code)
+                .ToListAsync();
+
+            var selected = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .Select(ur => ur.Role.RoleCode)
+                .ToList();
+
+            var vm = new AdminEditRolesVM
+            {
+                UserId = user.UserId,
+                AllRoles = allAdminRoles,
+                SelectedRoles = selected
+            };
+
+            return View(vm);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditRoles(AdminEditRolesVM vm)
+        {
+            if (string.IsNullOrWhiteSpace(vm.UserId))
+            {
+                ModelState.AddModelError(nameof(vm.UserId), "UserId 必填");
+            }
+            if (!ModelState.IsValid) return View(vm);
+
+            var user = await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserId == vm.UserId && u.AccountType == "Admin");
+
+            if (user == null) return NotFound("找不到此管理員帳號");
+
+            // 目標集合（前端送回的勾選）
+            var targetCodes = (vm.SelectedRoles ?? new List<string>()).ToHashSet();
+
+            // 目前擁有
+            var currentCodes = user.UserRoles
+                .Where(ur => ur.Role != null)
+                .Select(ur => ur.Role.RoleCode)
+                .ToHashSet();
+
+            // 差異計算
+            var codesToAdd = targetCodes.Except(currentCodes).ToList();
+            var codesToRemove = currentCodes.Except(targetCodes).ToList();
+
+            // 找出要新增/移除對應的 RoleId
+            var addRoleIds = await _context.Roles
+                .Where(r => r.RoleType == "Admin" && r.IsActive && codesToAdd.Contains(r.RoleCode))
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            var removeRoleIds = await _context.Roles
+                .Where(r => r.RoleType == "Admin" && codesToRemove.Contains(r.RoleCode))
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            // 移除多餘
+            if (removeRoleIds.Count > 0)
+            {
+                var toRemove = user.UserRoles.Where(ur => removeRoleIds.Contains(ur.RoleId)).ToList();
+                _context.UserRoles.RemoveRange(toRemove);
+            }
+
+            // 新增缺少
+            foreach (var rid in addRoleIds)
+            {
+                _context.UserRoles.Add(new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = rid
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            // 依你路由調整：回詳細頁或清單頁
+            return RedirectToAction("Details", new { userId = user.UserId });
+        }
 
 
 
