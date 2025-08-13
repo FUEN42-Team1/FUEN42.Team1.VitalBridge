@@ -466,7 +466,7 @@
             const parentCategory= document.getElementById('parentCategory').value;
             const isActive = document.getElementById('categoryIsActive').checked;
             const fileName = document.getElementById('image').value;
-            console.log(fileName)
+            
             // const fileName = $('#image').val();
 
             // console.log(fileName);  這邊抓到的是fileName 是名字 不是id
@@ -659,8 +659,20 @@
                     document.getElementById('editCategoryId').value = data.id;
                     document.getElementById('editCategoryName').value = data.name;
                     document.getElementById('editCategoryIsActive').checked = data.isActive;
-                    fileName = $('editImage').val();
-                    console.log('載入圖片檔名:', fileName);
+                    document.getElementById('editImage').value = data.imageFileName;
+
+                    // console.log('載入圖片檔名:', data.imageFileName);
+                    // 處理圖片檔名和預覽
+                    if(data.imageFileName){
+                        document.getElementById("editImage").value = data.imageFileName;
+                         
+                        // 使用 API 路徑來取得圖片
+                        $("#editShowimage").attr("src", "/api/UploadFile/GetFile?fileName=" + encodeURIComponent(data.imageFileName)).show();
+                    } else {
+                        document.getElementById("editImage").value = '';
+                        $("#editShowimage").attr("src", "").hide();
+                    }
+
 
                     // 載入父類別選項並設定選中值
                     loadEditParentOptions(data.fatherId, data.id);

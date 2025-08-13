@@ -24,8 +24,10 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 		// 根據ID取得類別
 		public async Task<Category> GetByIdAsync(int id)
 		{
-			// 使用 FindAsync 方法查找指定 ID 的類別
-			return await _context.Categories.FindAsync(id);
+			// 使用 Include 方法載入 File 關聯資料
+			return await _context.Categories
+				.Include(c=>c.File)
+				.FirstOrDefaultAsync(c =>c.Id == id);
 		}
 
 		// 新增商品類別資料
@@ -112,6 +114,7 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 
 		public async Task<int?> GetFileIdByFileNameAsync(string fileName)
 		{
+
 			// 如果 FileName 為空 則返回 null
 
 			if (string.IsNullOrWhiteSpace(fileName))
@@ -119,9 +122,9 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
 				return null;
 			}
 			// 從 FileStreams 中查找對應的 FileId，這邊直接取的FileId
-			// 這裡使用 FirstOrDefaultAsync 來取得第一個符合條件的結果
+			
 			return await _context.FileStreams
-				.Where(f => f.FileName == fileName) //過濾條件（WHERE 子句）
+				.Where(f => f.FileName == fileName) 
 				.Select(f=>f.Id) //選擇需要的欄位（SELECT 子句）
 				.FirstOrDefaultAsync();
 			

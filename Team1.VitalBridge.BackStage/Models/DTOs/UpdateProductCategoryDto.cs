@@ -8,8 +8,10 @@
         public string Name { get; set; }
         public bool IsActive { get; set; }
 
+		public string? ImageFileName { get; set; } // 這邊要去接fileName名字
 
 
-        
-    }
+
+
+	}
 }

@@ -84,7 +84,18 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 fatherName = parent?.Name;
             }
 
-            // 將 EF 模型轉換為 DTO
+			// 如果有圖片檔案，則取得檔案名稱，因為前端index.cshtml透過檔名讀取圖片
+			// 如果沒有圖片檔案，則為 null
+			string? imageFileName = null;
+			if (category.FileId.HasValue && category.File != null)
+			{
+				imageFileName = category.File.FileName;
+			}
+
+
+
+
+			// 將 EF 模型轉換為 DTO
 			return new ProductCategoryDto
 			{
 				Id = category.Id,
@@ -92,7 +103,8 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 				FatherId = category.FatherId,
 				IsActive = category.IsActive,
 				Level = category.FatherId == null ? 0 : 1, // 根據是否有父類別設定層級
-				FatherName = fatherName // 設定父類別名稱
+				FatherName = fatherName, // 設定父類別名稱
+				ImageFileName = imageFileName // 把資料庫的圖片檔案名稱傳給前端
 			};
 
 
