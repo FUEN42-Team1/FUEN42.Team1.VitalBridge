@@ -2,7 +2,7 @@
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
-	public class CreateShipMethodViewModel
+	public class CreateShipViewModel
 	{
 
 		[Required(ErrorMessage = "請輸入運送方式名稱")]

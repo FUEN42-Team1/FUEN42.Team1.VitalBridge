@@ -14,14 +14,49 @@
         </div>
     }
 }
+@if (TempData["EditMessage"] != null)
+{
+    {
+        <div class="d-flex justify-content-end">
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show w-25" role="alert">
+                @TempData["EditMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+}
 
-<h1>物流設定</h1>
+@if (TempData["DeleteError"] != null)
+{
+    {
+        <div class="d-flex justify-content-end">
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show w-25" role="alert">
+                @TempData["DeleteError"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+}
+@if (TempData["DeleteMessage"] != null)
+{
+    {
+        <div class="d-flex justify-content-end">
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show w-25" role="alert">
+                @TempData["DeleteMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+}
 
 
 
 <div class="container">
-    <div>
-        <a class="btn btn-primary" asp-controller="Ship" asp-action="CreateShipMethod">
+    <div >
+        <h2 class="text-primary fw-bold ">物流設定</h2>
+     </div>
+    <div class="d-flex justify-content-end mb-3">
+        <a class="btn btn-primary " asp-controller="Ship" asp-action="Create">
             新增物流選項
         </a>
     </div>
@@ -35,7 +70,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.ShipCost)
             </th>
-            <th>
+                <th class="text-center">
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
             <th>
@@ -46,30 +81,34 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>@item.Id</td>
+            
             <td >@item.ShipMethodName</td>
            <td>@item.ShipCost</td>
-            <td>@item.IsActive</td>
-            <td>
-                    
-                    <div class="form-check form-switch " >
-
-                        <input 
-                        class="form-check-input" 
-                        type="checkbox" 
-                        data-id="@item.Id"
-                        
-                        @(item.IsActive ==true? "checked" : "")>
-                    </div>
-                   
-               
+            <td class="text-center">
+                <div class="form-check form-switch m-0 d-inline-block">
+                    <input class="form-check-input"
+                            type="checkbox"
+                            disabled
+                            checked="@(item.IsActive == true)" />
+                </div>
             </td>
+                   
 
             <td>
+                <div>
                 <div class="edit">
-                    編輯
+                            <a class="btn btn-warning " asp-controller="Ship" asp-action="Edit" asp-route-id="@item.Id">
+                                編輯
+                            </a>
+                </div>
+                <div class="delete">
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('確定要刪除這個物流選項嗎？');">
+                                    <button type="submit" class="btn btn-danger">刪除</button>
+                                </form>
+                  
                 </div>
 
+                        </div>
             </td>
 
                 
