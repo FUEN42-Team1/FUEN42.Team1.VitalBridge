@@ -5,6 +5,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
 	public class ProductListViewModel
 	{
+		public int Id { get; set; }
 
 		[Display(Name = "品名")]
 		public string Name { get; set; }
@@ -30,7 +31,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
 		{
 			return new ProductListViewModel
 			{
-
+				Id = p.Id,
 				Name = p.Name,
 				ItemNumber = p.ItemNumber,
 				Price = p.Price,

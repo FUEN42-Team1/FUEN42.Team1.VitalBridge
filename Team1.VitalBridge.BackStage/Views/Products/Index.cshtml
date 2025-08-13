@@ -1,11 +1,111 @@
 ﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ProductListViewModel>
 
 @{
-    ViewData["Title"] = "商品清單";
+    ViewData["Title"] = "商品管理";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="container mt-4">
+    <!-- 標題列 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold">商品管理</h3>
+    </div>
+    
 
+    <!-- 搜尋與篩選區 -->
+    <div class="card shadow-sm rounded-3 mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a class="btn btn-primary" asp-action="Create">新增商品</a>
+                <div class="d-flex justify-content-end mb-3 align-items-center">
+                    <span style="margin-right: 5px;">每頁</span>
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()" style="width: auto; display: inline-block;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                    <span style="margin-left: 5px;">筆</span>
+                </div>
+            </div>
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" name="keyword" class="form-control" placeholder="輸入商品名稱或關鍵字" aria-label="Search" />
+                        <button type="submit" class="btn btn-primary">搜尋</button>
+                    </div>
+                </div>
+                <div class="col-md-8 text-end">
+                    <select name="category" class="form-select" style="width: auto; display: inline-block; margin-left: 10px;">
+                        <option value="">全部分類</option>
+                        <option value="1">分類一</option>
+                        <option value="2">分類二</option>
+                    </select>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 商品資料表格 -->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table class="table table-hover table-bordered align-middle">
+                <thead class="table-primary text-white">
+                    <tr>
+                        @* <th>圖片</th> *@
+                        <th>名稱</th>
+                        <th>貨號</th>
+                        <th>價格</th>
+                        <th>庫存</th>
+                        <th>上架狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            @* <td><img src="@item.ImageUrl" class="img-fluid" style="max-height:50px;" /></td> *@
+                            
+                            <td>@item.Name</td>
+                            <td>@item.ItemNumber</td>
+                            <td>@item.Price.ToString("C")</td>
+                            <td>@item.Quantity</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @(item.IsActive ? "checked" : "")>
+                                </div>
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary me-1">編輯</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">刪除</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 分頁 -->
+    <div class="d-flex justify-content-end">
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled"><a class="page-link">上一頁</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">下一頁</a></li>
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+
+
+<!--自動產生的-->
+<!--
 <table class="table table-bordered table-hover">
     <thead class="table-light">
         <tr>
@@ -38,4 +138,4 @@
         }
     </tbody>
 </table>
-
+-->
