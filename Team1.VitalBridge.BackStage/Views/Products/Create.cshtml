@@ -1,0 +1,1110 @@
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.CreateProductViewModel
+
+@{
+    ViewData["Title"] = "新增商品";
+}
+
+<style>
+    .product-form-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+
+    .section-header {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #21AD5B;
+    }
+
+    .image-upload-container {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background: #fafafa;
+        transition: all 0.3s ease;
+        min-height: 200px;
+        position: relative;
+    }
+
+    .image-upload-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .image-upload-item {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .image-upload-item:hover {
+        border-color: #21AD5B;
+        background: #f0fff4;
+    }
+    
+    .image-preview {
+        width: 100%;
+        aspect-ratio: 1; /* 正方形 */
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        background: white;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 15px;
+    }
+    
+    .image-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .image-number {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+    }
+    
+    .image-remove {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #dc3545;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+    
+    .image-remove:hover {
+        background: #c82333;
+        transform: scale(1.1);
+    }
+    
+    .image-preview.has-image .image-remove {
+        display: flex;
+    }
+    
+    .main-image-label {
+        text-align: center;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        min-height: 20px; /* 確保有固定高度，即使沒有文字 */
+    }
+
+    @@keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .category-tree {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        background: #f8f9fa;
+    }
+
+    .category-item {
+        margin-bottom: 8px;
+    }
+
+    .category-item.level-0 {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .category-item.level-1 {
+        margin-left: 20px;
+        color: #666;
+    }
+
+    .category-item.level-1 input[type="checkbox"] {
+        margin-right: 8px;
+    }
+
+    .category-item.level-0.disabled {
+        color: #999;
+        font-style: italic;
+    }
+
+    .ship-method-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .ship-method-item:hover {
+        border-color: #21AD5B;
+        background: #f0fff4;
+    }
+
+    .ship-method-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .ship-method-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .ship-cost {
+        color: #21AD5B;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .ship-method-switch {
+        display: flex;
+        align-items: center;
+    }
+
+    /* 自定義 Switch 樣式 */
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        background-color: #e9ecef; /* 改為淺灰色背景 */
+        border: 1px solid #ced4da; /* 加上邊框 */
+        transition: all 0.3s ease;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #21AD5B;
+        border-color: #21AD5B;
+    }
+
+    .form-switch .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(33, 173, 91, 0.25);
+        border-color: #21AD5B;
+    }
+
+    .form-switch .form-check-input:not(:checked):hover {
+        background-color: #f8f9fa; /* hover 時更亮一點 */
+        border-color: #adb5bd;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-primary {
+        background-color: #21AD5B;
+        border-color: #21AD5B;
+        padding: 10px 30px;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background-color: #16763E;
+        border-color: #16763E;
+    }
+
+    .btn-secondary {
+        padding: 10px 30px;
+        font-weight: 500;
+    }
+
+    .upload-instruction {
+        color: #666;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .toast {
+        min-width: 300px;
+    }
+
+    /* 圖片上傳區域樣式 */
+    .main-upload-area {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 40px 20px;
+        text-align: center;
+        background: #fafafa;
+        margin-bottom: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .main-upload-area:hover {
+        border-color: #21AD5B;
+        background: #f0fff4;
+    }
+
+    .upload-icon {
+        font-size: 48px;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+
+    .main-upload-area.dragover .upload-icon {
+        color: #21AD5B;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="product-form-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">新增商品</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Products")">商品管理</a></li>
+                    <li class="breadcrumb-item active">新增商品</li>
+                </ol>
+            </nav>
+        </div>
+
+        <form asp-action="Create" method="post" id="productForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <!-- 基本資訊 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h5 class="section-header">基本資訊</h5>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label required-field">品名</label>
+                            <input asp-for="Name" class="form-control" placeholder="請輸入商品名稱" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ItemNumber" class="form-label required-field">貨號</label>
+                            <input asp-for="ItemNumber" class="form-control" placeholder="請輸入商品貨號" />
+                            <span asp-validation-for="ItemNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="Price" class="form-label required-field">價格</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">NT$</span>
+                                        <input asp-for="Price" class="form-control" placeholder="0" type="number" min="1" step="1" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label asp-for="Quantity" class="form-label required-field">庫存</label>
+                                    <input asp-for="Quantity" class="form-control" placeholder="0" type="number" min="0" />
+                                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Keypoint" class="form-label required-field">商品簡述</label>
+                            <input asp-for="Keypoint" class="form-control" placeholder="請輸入商品簡述（最多250字）" maxlength="250" />
+                            <span asp-validation-for="Keypoint" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- 類別選擇 -->
+                    <div class="mb-4">
+                        <h5 class="section-header">類別</h5>
+                        <div class="category-tree">
+                            <div id="categoryContainer">
+                                <!-- 類別選項將由 JavaScript 動態載入 -->
+                            </div>
+                        </div>
+                        <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 圖片上傳 -->
+            <div class="mb-4">
+                <h5 class="section-header">圖片</h5>
+                <p class="upload-instruction">建議尺寸 800x800px，支援 JPG、PNG 格式</p>
+                
+                <!-- 圖片網格 -->
+                <div class="image-upload-grid" id="imageGrid">
+                    <!-- 主圖 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label">主圖 *</div>
+                        <div class="image-preview empty" data-slot="0">
+                            <div class="image-number">1</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput1" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput1').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn1">上傳圖片</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 圖片2 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div> <!-- 空白標籤 -->
+                        <div class="image-preview empty" data-slot="1">
+                            <div class="image-number">2</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput2" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput2').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn2">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片3 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="2">
+                            <div class="image-number">3</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput3" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput3').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn3">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片4 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="3">
+                            <div class="image-number">4</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput4" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput4').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn4">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片5 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="4">
+                            <div class="image-number">5</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput5" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput5').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn5">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片6 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="5">
+                            <div class="image-number">6</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput6" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput6').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn6">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片7 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="6">
+                            <div class="image-number">7</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput7" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput7').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn7">上傳圖片</button>
+                        </div>
+                    </div>
+
+                    <!-- 圖片8 -->
+                    <div class="image-upload-item">
+                        <div class="main-image-label"></div>
+                        <div class="image-preview empty" data-slot="7">
+                            <div class="image-number">8</div>
+                            <button type="button" class="image-remove">&times;</button>
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="fileInput8" accept="image/*" style="display: none;" />
+                            <button type="button" class="btn btn-select" onclick="document.getElementById('fileInput8').click()">選擇檔案</button>
+                            <button type="button" class="btn btn-upload" id="uploadBtn8">上傳圖片</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 隱藏的圖片檔名輸入框 -->
+                <input asp-for="Image1FileName" type="hidden" />
+                <input asp-for="Image2FileName" type="hidden" />
+                <input asp-for="Image3FileName" type="hidden" />
+                <input asp-for="Image4FileName" type="hidden" />
+                <input asp-for="Image5FileName" type="hidden" />
+                <input asp-for="Image6FileName" type="hidden" />
+                <input asp-for="Image7FileName" type="hidden" />
+                <input asp-for="Image8FileName" type="hidden" />
+            </div>
+
+            <!-- 商品內容 -->
+            <div class="mb-4">
+                <h5 class="section-header">商品內容</h5>
+                <div class="mb-3">
+                    <label asp-for="ProductDescription" class="form-label required-field">商品描述</label>
+                    <textarea asp-for="ProductDescription" class="form-control" rows="8" placeholder="請輸入詳細的商品描述..."></textarea>
+                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- 運送方式 -->
+            <div class="mb-4">
+                <h5 class="section-header">運送方式</h5>
+                <div id="shipMethodContainer">
+                    @if (Model.Ships != null && Model.Ships.Any())
+                    {
+                        foreach (var ship in Model.Ships)
+                        {
+                            <div class="ship-method-item">
+                                <div class="ship-method-info">
+                                    <div class="ship-method-name">@ship.ShipMethodName</div>
+                                    <div class="ship-cost">NT$ @ship.ShipCost.ToString("N0")</div>
+                                </div>
+                                <div class="ship-method-switch">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input" name="SelectedShipIds" value="@ship.Id" 
+                                               id="ship_@ship.Id" @(Model.SelectedShipIds != null && Model.SelectedShipIds.Contains(ship.Id) ? "checked" : "") />
+                                        <label class="form-check-label" for="ship_@ship.Id"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted">暫無可用的運送方式</div>
+                    }
+                </div>
+                <span asp-validation-for="SelectedShipIds" class="text-danger"></span>
+            </div>
+
+            <!-- 上架狀態 -->
+            <div class="mb-4">
+                <h5 class="section-header">上架狀態</h5>
+                <div class="form-check form-switch">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveSwitch" />
+                    <label class="form-check-label" for="isActiveSwitch">
+                        <span id="statusText">上架中</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 操作按鈕 -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">取消</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">確定</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/UploadImage.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 初始化頁面
+            initializePage();
+            initializeImageUpload();
+            loadCategories();
+            // 移除 loadShipMethods() 因為現在直接從後端載入
+            
+            // 綁定事件
+            bindEvents();
+        });
+
+        // 初始化頁面
+        function initializePage() {
+            // 設定狀態切換文字
+            updateStatusText();
+            
+            // 價格輸入限制為整數
+            $('#Price').on('input', function() {
+                var value = $(this).val();
+                if (value.includes('.')) {
+                    $(this).val(Math.floor(value));
+                }
+            });
+        }
+
+        // 綁定事件
+        function bindEvents() {
+            // 狀態切換
+            $('#isActiveSwitch').change(updateStatusText);
+            
+            // 庫存和狀態聯動檢查
+            $('#Quantity, #isActiveSwitch').change(function() {
+                var quantity = parseInt($('#Quantity').val()) || 0;
+                var isActive = $('#isActiveSwitch').prop('checked');
+                
+                if (quantity === 0 && isActive) {
+                    showToast('警告', '庫存為0時建議不要上架商品', 'warning');
+                }
+            });
+
+            // 表單提交前驗證
+            $('#productForm').submit(function(e) {
+                if (!validateForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // 更新狀態文字
+        function updateStatusText() {
+            const isActive = $('#isActiveSwitch').prop('checked');
+            $('#statusText').text(isActive ? '上架中' : '已下架');
+        }
+
+        // 初始化圖片上傳功能
+        function initializeImageUpload() {
+            const fileInput = $('#imageFileInput');
+
+            // 點擊上傳區域觸發檔案選擇
+            $('#mainUploadArea').click(function() {
+                fileInput.removeAttr('data-target-slot');
+                fileInput.click();
+            });
+
+            // 點擊圖片槽位觸發檔案選擇
+            $('.image-slot').click(function() {
+                if (!$(this).hasClass('has-image')) {
+                    fileInput.attr('data-target-slot', $(this).data('slot'));
+                    fileInput.click();
+                }
+            });
+
+            // 檔案選擇處理
+            fileInput.change(function() {
+                const files = this.files;
+                const targetSlot = $(this).attr('data-target-slot');
+                
+                if (files.length > 0) {
+                    if (targetSlot !== undefined) {
+                        // 單個槽位上傳
+                        uploadImageToSlot(files[0], parseInt(targetSlot));
+                    } else {
+                        // 批量上傳到空槽位
+                        uploadMultipleImages(files);
+                    }
+                }
+                
+                // 清除選擇的檔案和目標槽位
+                $(this).val('');
+                $(this).removeAttr('data-target-slot');
+            });
+
+            // 移除圖片按鈕
+            $(document).on('click', '.remove-btn', function(e) {
+                e.stopPropagation();
+                const slot = $(this).closest('.image-slot');
+                removeImageFromSlot(slot.data('slot'));
+            });
+        }
+
+        // 設定拖拽功能
+        function setupDragAndDrop() {
+            const mainUploadArea = $('#mainUploadArea');
+            const imageSlots = $('.image-slot');
+
+            // 主上傳區域拖拽
+            mainUploadArea.on('dragover dragenter', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            mainUploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            mainUploadArea.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    uploadMultipleImages(files);
+                }
+            });
+
+            // 個別槽位拖拽
+            imageSlots.on('dragover dragenter', function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('has-image')) {
+                    $(this).addClass('dragover');
+                }
+            });
+
+            imageSlots.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            imageSlots.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                
+                if (!$(this).hasClass('has-image')) {
+                    const files = e.originalEvent.dataTransfer.files;
+                    if (files.length > 0) {
+                        uploadImageToSlot(files[0], $(this).data('slot'));
+                    }
+                }
+            });
+        }
+
+        // 上傳圖片到指定槽位
+        function uploadImageToSlot(file, slotIndex) {
+            if (!file.type.startsWith('image/')) {
+                showToast('錯誤', '請選擇圖片檔案', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 顯示上傳中狀態
+            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
+            slot.html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">上傳中...</span></div>');
+
+            // 使用你們的上傳 API
+            $.ajax({
+                url: '/api/UploadFile/Upload', // 根據你們的API路徑調整
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // 假設API返回 { fileName: "xxx.jpg", url: "..." }
+                    updateImageSlot(slotIndex, response.fileName, response.url || `/api/UploadFile/GetFile?fileName=${encodeURIComponent(response.fileName)}`);
+                    showToast('成功', '圖片上傳成功', 'success');
+                },
+                error: function() {
+                    restoreImageSlot(slotIndex);
+                    showToast('錯誤', '圖片上傳失敗，請重試', 'error');
+                }
+            });
+        }
+
+        // 批量上傳圖片
+        function uploadMultipleImages(files) {
+            let uploadCount = 0;
+            const maxImages = 8;
+
+            for (let i = 0; i < files.length && uploadCount < maxImages; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    // 找到第一個空的槽位
+                    const emptySlot = $('.image-slot:not(.has-image)').first();
+                    if (emptySlot.length > 0) {
+                        uploadImageToSlot(file, emptySlot.data('slot'));
+                        uploadCount++;
+                    }
+                }
+            }
+
+            if (uploadCount === 0) {
+                showToast('提示', '沒有可用的圖片槽位', 'info');
+            }
+        }
+
+        // 更新圖片槽位
+        function updateImageSlot(slotIndex, fileName, imageUrl) {
+            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
+            const slotLabel = slotIndex === 0 ? '主圖' : (slotIndex + 1).toString();
+            
+            slot.addClass('has-image').html(`
+                <div class="slot-label">${slotLabel}</div>
+                <img src="${imageUrl}" alt="商品圖片 ${slotIndex + 1}" />
+                <button type="button" class="remove-btn">&times;</button>
+            `);
+
+            // 更新對應的隱藏輸入框
+            $(`input[name="Image${slotIndex + 1}FileName"]`).val(fileName);
+        }
+
+        // 恢復圖片槽位
+        function restoreImageSlot(slotIndex) {
+            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
+            const slotLabel = slotIndex === 0 ? '主圖' : (slotIndex + 1).toString();
+            
+            slot.removeClass('has-image').html(`
+                <div class="slot-label">${slotLabel}</div>
+                <div class="placeholder-text">+</div>
+                <button type="button" class="remove-btn">&times;</button>
+            `);
+        }
+
+        // 移除圖片
+        function removeImageFromSlot(slotIndex) {
+            restoreImageSlot(slotIndex);
+            $(`input[name="Image${slotIndex + 1}FileName"]`).val('');
+        }
+
+        // 載入類別選項
+        function loadCategories() {
+            $.ajax({
+                url: '/api/ProductCategoryApi',
+                method: 'GET',
+                success: function(data) {
+                    renderCategories(data);
+                },
+                error: function() {
+                    $('#categoryContainer').html('<div class="text-danger">載入類別失敗</div>');
+                }
+            });
+        }
+
+        // 渲染類別選項
+        function renderCategories(categories) {
+            const container = $('#categoryContainer');
+            container.empty();
+
+            // 計算層級
+            const categoriesWithLevel = categories.map(category => ({
+                ...category,
+                level: category.fatherId != null ? 1 : 0
+            }));
+
+            // 取得根類別
+            const rootCategories = categoriesWithLevel.filter(c => c.level === 0);
+
+            rootCategories.forEach(parent => {
+                // 檢查是否有子類別
+                const children = categoriesWithLevel.filter(c => c.fatherId === parent.id);
+                const hasChildren = children.length > 0;
+
+                // 父類別 (不可選擇如果有子類別)
+                const parentHtml = `
+                    <div class="category-item level-0 ${hasChildren ? 'disabled' : ''}">
+                        ${hasChildren ? parent.name + ' (請選擇子類別)' : `
+                            <label>
+                                <input type="checkbox" name="SelectedCategoryIds" value="${parent.id}" 
+                                       ${hasChildren ? 'disabled' : ''} />
+                                ${parent.name}
+                            </label>
+                        `}
+                    </div>
+                `;
+                container.append(parentHtml);
+
+                // 子類別
+                children.forEach(child => {
+                    const childHtml = `
+                        <div class="category-item level-1">
+                            <label>
+                                <input type="checkbox" name="SelectedCategoryIds" value="${child.id}" />
+                                ${child.name}
+                            </label>
+                        </div>
+                    `;
+                    container.append(childHtml);
+                });
+            });
+        }
+
+        // 載入運送方式
+        function loadShipMethods() {
+            $.ajax({
+                url: '/api/Ships', // 根據你們的API路徑調整
+                method: 'GET',
+                success: function(data) {
+                    renderShipMethods(data);
+                },
+                error: function() {
+                    $('#shipMethodContainer').html('<div class="text-danger">載入運送方式失敗</div>');
+                }
+            });
+        }
+
+        // 渲染運送方式
+        function renderShipMethods(ships) {
+            const container = $('#shipMethodContainer');
+            container.empty();
+
+            ships.forEach(ship => {
+                if (ship.isActive) {
+                    const shipHtml = `
+                        <div class="ship-method-item">
+                            <label>
+                                <input type="checkbox" name="SelectedShipIds" value="${ship.id}" />
+                                ${ship.shipMethodName}
+                            </label>
+                            <span class="ship-cost">NT$ ${ship.shipCost}</span>
+                        </div>
+                    `;
+                    container.append(shipHtml);
+                }
+            });
+        }
+
+        // 表單驗證
+        function validateForm() {
+            let isValid = true;
+
+            // 檢查是否選擇了類別
+            if ($('input[name="SelectedCategoryIds"]:checked').length === 0) {
+                showToast('錯誤', '請至少選擇一個商品類別', 'error');
+                isValid = false;
+            }
+
+            // 檢查是否選擇了運送方式
+            if ($('input[name="SelectedShipIds"]:checked').length === 0) {
+                showToast('錯誤', '請至少選擇一個運送方式', 'error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 顯示 Toast 訊息
+        function showToast(title, message, type = 'info') {
+            const bgClass = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-info';
+
+            const toastHtml = `
+                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header ${bgClass} text-white">
+                            <strong class="me-auto">${title}</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+
+            // 3秒後自動關閉
+            setTimeout(() => {
+                toastContainer.remove();
+            }, 3000);
+        }
+
+        // 上傳圖片到指定槽位 (更新為使用你們的API)
+        function uploadImageToSlot(file, slotIndex) {
+            if (!file.type.startsWith('image/')) {
+                showToast('錯誤', '請選擇圖片檔案', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // 顯示上傳中狀態
+            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
+            const originalContent = slot.html();
+            slot.html('<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">上傳中...</span></div></div>');
+
+            // 使用你們的上傳 API
+            $.ajax({
+                url: '/api/UploadFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    // 根據你們的API回應格式調整
+                    const fileName = response.fileName;
+                    const imageUrl = `/api/UploadFile/GetFile?fileName=${encodeURIComponent(fileName)}`;
+                    updateImageSlot(slotIndex, fileName, imageUrl);
+                    showToast('成功', '圖片上傳成功', 'success');
+                },
+                error: function(xhr, status, error) {
+                    // 恢復原始內容
+                    slot.html(originalContent);
+                    console.error('圖片上傳失敗:', error);
+                    showToast('錯誤', '圖片上傳失敗，請重試', 'error');
+                }
+            });
+        }
+
+        // 載入運送方式 (使用正確的API路徑)
+        function loadShipMethods() {
+            // 模擬運送方式資料，你可以根據實際API調整
+            const mockShipData = [
+                { id: 1, shipMethodName: '宅配', shipCost: 100, isActive: true },
+                { id: 2, shipMethodName: '7-11 貨到付款', shipCost: 60, isActive: true },
+                { id: 3, shipMethodName: '7-11 純取貨', shipCost: 60, isActive: true }
+            ];
+            
+            renderShipMethods(mockShipData);
+            
+            // 如果有實際的運送方式API，取消註解並修改路徑
+            /*
+            $.ajax({
+                url: '/api/Ships', // 根據你們的API路徑調整
+                method: 'GET',
+                success: function(data) {
+                    renderShipMethods(data);
+                },
+                error: function() {
+                    $('#shipMethodContainer').html('<div class="text-danger">載入運送方式失敗</div>');
+                }
+            });
+            */
+        }
+
+        // 表單提交處理
+        $('#productForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                return;
+            }
+
+            // 收集選中的類別和運送方式
+            const selectedCategories = [];
+            $('input[name="SelectedCategoryIds"]:checked').each(function() {
+                selectedCategories.push(parseInt($(this).val()));
+            });
+
+            const selectedShips = [];
+            $('input[name="SelectedShipIds"]:checked').each(function() {
+                selectedShips.push(parseInt($(this).val()));
+            });
+
+            // 設定隱藏欄位值
+            if (selectedCategories.length > 0) {
+                // 為了配合後端模型綁定，需要建立多個隱藏欄位
+                selectedCategories.forEach((categoryId, index) => {
+                    if ($(`input[name="SelectedCategoryIds[${index}]"]`).length === 0) {
+                        $(this).append(`<input type="hidden" name="SelectedCategoryIds[${index}]" value="${categoryId}" />`);
+                    }
+                });
+            }
+
+            if (selectedShips.length > 0) {
+                selectedShips.forEach((shipId, index) => {
+                    if ($(`input[name="SelectedShipIds[${index}]"]`).length === 0) {
+                        $(this).append(`<input type="hidden" name="SelectedShipIds[${index}]" value="${shipId}" />`);
+                    }
+                });
+            }
+
+            // 顯示提交中狀態
+            const submitBtn = $('#submitBtn');
+            const originalText = submitBtn.text();
+            submitBtn.prop('disabled', true)
+                     .html('<span class="spinner-border spinner-border-sm me-2" role="status"></span>處理中...');
+
+            // 提交表單
+            this.submit();
+        });
+
+        // 價格輸入格式化
+        $('#Price').on('input', function() {
+            let value = $(this).val();
+            // 移除非數字字元
+            value = value.replace(/[^\d]/g, '');
+            $(this).val(value);
+        });
+
+        // 庫存輸入格式化
+        $('#Quantity').on('input', function() {
+            let value = $(this).val();
+            // 移除非數字字元
+            value = value.replace(/[^\d]/g, '');
+            $(this).val(value);
+        });
+
+        // 字數統計
+        $('#Keypoint').on('input', function() {
+            const maxLength = 250;
+            const currentLength = $(this).val().length;
+            const remaining = maxLength - currentLength;
+            
+            // 移除舊的字數提示
+            $(this).siblings('.char-count').remove();
+            
+            // 添加新的字數提示
+            $(this).after(`<small class="form-text text-muted char-count">${currentLength}/${maxLength} 字</small>`);
+            
+            if (remaining < 20) {
+                $(this).siblings('.char-count').removeClass('text-muted').addClass('text-warning');
+            }
+            if (remaining < 0) {
+                $(this).siblings('.char-count').removeClass('text-warning').addClass('text-danger');
+            }
+        });
+
+        // 觸發字數統計初始化
+        $('#Keypoint').trigger('input');
+   </script>
+   }

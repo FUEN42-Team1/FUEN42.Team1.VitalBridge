@@ -30,11 +30,39 @@ namespace Team1.VitalBridge.BackStage.Controllers
 		{
             var model = new CreateProductViewModel();
             await LoadCategoryOptions(model);
-            return View(model);
+            await LoadShipOptions(model); // 載入物流選項
+			return View(model);
         }
 
-        // 載入類別選項
-        private async Task LoadCategoryOptions(CreateProductViewModel model)
+		// 載入物流選項
+		// 這邊會載入所有啟用的物流方式，並將其加入到 CreateProductViewModel 的 Ships 屬性中
+		private async Task LoadShipOptions(CreateProductViewModel vm)
+		{
+			// 取得啟用的物流選項
+            var ships = await _context.Ships
+                .Where(s => s.IsActive == true) // 只選取啟用的物流方式
+				.OrderBy(s => s.ShipMethodName)
+                .ToListAsync();
+
+            // 判斷每個物流選項是否可選擇
+            foreach (var ship in ships) { 
+                
+				// 將物流選項加入到模型的 Ships 屬性中
+                vm.Ships.Add(new ShipSelectionItemViewModel
+                {
+                    Id = ship.Id,
+                    ShipMethodName = ship.ShipMethodName,
+                    ShipCost = ship.ShipCost,
+                    IsActive = ship.IsActive ?? true  
+                });
+
+
+			}
+
+		}
+
+		// 載入類別選項
+		private async Task LoadCategoryOptions(CreateProductViewModel model)
         {
             // 1. 取得所有啟用的類別
             var categories = await _context.Categories
@@ -64,6 +92,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
             }
 
         }
+
+        
+        
 
         // 新增產品
         // POST: Products/Create
@@ -109,23 +140,48 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     bool hasChildren = allCategories.Any(c => c.FatherId == categoryId);
                     if (hasChildren)
                     {
-                        ModelState.AddModelError("SelectedCategoryIds", "不能選擇父類別")
+                        ModelState.AddModelError("SelectedCategoryIds", "不能選擇父類別");
                             break;
                     }
 
                 }
             }
 
+            // 3. 物流選項驗證
+            // 3.1 檢查是否有選擇至少一個物流方式
+            if (vm.SelectedCategoryIds == null || !vm.SelectedCategoryIds.Any())
+            {
+
+                ModelState.AddModelError("SelectedShipIds", "請至少選擇一個物流方式");
+            }
+            else {
+				// 3.2 檢查選中物流方式的有效性
+                 var activeShips = await _context.Ships
+                    .Where(s => s.IsActive == true)
+                    .ToListAsync();
+
+                foreach(var shipId in vm.SelectedShipIds)
+                {
+					var ship = activeShips.FirstOrDefault(s => s.Id == shipId);
+
+					if (ship == null)
+					{
+						ModelState.AddModelError("SelectedShipIds", "選擇的物流方式不存在或已停用");
+						break;
+					}
+				}
+			}
 
 
 
-            // 3.業務邏輯驗證
 
-            // 3.1 檢查貨號是否重複
+			// 4.業務邏輯驗證
 
-            // 檢查商品貨號是否已存在
-            bool exists = _context.Products
-                    .Any(p => p.ItemNumber == vm.ItemNumber);
+			// 4.1 檢查貨號是否重複
+
+			// 檢查商品貨號是否已存在
+			bool exists = _context.Products
+                        .Any(p => p.ItemNumber == vm.ItemNumber);
             // 如果已存在，則返回錯誤
             if (exists)
             {
@@ -134,21 +190,27 @@ namespace Team1.VitalBridge.BackStage.Controllers
             }
 
 
-            // 3.2 檢查價格是否為正數且大於0
-            if (vm.Price <= 0)
-            {
-                ModelState.AddModelError(nameof(vm.Price), "價格必須大於0");
-            }
+			// 4.2 檢查價格是否為正數且大於0
+
+			if (vm.Price <= 0)
+			{
+				ModelState.AddModelError(nameof(vm.Price), "價格必須大於0");
+			}
+			// 檢查是否為正整數
+			if (vm.Price % 1 != 0)
+			{
+				ModelState.AddModelError(nameof(vm.Price), "台幣價格必須是整數");
+			}
 
 
 
-            // 3.3 檢查庫存為0時不能啟用
-            if (vm.Quantity == 0 && vm.IsActive)
+			// 4.3 檢查庫存為0時不能啟用
+			if (vm.Quantity == 0 && vm.IsActive)
             {
                 ModelState.AddModelError(nameof(vm.Quantity), "庫存為0時不能啟用商品");
             }
 
-            // 4. 如果有任何驗證錯誤，則返回表單頁面
+            // 5. 如果有任何驗證錯誤，則返回表單頁面
 
             if (!ModelState.IsValid)
             {
@@ -157,9 +219,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return View(vm);
             }
 
-            // 5. 驗證通過，開始建立資料
+            // 6. 驗證通過，開始建立資料
 
-            // 5.1 建立商品實體
+            // 建立商品實體
             var product = new Product
             {
                 ItemNumber = vm.ItemNumber,
@@ -170,12 +232,12 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Quantity = vm.Quantity,
             };
 
-            // 5.1 建立商品
+            // 6.1 建立商品
             _context.Products.AddAsync(product);
             await _context.SaveChangesAsync(); // 儲存商品以獲取 Id
 
 
-            // 5.2 處理圖片
+            // 6.2 處理圖片
             var imageFileNames = new[]
             {
                 // 宣告圖片檔案名稱，在 CreateProductViewModel 中已經定義了這些屬性
@@ -212,7 +274,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     }
                 }
             }
-            // 5.3 建立商品類別關聯
+            // 6.3 建立商品類別關聯
             if(vm.SelectedCategoryIds?.Any() == true)
             {
                 //categoryId 是選中的類別Id，從 CreateProductViewModel 中取得
@@ -227,8 +289,25 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 }
             }
 
-            // 6. 儲存變更  
-            await _context.SaveChangesAsync();
+            // 6.4 建立商品物流關聯
+            if (vm.SelectedShipIds?.Any() == true)
+            {
+				// shipId 是選中的物流方式Id，從 CreateProductViewModel 中取得
+				foreach (var shipId in vm.SelectedShipIds)
+                {
+					// 建立商品物流關聯
+					// ProductShip 是一個中介表，用來連接 Product 和 Ship
+					var productShip = new ProductShip
+                    {
+                        ProductId = product.Id,
+                        ShipId = shipId
+                    };
+                    _context.ProductShips.Add(productShip);
+                }
+			}
+
+			// 7. 儲存變更  
+			await _context.SaveChangesAsync();
 
             // 7. 成功後導向首頁
 

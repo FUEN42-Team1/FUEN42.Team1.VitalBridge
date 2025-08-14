@@ -26,7 +26,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string ProductDescription { get; set; }
 
         [Display(Name = "價格")]
-        [Required(ErrorMessage = "請輸入{0}")]
+		[Range(1, 999999, ErrorMessage = "價格必須是正整數")]
+		[Required(ErrorMessage = "請輸入{0}")]
         public decimal Price { get; set; }
 
         [Display(Name = "庫存")]
@@ -53,5 +54,14 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         // 給前端顯示的類別選項
         public List<CategorySelectionItemViewModel> Categories { get; set; } = new List<CategorySelectionItemViewModel>();
 
-    }
+
+		// 處理物流選項
+		// 選中的物流方式ID
+		public List<int> SelectedShipIds { get; set; } = new List<int>();
+
+        // 給前端顯示的選項
+        public  List<ShipSelectionItemViewModel> Ships {  get; set; }  =new List<ShipSelectionItemViewModel>();
+
+
+	}
 }
