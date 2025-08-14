@@ -1,0 +1,126 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.Institutions.InstitutionClaimListItemVM>
+@using System.Text.Encodings.Web
+@using System.Text.RegularExpressions
+@{
+    Layout = "_LayoutAuth";
+    var q = (string)(ViewBag.Q ?? "");
+    var count = Model?.Count() ?? 0;
+}
+
+@section Styles {
+    <style>
+        html, body {
+            background-color: #f8f9fa !important;
+        }
+
+        main, .content, .content-wrapper, .app-content, .container-xxl {
+            background-color: transparent !important;
+        }
+
+        .result-count {
+            color: #6c757d;
+            font-size: .9rem;
+        }
+
+        mark {
+            padding: 0 .1em;
+            border-radius: .125rem;
+        }
+    </style>
+}
+
+@functions {
+    // 安全高亮：先 HTML 編碼，再以不分大小寫包 <mark>
+    public static string Highlight(string? text, string? q)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        if (string.IsNullOrWhiteSpace(q)) return HtmlEncoder.Default.Encode(text);
+        var encoded = HtmlEncoder.Default.Encode(text);
+        var pattern = Regex.Escape(q.Trim());
+        return Regex.Replace(encoded, pattern, m => $"<mark>{m.Value}</mark>", RegexOptions.IgnoreCase);
+    }
+
+    string StatusText(string s) => s switch
+    {
+        "Approved" => "已審核",
+        "Pending" => "審核中",
+        "Rejected" => "已駁回",
+        _ => "—"
+    };
+    string StatusClass(string s) => s switch
+    {
+        "Approved" => "bg-success",
+        "Pending" => "bg-warning text-dark",
+        "Rejected" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="container-xxl py-4">
+    <div class="d-flex align-items-end justify-content-between mb-3">
+        <h3 class="mb-0">可認領的機構</h3>
+        <div class="result-count">@count 筆</div>
+    </div>
+
+    <!-- 搜尋列（GET，同頁刷新） -->
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-sm-8 col-md-6">
+            <input type="text" class="form-control" name="q" value="@q" placeholder="搜尋機構名稱或代碼">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">搜尋</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(q))
+        {
+            <div class="col-auto">
+                <a class="btn btn-outline-secondary" href="@Url.Action("SearchList")">清除</a>
+            </div>
+        }
+    </form>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-light border">
+            查無符合條件的機構。您可以
+            <a asp-controller="InstitutionAuth" asp-action="Register">申請機構帳號</a>。
+        </div>
+    }
+    else
+    {
+        @foreach (var x in Model)
+        {
+            <div class="card mb-2 shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <strong class="h5 mb-0">@Html.Raw(Highlight(x.Name, q))</strong>
+                            <span class="badge @StatusClass(x.Status)">@StatusText(x.Status)</span>
+                            @if (x.IsPhysicalCheck)
+                            {
+                                <span class="badge bg-info">已實查</span>
+                            }
+                            <span class="badge bg-primary">可認領</span>
+                        </div>
+
+                        <div class="text-muted mt-1">
+                            <span class="me-3">代碼：@Html.Raw(Highlight(x.InstitutionCode, q))</span>
+                            <span>@Html.Raw(Highlight(x.AddressDisplay, q))</span>
+                        </div>
+                        <div class="small text-muted mt-1">
+                            @if (!string.IsNullOrWhiteSpace(x.Phone))
+                            {
+                                <span class="me-3">電話：@x.Phone</span>
+                            }
+                            <span>最近更新：@x.UpdatedAt.ToString("yyyy/MM/dd")</span>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <a asp-action="Start"
+                           asp-route-institutionCode="@x.InstitutionCode"
+                           class="btn btn-outline-primary">認領</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
