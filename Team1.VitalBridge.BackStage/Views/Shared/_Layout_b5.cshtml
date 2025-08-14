@@ -180,20 +180,62 @@
                                 </a>
                             </div><!--//app-utility-item-->
 
-                            <div class="app-utility-item app-user-dropdown dropdown">
-                                <a class="dropdown-toggle" id="user-dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                                   role="button" aria-expanded="false">
-                                    <img src="~/portal-theme-bs5/assets/images/user.png" alt="user profile">
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="user-dropdown-toggle">
-                                    <li><a class="dropdown-item" href="account.html">Account</a></li>
-                                    <li><a class="dropdown-item" href="settings.html">Settings</a></li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li><a class="dropdown-item" href="login.html">Log Out</a></li>
-                                </ul>
-                            </div><!--//app-user-dropdown-->
+                            @* <div class="app-utility-item app-user-dropdown dropdown"> *@
+                            @*     <a class="dropdown-toggle" id="user-dropdown-toggle" data-bs-toggle="dropdown" href="#" *@
+                            @*        role="button" aria-expanded="false"> *@
+                            @*         <img src="~/portal-theme-bs5/assets/images/user.png" alt="user profile"> *@
+                            @*     </a> *@
+                            @*     <ul class="dropdown-menu" aria-labelledby="user-dropdown-toggle"> *@
+                            @*         <li><a class="dropdown-item" href="account.html">Account</a></li> *@
+                            @*         <li><a class="dropdown-item" href="settings.html">Settings</a></li> *@
+                            @*         <li> *@
+                            @*             <hr class="dropdown-divider"> *@
+                            @*         </li> *@
+                            @*         <li><a class="dropdown-item" href="login.html">Log Out</a></li> *@
+                            @*     </ul> *@
+                            @* </div><!--//app-user-dropdown--> *@
+
+
+
+                            @{
+                                // 取得目前 URL Path
+                                var path = Context.Request.Path.ToString();
+                                // 判斷是否為管理員後台
+                                bool isAdminPortal = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
+                                // 對應各自的 Auth Controller
+                                var authController = isAdminPortal ? "AdminAuth" : "InstitutionAuth";
+                                // 產生登入/登出網址
+                                var loginUrl = Url.Action("Login", authController);
+                                var logoutUrl = Url.Action("Logout", authController);
+                            }
+
+                            @if (User?.Identity?.IsAuthenticated ?? false)
+                            {
+                                <!-- 已登入：登出 -->
+                                <div class="app-utility-item">
+                                    <form action="@logoutUrl" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" title="登出"
+                                                style="background:none;border:none;padding:0;cursor:pointer;font-size:0.9rem;color:inherit;">
+                                            登出
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- 未登入：登入 -->
+                                <div class="app-utility-item">
+                                    <a href="@loginUrl" title="登入"
+                                       style="font-size:0.9rem;color:inherit;text-decoration:none;">
+                                        登入
+                                    </a>
+                                </div>
+                            }
+
+
+
+
                         </div><!--//app-utilities-->
                     </div><!--//row-->
                 </div><!--//app-header-content-->
@@ -266,10 +308,10 @@
                                         <a class="submenu-link" asp-area="" asp-controller="AdminRoles"
                                            asp-action="Index">身分權限管理</a>
                                     </li>
-                                    <li class="submenu-item">
-                                        <a class="submenu-link" asp-area="" asp-controller="AdminAuth"
-                                           asp-action="Login">登入</a>
-                                    </li>
+                                    @* <li class="submenu-item"> *@
+                                    @*     <a class="submenu-link" asp-area="" asp-controller="AdminAuth" *@
+                                    @*        asp-action="Login">登入</a> *@
+                                    @* </li> *@
                                 </ul>
                             </div>
                         </li><!--會員管理 END-->

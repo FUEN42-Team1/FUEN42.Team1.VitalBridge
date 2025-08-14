@@ -315,6 +315,16 @@ namespace Team1.VitalBridge.BackStage.Controllers.Institutions
             return View();
         }
 
+        //登出
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            // 清除 JWT Cookie
+            _jwtService.ClearTokenCookie(Response, "institution_auth_token", "/Institution");
+            // 重定向到登入頁面
+            return RedirectToAction("Login", "InstitutionAuth");
+        }
 
 
 

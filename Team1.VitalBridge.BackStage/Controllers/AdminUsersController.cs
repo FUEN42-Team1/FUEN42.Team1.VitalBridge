@@ -13,6 +13,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 {
 
     [Authorize(AuthenticationSchemes = "AdminJwtScheme")]
+    
     [Route("Admin/[controller]/[action]")]
 
     public class AdminUsersController : Controller

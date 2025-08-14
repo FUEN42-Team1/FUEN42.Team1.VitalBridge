@@ -87,11 +87,13 @@
                         <div class="card-header bg-white text-center py-3 border-bottom border-muted">
                             <h3 class="mb-0 fw-semibold text-dark">@ViewData["Title"]</h3>
                         </div>
+                       
+
                         <div class="card-body p-4">
-                            <form asp-action="Login" method="post">
-                                @* <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3 rounded-3" role="alert" style="display: none;"></div> *@
+                            <form asp-action="Login" method="post" novalidate>
                                 <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3 rounded-3" role="alert"></div>
 
+                                <!-- 登入表單 -->
                                 <div class="mb-3">
                                     <label asp-for="InstitutionCode" class="form-label text-dark fw-medium"></label>
                                     <div class="input-group">
@@ -119,15 +121,39 @@
                                     <span asp-validation-for="Password" class="text-danger mt-1 d-block"></span>
                                 </div>
 
-                                <div class="d-grid mb-3">
+                                <div class="d-grid mb-2">
                                     <button type="submit" class="btn btn-primary fw-semibold py-2 rounded-3 transition-smooth">登入</button>
                                 </div>
+                                <div class="text-end mb-3">
+                                    <a asp-action="ForgotPassword" class="small text-muted">忘記密碼？</a>
+                                </div>
 
-                                <div class="d-grid">
-                                    <a asp-action="Register" class="btn btn-secondary fw-semibold py-2 rounded-3 transition-smooth">申請機構帳號</a>
+                                <!-- 分隔線：其他入口 -->
+                                <div class="d-flex align-items-center my-3">
+                                    <hr class="flex-grow-1">
+                                    <span class="px-2 text-muted small">或</span>
+                                    <hr class="flex-grow-1">
+                                </div>
+
+                                <!-- 認領 / 申請 導流 -->
+                                <div class="d-grid mb-2">
+                                    <!-- 建議路由：/InstitutionClaim/Start（GET） -->
+                                    <a asp-controller="InstitutionClaim" asp-action="Start"
+                                       class="btn btn-outline-primary fw-semibold py-2 rounded-3 transition-smooth">
+                                        我是此機構的管理者（認領）
+                                    </a>
+                                </div>
+
+                                <div class="text-center">
+                                    <small class="text-muted d-block mb-1">
+                                        若平台已有您的機構資料，請先認領以避免重複建立。
+                                    </small>
+                                    <!-- 申請帳號：仍保留，但弱化為文字連結 -->
+                                    <a asp-action="Register" class="small">找不到我的機構？改用申請機構帳號</a>
                                 </div>
                             </form>
                         </div>
+
                     </div>
                 </div>
             </div>
