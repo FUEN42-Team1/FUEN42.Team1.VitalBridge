@@ -79,9 +79,10 @@
             <a asp-action="Index" asp-controller="AdminUsers" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> 返回清單
             </a>
-            <a asp-action="Edit" asp-controller="AdminUsers" asp-route-userId="@Model.UserId" class="btn btn-primary">
-                <i class="bi bi-pencil-square"></i> 編輯
-            </a>
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editAdminModal">
+                <i class="bi bi-pencil-square me-1"></i> 編輯
+            </button>
+
         </div>
     </div>
 
@@ -263,4 +264,57 @@
             });
         });
     </script>
+
+
 }
+
+<button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editAdminModal">
+    <i class="bi bi-pencil-square me-1"></i> 編輯
+</button>
+
+<div class="modal fade" id="editAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">編輯基本資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("_AdminEditForm",
+                         new Team1.VitalBridge.BackStage.Models.ViewModels.Admin.AdminEditVM
+                {
+                    UserId = Model.UserId,
+                    Name = Model.Name,
+                    Phone = Model.Phone,
+                    Note = Model.Note
+                })
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+    (function () {
+      const shouldOpen =
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                 (TempData["OpenEditModal"]?.ToString() == "1")));
+
+      if (shouldOpen) {
+        const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+        modal.show();
+
+        const nameVal  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Name"] ?? ""));
+        const phoneVal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Phone"] ?? ""));
+        const noteVal  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Note"] ?? ""));
+
+        const form = document.getElementById('admin-edit-form');
+        if (form) {
+          if (nameVal)  form.querySelector('input[name="Name"]').value = nameVal;
+          if (phoneVal) form.querySelector('input[name="Phone"]').value = phoneVal;
+          if (noteVal)  form.querySelector('textarea[name="Note"]').value = noteVal;
+        }
+      }
+    })();
+</script>

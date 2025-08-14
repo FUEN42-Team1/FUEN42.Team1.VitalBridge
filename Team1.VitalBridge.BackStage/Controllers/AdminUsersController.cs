@@ -214,17 +214,56 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
+
+
         [HttpGet]
-        public async Task<IActionResult> Edit(string userId) {
-
-
-
-
-
-
+        public async Task<IActionResult> Edit(string userId)
+        {
 
             return View();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> Edit(AdminEditVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                // 開窗旗標與回填
+                TempData["OpenEditModal"] = "1";
+                TempData["EditVM_Name"] = vm.Name ?? "";
+                TempData["EditVM_Phone"] = vm.Phone ?? "";
+                TempData["EditVM_Note"] = vm.Note ?? "";
+
+                // （除錯期可把錯誤也帶回頁面看）
+                // TempData["Edit_Errors"] = string.Join(" | ",
+                //     ModelState.Where(x => x.Value?.Errors.Count > 0)
+                //               .Select(x => $"{x.Key}:{string.Join(",", x.Value!.Errors.Select(e => e.ErrorMessage))}"));
+
+                return RedirectToAction(nameof(Details), new { userId = vm.UserId });
+            }
+
+            var user = await _context.Users
+                .Include(u => u.AdminProfile)
+                .FirstOrDefaultAsync(u => u.UserId == vm.UserId && u.AccountType == "Admin");
+            if (user == null) return NotFound();
+
+            user.Name = vm.Name.Trim();
+            user.Phone = string.IsNullOrWhiteSpace(vm.Phone) ? null : vm.Phone.Trim();
+
+            if (user.AdminProfile == null)
+                user.AdminProfile = new AdminProfile { UserId = user.Id };
+            user.AdminProfile.Note = string.IsNullOrWhiteSpace(vm.Note) ? null : vm.Note.Trim();
+
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "已更新管理員基本資料。";
+            return RedirectToAction(nameof(Details), new { userId = vm.UserId });
+        }
+
+
 
 
 
