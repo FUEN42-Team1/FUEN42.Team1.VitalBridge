@@ -113,7 +113,8 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             return true;
         }
 
-		public async Task<int?> GetFileIdByFileNameAsync(string fileName)
+        // 從FileName 取得圖片Id
+        public async Task<int?> GetFileIdByFileNameAsync(string fileName)
 		{
 
 			// 如果 FileName 為空 則返回 null

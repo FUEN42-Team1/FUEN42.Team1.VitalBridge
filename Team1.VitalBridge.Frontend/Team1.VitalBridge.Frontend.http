@@ -1,0 +1,6 @@
+@Team1.VitalBridge.Frontend_HostAddress = http://localhost:5232
+
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
