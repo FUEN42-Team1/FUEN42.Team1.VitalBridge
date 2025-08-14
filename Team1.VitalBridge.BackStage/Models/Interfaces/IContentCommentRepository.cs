@@ -9,7 +9,7 @@ namespace Team1.VitalBridge.BackStage.Models.Interfaces
         Task<IEnumerable<Comment>> GetAllIncludeAsync();
         Task<Comment?> GetByIdAsync(int id);
         Task AddAsync(Comment contentComment);
-        Task UpdateAsync(Comment contentComment);
+        Task UpdateAsync(Comment existingComment);
         Task DeleteAsync(int id);
         Task<IEnumerable<Comment>> GetByArticleIdAsync(int articleId);
     }

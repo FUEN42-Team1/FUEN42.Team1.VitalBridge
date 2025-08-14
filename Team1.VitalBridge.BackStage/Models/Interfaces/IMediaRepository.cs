@@ -9,6 +9,7 @@ namespace Team1.VitalBridge.BackStage.Models.Interfaces
         Task AddAsync(Media media);
         Task UpdateAsync(Media media);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Media?>> GetByContentIdAsync(int contentId);
         Task<IEnumerable<Media>> GetByTypeAsync(string type);
 
     }

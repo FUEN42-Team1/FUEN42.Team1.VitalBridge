@@ -74,18 +74,12 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             return comment;
         }
 
-        public async Task UpdateAsync(Comment contentComment)
+        public async Task UpdateAsync(Comment existingComment)
         {
-            if (contentComment == null)
-            {
-                throw new ArgumentNullException(nameof(contentComment), "Content comment cannot be null");
-            }
-            var existingComment = await _context.Comments.FindAsync(contentComment.Id);
             if (existingComment == null)
             {
-                throw new KeyNotFoundException($"Comment with ID {contentComment.Id} not found.");
+                throw new KeyNotFoundException($"Comment with ID {existingComment.Id} not found.");
             }
-            _context.Entry(existingComment).CurrentValues.SetValues(contentComment);
             await _context.SaveChangesAsync();
         }
     }
