@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "管理員詳細資料";
 
-    // 狀態外觀設定（可依你的實際狀態字串再擴充）
+    // ===== 顯示字串與徽章樣式 =====
     string status = (Model.Status ?? "").Trim();
     string statusText = status switch
     {
@@ -22,6 +22,7 @@
         _ => "badge bg-light text-dark"
     };
 
+    // 是否鎖定（以 UTC 判斷；若你存本地時間，可以改用 DateTime.Now）
     bool isLocked = Model.LockedUntil.HasValue && Model.LockedUntil.Value > DateTime.UtcNow;
     string lockedBadge = isLocked ? "badge bg-danger" : "badge bg-info";
     string lockedText = Model.LockedUntil.HasValue
@@ -34,9 +35,38 @@
     string emailText = string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email;
 
     string fmt(DateTime? dt) => dt.HasValue ? dt.Value.ToString("yyyy/MM/dd HH:mm") : "—";
+
+    int failedCount = Model.FailedLoginCount ?? 0;
+    string lockedUntilText = Model.LockedUntil.HasValue
+        ? Model.LockedUntil.Value.ToString("yyyy/MM/dd HH:mm")
+        : "—";
 }
 
 <div class="container-xxl py-4">
+
+    @* ===== TempData 訊息區（可選） ===== *@
+    @if (TempData["Success"] is string s && !string.IsNullOrWhiteSpace(s))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @s
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Info"] is string i && !string.IsNullOrWhiteSpace(i))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @i
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] is string e && !string.IsNullOrWhiteSpace(e))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @e
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- 頁首與動作 -->
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
@@ -78,7 +108,10 @@
                             <span id="emailText">@emailText</span>
                             @if (!string.IsNullOrWhiteSpace(Model.Email))
                             {
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-clipboard="#emailText">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-clipboard="#emailText"
+                                        aria-label="複製 Email">
                                     複製
                                 </button>
                             }
@@ -90,7 +123,6 @@
                         <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Status)</dt>
                         <dd class="col-sm-9 d-flex align-items-center gap-2">
                             <span class="@statusClass">@statusText</span>
-                            @* 顯示原始狀態字串（debug/查核用），不要可刪 *@
                             <small class="text-muted">(@(string.IsNullOrWhiteSpace(Model.Status) ? "—" : Model.Status))</small>
                         </dd>
 
@@ -104,20 +136,50 @@
         <!-- 使用狀態 -->
         <div class="col-12 col-lg-5">
             <div class="card shadow-sm h-100">
-                <div class="card-header bg-body">
+                <div class="card-header bg-body d-flex align-items-center justify-content-between">
                     <span class="fw-semibold">使用狀態</span>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @if (isLocked)
+                        {
+                            @* <span class="badge bg-danger">已鎖定</span> *@
+                            <form asp-action="ResetLock"
+                                  asp-controller="AdminUsers"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('確定要解除鎖定並清除累計登入失敗次數嗎？');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@Model.UserId" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-unlock"></i> 解除鎖定
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            @* <span class="badge bg-success">未鎖定</span> *@
+                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="目前未鎖定">
+                                <i class="bi bi-unlock"></i> 解除鎖定
+                            </button>
+                        }
+                    </div>
                 </div>
+
                 <div class="card-body">
                     <div class="row gy-2">
                         <div class="col-6">
                             <div class="small text-muted">@Html.DisplayNameFor(m => m.FailedLoginCount)</div>
-                            <div class="fs-5">
-                                @((Model.FailedLoginCount ?? 0).ToString())
-                            </div>
+                            <div class="fs-5">@failedCount</div>
                         </div>
                         <div class="col-6">
                             <div class="small text-muted">@Html.DisplayNameFor(m => m.LockedUntil)</div>
-                            <div>@(Model.LockedUntil.HasValue ? Model.LockedUntil.Value.ToString("yyyy/MM/dd HH:mm") : "—")</div>
+                            <div>
+                                @lockedUntilText
+                                @if (isLocked)
+                                {
+                                    <span class="text-muted small ms-1">(鎖定中)</span>
+                                }
+                            </div>
                         </div>
                         <div class="col-6">
                             <div class="small text-muted">@Html.DisplayNameFor(m => m.LastLoginAt)</div>
@@ -127,9 +189,10 @@
                             <div class="small text-muted">@Html.DisplayNameFor(m => m.LastAdminActionAt)</div>
                             <div>@fmt(Model.LastAdminActionAt)</div>
                         </div>
-
                     </div>
+
                     <hr />
+
                     <div class="row gy-2">
                         <div class="col-6">
                             <div class="small text-muted">@Html.DisplayNameFor(m => m.CreatedAt)</div>
@@ -182,18 +245,20 @@
 
 @section Scripts {
     <script>
-        // 簡易複製按鈕（不依賴外部套件）
+        // 複製按鈕（不依賴外部套件）
         document.querySelectorAll('[data-clipboard]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const sel = btn.getAttribute('data-clipboard');
                 const el = document.querySelector(sel);
-                const text = el ? el.textContent.trim() : '';
+                const text = el ? (el.textContent || '').trim() : '';
                 if (!text) return;
 
                 navigator.clipboard.writeText(text).then(() => {
                     const original = btn.textContent;
                     btn.textContent = '已複製！';
                     setTimeout(() => btn.textContent = original, 1200);
+                }).catch(() => {
+                    alert('複製失敗，請手動選取。');
                 });
             });
         });

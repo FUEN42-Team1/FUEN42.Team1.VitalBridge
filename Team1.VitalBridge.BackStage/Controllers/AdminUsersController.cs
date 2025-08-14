@@ -52,6 +52,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     Status = u.Status,
                     Note = u.AdminProfile != null ? u.AdminProfile.Note : null,
                     LastLoginAt = u.LastLoginAt,
+                    LockedUntil = u.LockedUntil,
                     LastAdminActionAt = u.AdminProfile != null
                                         ? u.AdminProfile.LastAdminActionAt
                                         : null,
@@ -61,6 +62,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                             .Select(ur => ur.Role.Name)
                             .ToArray()
                         : Array.Empty<string>()
+
                 })
                 .OrderByDescending(x => x.LastAdminActionAt ?? x.LastLoginAt)
                 .ToListAsync();
@@ -211,6 +213,21 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(string userId) {
+
+
+
+
+
+
+
+            return View();
+        }
+
+
+
+
 
 
 
@@ -314,7 +331,33 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
+        //重設帳號鎖定
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetLock(string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId && u.AccountType == "Admin");
+            if (user == null) return NotFound();
 
+            // 若已經沒鎖，直接回到詳細頁
+            if (!user.LockedUntil.HasValue || user.LockedUntil <= DateTime.UtcNow)
+            {
+                TempData["Info"] = "帳號目前未鎖定，不需解鎖。";
+                return RedirectToAction("Details", new { AdminUserId = userId });
+            }
+
+            user.FailedLoginCount = 0;
+            user.LockedUntil = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            // 紀錄稽核軌跡（建議）
+            //_audit.Log(User, "AdminUserUnlock", new { TargetUserId = user.UserId });
+
+            TempData["Success"] = "已解除鎖定並清除累計登入失敗次數。";
+            return RedirectToAction("Details", new { userId = userId });
+        }
 
 
 

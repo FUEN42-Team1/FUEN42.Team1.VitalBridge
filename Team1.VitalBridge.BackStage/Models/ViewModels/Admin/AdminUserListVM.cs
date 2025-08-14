@@ -32,5 +32,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels.Admin
         [Display(Name = "身分")]
         public string[] Roles { get; set; }
 
+        [Display(Name = "解鎖時間")]
+        public DateTime? LockedUntil { get; set; }
+
     }
 }

@@ -113,7 +113,21 @@
                             <td class="ellipsis-1" title="@rolesText">@rolesText</td>
 
                             <td>
-                                <span class="badge @StatusBadgeClass(x.Status)">@StatusText(x.Status)</span>
+                                @{
+                                    var statusText = StatusText(x.Status);
+                                    var statusClass = StatusBadgeClass(x.Status);
+
+                                    bool isLocked = x.LockedUntil.HasValue && x.LockedUntil.Value > DateTime.UtcNow;
+                                }
+
+                                <span class="badge @statusClass">@statusText</span>
+
+                                @if (isLocked)
+                                {
+                                    <span class="badge bg-danger ms-1">
+                                        <i class="bi bi-lock-fill"></i> 已鎖定
+                                    </span>
+                                }
                             </td>
 
                             <!-- 註記：單行省略號 -->
