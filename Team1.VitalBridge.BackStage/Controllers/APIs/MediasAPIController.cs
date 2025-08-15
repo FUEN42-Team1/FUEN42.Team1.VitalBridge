@@ -144,15 +144,6 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             return contentType;
         }
 
-
-       
-
-        
-
-
-        
-
-
         // PUT api/<MediasAPIController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)

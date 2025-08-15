@@ -1,0 +1,259 @@
+﻿/* Base Styles */
+.pageBody {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6; /* Light gray background */
+    margin: 0;
+    padding: 16px; /* p-4 sm:p-6 lg:p-8 */
+    box-sizing: border-box;
+}
+
+/* Main Container */
+.container {
+    max-width: 1280px; /* max-w-7xl */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #ffffff; /* bg-white */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    border-radius: 12px; /* rounded-xl */
+    padding: 24px; /* p-6 */
+}
+
+/* Responsive padding for container */
+@media (min-width: 640px) { /* sm: */
+    body {
+        padding: 24px; /* sm:p-6 */
+    }
+
+    .container {
+        padding: 32px; /* md:p-8 */
+    }
+}
+
+@media (min-width: 1024px) { /* lg: */
+    body {
+        padding: 32px; /* lg:p-8 */
+    }
+
+    .container {
+        padding: 40px; /* lg:p-10 */
+    }
+}
+
+/* Search and Filter Area */
+.search-filter-area {
+    margin-bottom: 32px; /* mb-8 */
+    padding: 24px; /* p-6 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+}
+
+    .search-filter-area h2 {
+        font-size: 24px; /* text-2xl */
+        font-weight: 600; /* font-semibold */
+        color: #1f2937; /* text-gray-800 */
+        margin-bottom: 16px; /* mb-4 */
+    }
+
+.search-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* grid-cols-1 */
+    gap: 16px; /* gap-4 */
+}
+
+@media (min-width: 768px) { /* md: */
+    .search-grid {
+        grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+    }
+}
+
+@media (min-width: 1024px) { /* lg: */
+    .search-grid {
+        grid-template-columns: repeat(4, 1fr); /* lg:grid-cols-4 */
+    }
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #374151; /* text-gray-700 */
+    margin-bottom: 4px; /* mb-1 */
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px; /* p-2 */
+    border: 1px solid #d1d5db; /* border border-gray-300 */
+    border-radius: 6px; /* rounded-md */
+    box-sizing: border-box; /* Ensures padding doesn't increase width */
+    font-size: 16px;
+}
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
+        border-color: #3b82f6; /* focus:ring-blue-500 */
+    }
+
+.form-group select {
+    background-color: #ffffff; /* bg-white */
+}
+
+.apply-filters-button {
+    margin-top: 24px; /* mt-6 */
+    padding: 10px 24px; /* px-6 py-2 */
+    background-color: #2563eb; /* bg-blue-600 */
+    color: #ffffff; /* text-white */
+    border-radius: 6px; /* rounded-md */
+    transition: background-color 0.2s ease-in-out; /* transition-colors */
+    border: none;
+    cursor: pointer;
+}
+
+    .apply-filters-button:hover {
+        background-color: #1d4ed8; /* hover:bg-blue-700 */
+    }
+
+    .apply-filters-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.3); /* focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 */
+    }
+
+/* Rows Per Page Selector (separate section) */
+.rows-per-page-area {
+    margin-bottom: 16px; /* mb-4 */
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    justify-content: flex-start; /* justify-start */
+    padding: 16px; /* p-4 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+}
+
+    .rows-per-page-area label {
+        font-size: 14px; /* text-sm */
+        font-weight: 500; /* font-medium */
+        color: #374151; /* text-gray-700 */
+        margin-right: 8px; /* mr-2 */
+    }
+
+    .rows-per-page-area select {
+        padding: 8px; /* p-2 */
+        border: 1px solid #d1d5db; /* border border-gray-300 */
+        border-radius: 6px; /* rounded-md */
+        background-color: #ffffff; /* bg-white */
+        font-size: 16px;
+    }
+
+        .rows-per-page-area select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
+            border-color: #3b82f6; /* focus:ring-blue-500 */
+        }
+
+/* Comments Table Display */
+.table-container {
+    overflow-x: auto; /* Enables horizontal scroll when content overflows */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+    border: 1px solid #e5e7eb; /* border border-gray-200 */
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%; /* Ensure it tries to take full width */
+    min-width: 700px; /* Forces table to be at least this wide, enabling scroll on smaller screens */
+    background-color: #ffffff; /* bg-white */
+}
+
+th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb; /* border-bottom */
+    white-space: nowrap; /* Keep content on a single line where possible, contributing to horizontal scroll if needed */
+}
+
+th {
+    background-color: #f9fafb; /* bg-gray-50 */
+    color: #374151; /* text-gray-700 */
+    font-weight: 600; /* font-semibold */
+    text-transform: uppercase;
+    font-size: 0.875rem; /* text-sm */
+}
+
+tr:hover {
+    background-color: #f3f4f6; /* hover:bg-gray-100 */
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #6b7280; /* Gray border */
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    vertical-align: middle; /* Align with text better */
+}
+
+    input[type="checkbox"]:checked {
+        background-color: #10b981; /* Green when checked */
+        border-color: #10b981;
+    }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
+/* Pagination Controls */
+.pagination-controls {
+    margin-top: 32px; /* mt-8 */
+    display: flex;
+    flex-direction: column; /* Default to column for small screens */
+    align-items: center; /* Center items horizontally when stacked */
+    justify-content: center; /* Center vertically when stacked */
+    padding: 16px; /* p-4 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 8px; /* rounded-lg */
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+    gap: 16px; /* Gap between info and buttons when stacked */
+}
+
+@media (min-width: 640px) { /* sm: breakpoint */
+    .pagination-controls {
+        flex-direction: row; /* Switch to row for larger screens */
+        justify-content: space-between; /* Distribute items horizontally */
+        gap: 0; /* Remove gap when in row mode, as justify-content handles spacing */
+    }
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between individual buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line if space is limited */
+    justify-content: center; /* Center buttons within their row when wrapped */
+}
+
+.pagination-info {
+    color: #374151; /* text-gray-700 */
+    font-weight: 500; /* font-medium */
+    white-space: nowrap; /* Prevent text from wrapping within the info span */
+}

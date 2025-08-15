@@ -44,9 +44,6 @@ public partial class Content
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("coverPicFileId")]
-    public int? CoverPicFileId { get; set; }
-
     [InverseProperty("ContentNavigation")]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

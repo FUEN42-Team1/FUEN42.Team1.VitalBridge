@@ -218,7 +218,6 @@ const editorConfig = {
 
 document.addEventListener('DOMContentLoaded', () => {
     const editorElement = document.querySelector('#ContentEditor');
-    
 
     if (editorElement) {
         ClassicEditor.create(editorElement, editorConfig)

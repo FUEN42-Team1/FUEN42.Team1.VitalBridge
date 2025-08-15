@@ -144,15 +144,12 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return NotFound();
             }
 
-            //var content = await _context.Contents
-            //    .Include(c => c.ContentCategory)
-            //    .FirstOrDefaultAsync(m => m.Id == id);
-            //if (content == null)
-            //{
-            //    return NotFound();
-            //}
+            await _repository.DeleteAsync(id.Value);
+            // Set the success message in TempData
+            TempData["SuccessMessage"] = "Article deleted successfully! 🎉";
 
-            return View();
+            // Redirect to the Index action
+            return RedirectToAction("Search", "ContentArticles");
         }
 
         
