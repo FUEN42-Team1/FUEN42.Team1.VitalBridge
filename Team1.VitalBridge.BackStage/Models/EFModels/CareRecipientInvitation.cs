@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("CareRecipientId", "InviteeEmail", Name = "UQ__CareReci__564A0524B7AE7929", IsUnique = true)]
+[Index("CareRecipientId", "InviteeEmail", Name = "UQ__CareReci__564A0524C42488FE", IsUnique = true)]
 public partial class CareRecipientInvitation
 {
     [Key]

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("UserId", Name = "UQ__AdminPro__CB9A1CFE37774416", IsUnique = true)]
+[Index("UserId", Name = "UQ__AdminPro__CB9A1CFED74D50BB", IsUnique = true)]
 public partial class AdminProfile
 {
     [Key]

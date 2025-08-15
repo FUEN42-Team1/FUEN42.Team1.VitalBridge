@@ -63,6 +63,9 @@ public partial class Organization
     [Column("isActive")]
     public bool IsActive { get; set; }
 
+    [Column("institutionId")]
+    public int? InstitutionId { get; set; }
+
     [ForeignKey("CityId")]
     [InverseProperty("Organizations")]
     public virtual City City { get; set; }
@@ -70,6 +73,10 @@ public partial class Organization
     [ForeignKey("DistrictId")]
     [InverseProperty("Organizations")]
     public virtual Township District { get; set; }
+
+    [ForeignKey("InstitutionId")]
+    [InverseProperty("Organizations")]
+    public virtual Institution Institution { get; set; }
 
     [InverseProperty("Organization")]
     public virtual ICollection<OrganizationCertificationRequest> OrganizationCertificationRequests { get; set; } = new List<OrganizationCertificationRequest>();

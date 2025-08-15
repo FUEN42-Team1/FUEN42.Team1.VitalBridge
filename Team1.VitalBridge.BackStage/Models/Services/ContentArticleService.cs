@@ -1,4 +1,4 @@
-﻿using Humanizer;
+﻿
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.DTOs;
 using Team1.VitalBridge.BackStage.Models.EFModels;
@@ -9,10 +9,12 @@ namespace Team1.VitalBridge.BackStage.Models.Services
     public class ContentArticleService : IContentArticleService
     {
         private readonly IContentArticleRepository _repository;
+        private readonly IMediaRepository _mediaRepository;
 
-        public ContentArticleService(IContentArticleRepository repository)
+        public ContentArticleService(IContentArticleRepository repository, IMediaRepository mediaRepository)
         {
             this._repository = repository;
+            this._mediaRepository = mediaRepository;
         }
 
         public async Task CreateArticleAsync(ContentArticleCreateDTO article)
@@ -38,11 +40,38 @@ namespace Team1.VitalBridge.BackStage.Models.Services
 
             // Save to repository
             await _repository.AddAsync(entity);
+
+            // use regex to find img in Content1 from ckeditor and save it to Media table
+            await MediaUpload(entity);
+        }
+
+        private async Task MediaUpload(Content entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Content1))
+            {
+                var fileIds = System.Text.RegularExpressions.Regex.Matches(entity.Content1, @"<img[^>]+src=""/api/MediasAPI/([^""]+)""")
+                    .Cast<System.Text.RegularExpressions.Match>()
+                    .Select(m => m.Groups[1].Value)
+                    .ToList();
+                foreach (var fileId in fileIds)
+                {
+                    // Create a new Media entity for each fileId
+                    var media = new Media
+                    {
+                        MemberId = 0, // Assuming MemberId is not set for now
+                        MediaTypeId = 1,
+                        Name = fileId, // Use fileId as the name for simplicity
+                        FileId = int.Parse(fileId),
+                        Content = entity // Associate with the current content
+                    };
+                    await _mediaRepository.AddAsync(media);
+                }
+            }
         }
 
         public async Task DeleteArticleAsync(int id)
         {
-            throw new NotImplementedException();
+            await _repository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<ContentArticleDTO>> GetAllArticlesListAsync()
@@ -58,7 +87,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
         public async Task<ContentArticleEditDTO> GetArticleForEditByIdAsync(int id)
         {
             var query = _repository.GetAllWithIncludes();
-            var dto  = await query
+            var dto = await query
                 .Where(c => c.Id == id)
                 .Select(c => new ContentArticleEditDTO
                 {
@@ -70,7 +99,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                     Status = c.Status
                 }).FirstOrDefaultAsync();
             if (dto == null)
-            {   
+            {
                 throw new KeyNotFoundException($"Article with ID {id} not found.");
             }
             return dto;
@@ -129,7 +158,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             }
 
             var dto = await query.OrderBy(c => c.ContentCategory.DisplayOrder)
-                .Select(c=> new ContentArticleListDTO
+                .Select(c => new ContentArticleListDTO
                 {
                     Id = c.Id,
                     Title = c.Title,
@@ -153,23 +182,38 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 throw new ArgumentNullException(nameof(article), "Article cannot be null");
             }
 
-            // Map DTO to Entity
-            var entity = new Content
-            {
-                Id = article.Id,
-                Title = article.Title,
-                Content1 = article.Content,
-                ContentCategoryId = article.ContentCategoryId,
-                //CoverPic = article.CoverPic, CoverPic MediaId
-                Status = article.Status,
-                ViewCount = 0, // Initial view count
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
             // todo If CoverPic is provided, set it
+            // Map DTO to existingEntity
+            var entity = await _repository.GetByIdAsync(article.Id);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Article with ID {article.Id} not found.");
+            }
+            entity.Title = article.Title;
+            entity.Content1 = article.Content;
+            entity.ContentCategoryId = article.ContentCategoryId;
+            entity.Content1 = article.Content;
+            entity.Status = article.Status;
 
             // Save to repository
             await _repository.UpdateAsync(entity);
+            // delete all medias with entity.tId
+            await MediaDelete(entity);
+            // add all new medias with entity content
+            await MediaUpload(entity);
         }
+        private async Task MediaDelete(Content entity)
+        {
+            var medias = await _mediaRepository.GetByContentIdAsync(entity.Id);
+            if (medias == null)
+                return;
+            while (medias.Any())
+            {
+                var media = medias.First();
+                await _mediaRepository.DeleteAsync(media.Id);
+                medias = await _mediaRepository.GetByContentIdAsync(entity.Id);
+            }
+        }
+
     }
 }

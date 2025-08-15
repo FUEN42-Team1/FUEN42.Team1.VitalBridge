@@ -90,21 +90,8 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             {
                 throw new ArgumentNullException(nameof(content));
             }
-            var existingContent = await _context.Contents.FindAsync(content.Id);
-            if (existingContent == null)
-            {
-                throw new KeyNotFoundException($"Content with ID {content.Id} not found.");
-            }
-            existingContent.Title = content.Title;
-            existingContent.CoverPic = content.CoverPic;
-            existingContent.ContentCategoryId = content.ContentCategoryId;
-            existingContent.Content1= content.Content1;
-            existingContent.Status = content.Status;
-            existingContent.ViewCount = content.ViewCount;
-            existingContent.UpdatedAt = DateTime.UtcNow;
-
-            //existingContent.DisplayOrder = content.DisplayOrder; 
-            _context.Contents.Update(existingContent);
+            
+            content.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
     }

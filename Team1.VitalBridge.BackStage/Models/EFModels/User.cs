@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Index("Email", "AccountType", Name = "UQ__Users__C98484592704A680", IsUnique = true)]
-[Index("UserId", Name = "UQ__Users__CB9A1CFE00B44710", IsUnique = true)]
+[Index("Email", "AccountType", Name = "UQ__Users__C9848459AC1ED1FB", IsUnique = true)]
+[Index("UserId", Name = "UQ__Users__CB9A1CFED410E116", IsUnique = true)]
 public partial class User
 {
     [Key]

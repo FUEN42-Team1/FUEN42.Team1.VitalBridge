@@ -1,0 +1,303 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Article Comment Management";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/AdminArticle.css" />
+}
+<div class="pageBody">
+    <div class="container">
+
+        <!-- Search and Filter Area -->
+        <div class="search-filter-area">
+            <h2>Manage Article Comments</h2>
+            <div class="search-grid">
+                <div class="form-group">
+                    <label for="articleTitleSearch">Search by Article Title</label>
+                    <input type="text" id="articleTitleSearch" placeholder="Enter article title">
+                </div>
+                <div class="form-group">
+                    <label for="memberNameSearch">Search by Member Name</label>
+                    <input type="text" id="memberNameSearch" placeholder="Enter member name">
+                </div>
+                <div class="form-group">
+                    <label for="commentContentSearch">Search by Content</label>
+                    <input type="text" id="commentContentSearch" placeholder="Enter comment content">
+                </div>
+                <div class="form-group">
+                    <label for="commentStatusFilter">Status</label>
+                    <select id="commentStatusFilter">
+                        <option value="all">All</option>
+                        <option value="enabled">Enabled</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+                </div>
+            </div>
+            <button class="apply-filters-button">
+                Apply Filters (Static)
+            </button>
+        </div>
+
+        <!-- Rows Per Page Selector -->
+        <div class="rows-per-page-area">
+            <label for="rowsPerPage">Rows Per Page:</label>
+            <select id="rowsPerPage">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+
+        <!-- Comments Table Display -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Article Title</th>
+                        <th>Member Name</th>
+                        <th>Comment Content</th>
+                        <th>Created At</th>
+                        <th>Enabled Status</th>
+                    </tr>
+                </thead>
+                <tbody id="commentsTableBody">
+                    <!-- Data will be populated here by JavaScript, right now it is just samples -->
+                    <!-- Sample Data Rows -->
+                    <tr>
+                        <td>The Future of AI</td>
+                        <td>Alice Johnson</td>
+                        <td>"Fascinating article! I wonder how AI will impact daily life in the next decade."</td>
+                        <td>2023-10-26 10:30 AM</td>
+                        <td>
+                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Understanding Quantum Physics</td>
+                        <td>Bob Williams</td>
+                        <td>"This was a bit complex for me, but the illustrations helped clarify some concepts."</td>
+                        <td>2023-10-25 03:15 PM</td>
+                        <td>
+                            <input type="checkbox" aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Healthy Eating Habits</td>
+                        <td>Carol Davis</td>
+                        <td>"Great tips! I've started incorporating more fresh vegetables into my diet."</td>
+                        <td>2023-10-24 09:00 AM</td>
+                        <td>
+                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>The History of the Roman Empire</td>
+                        <td>David Lee</td>
+                        <td>"An insightful read, especially the part about the fall of the Western Empire."</td>
+                        <td>2023-10-23 01:45 PM</td>
+                        <td>
+                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Beginner's Guide to Coding</td>
+                        <td>Eve Brown</td>
+                        <td>"Very helpful for someone just starting out! Clear and concise explanations."</td>
+                        <td>2023-10-22 11:20 AM</td>
+                        <td>
+                            <input type="checkbox" aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                    <!-- More sample data can be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <div class="pagination-buttons">
+                <button>First (Static)</button>
+                <button>Previous (Static)</button>
+                <span class="pagination-info">Page 1 of 10 (Static)</span>
+                <button>Next (Static)</button>
+                <button>Last (Static)</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        // Simulated API data
+        const allComments = [];
+        let currentPage = 1;
+        let rowsPerPage = parseInt($('#rowsPerPage').val());
+        let filteredComments = []; // Stores comments after applying search filters
+        let currentFilters = {
+            articleTitle: '',
+            memberName: '',
+            commentContent: '',
+            status: 'all'
+        };
+
+        /**
+         * AJAX call to backend, gather data base on filters and pagination
+         * returns {object} An object containing the paginated comments and total count.
+        */
+        function fetchAndFilterComments() {
+            // Simulate server-side filtering
+            let tempFiltered = allComments.filter(comment => {
+                const matchesArticleTitle = comment.articleTitle.toLowerCase().includes(currentFilters.articleTitle.toLowerCase());
+                const matchesMemberName = comment.memberName.toLowerCase().includes(currentFilters.memberName.toLowerCase());
+                const matchesCommentContent = comment.commentContent.toLowerCase().includes(currentFilters.commentContent.toLowerCase());
+                const matchesStatus = currentFilters.status === 'all' ||
+                                      (currentFilters.status === 'enabled' && comment.enabled) ||
+                                      (currentFilters.status === 'disabled' && !comment.enabled);
+                return matchesArticleTitle && matchesMemberName && matchesCommentContent && matchesStatus;
+            });
+
+            filteredComments = tempFiltered; // Update the global filteredComments
+
+            const totalComments = filteredComments.length;
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedComments = filteredComments.slice(startIndex, endIndex);
+
+            return {
+                data: paginatedComments,
+                total: totalComments
+            };
+        }
+
+        /**
+         * Renders the comments into the table body.
+         * param {Array<object>} comments - An array of comment objects to display.
+         */
+        function renderTable(comments) {
+            const $tbody = $('#commentsTableBody');
+            $tbody.empty(); // Clear existing rows
+
+            if (comments.length === 0) {
+                $tbody.append(`<tr><td colspan="5" class="text-center py-4 text-gray-500">No comments found matching your criteria.</td></tr>`);
+                return;
+            }
+
+            comments.forEach(comment => {
+                const checked = comment.enabled ? 'checked' : '';
+                const row = `
+                    <tr>
+                        <td>${comment.articleTitle}</td>
+                        <td>${comment.memberName}</td>
+                        <td>${comment.commentContent}</td>
+                        <td>${comment.createdAt}</td>
+                        <td>
+                            <input type="checkbox" data-comment-id="${comment.id}" ${checked} aria-label="Toggle comment enabled status">
+                        </td>
+                    </tr>
+                `;
+                $tbody.append(row);
+            });
+        }
+
+        /**
+         * Updates the pagination info and button states.
+         * param {number} totalCount - The total number of filtered comments.
+         */
+        function updatePaginationInfo(totalCount) {
+            const totalPages = Math.ceil(totalCount / rowsPerPage);
+            $('.pagination-info').text(`Page ${currentPage} of ${totalPages}`);
+
+            $('#firstPageBtn').prop('disabled', currentPage === 1); // disable if on first page
+            $('#prevPageBtn').prop('disabled', currentPage === 1); // disable if on first page
+            $('#nextPageBtn').prop('disabled', currentPage === totalPages || totalPages === 0); // disable if on last page or no pages
+            $('#lastPageBtn').prop('disabled', currentPage === totalPages || totalPages === 0); // disable if on last page or no pages
+        }
+
+        /**
+         * Orchestrates the fetching, rendering, and pagination updates.
+         * basically, summing it all up.
+         * This function is called when the page loads or when filters are applied.
+         */
+        function loadComments() {
+            const result = fetchAndFilterComments();
+            renderTable(result.data);
+            updatePaginationInfo(result.total);
+        }
+
+        $(document).ready(function(){
+            // Set initial rows per page
+            rowsPerPage = parseInt($('#rowsPerPage').val());
+
+            // Initial load of comments
+            loadComments();
+
+            // Event listener for Apply Filters button
+            $('.apply-filters-button').on('click', function() {
+                currentFilters.articleTitle = $('#articleTitleSearch').val();
+                currentFilters.memberName = $('#memberNameSearch').val();
+                currentFilters.commentContent = $('#commentContentSearch').val();
+                currentFilters.status = $('#commentStatusFilter').val();
+                currentPage = 1; // Reset to first page on new filter
+                loadComments();
+            });
+
+            // Event listener for Rows Per Page select
+            $('#rowsPerPage').on('change', function() {
+                rowsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to first page when rows per page changes
+                loadComments();
+            });
+
+            // Event listeners for pagination buttons
+            $('#firstPageBtn').on('click', function() {
+                currentPage = 1;
+                loadComments();
+            });
+
+            $('#prevPageBtn').on('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadComments();
+                }
+            });
+
+            $('#nextPageBtn').on('click', function() {
+                const totalPages = Math.ceil(filteredComments.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadComments();
+                }
+            });
+
+            $('#lastPageBtn').on('click', function() {
+                const totalPages = Math.ceil(filteredComments.length / rowsPerPage);
+                currentPage = totalPages;
+                loadComments();
+            });
+
+            // Event listener for comment status toggles (checkboxes)
+            // Using event delegation since rows are dynamically added/removed
+            $('#commentsTableBody').on('change', 'input[type="checkbox"]', function() {
+                const commentId = $(this).data('comment-id');
+                const isChecked = $(this).is(':checked');
+
+                // Update the enabled status in our simulated data
+                const commentToUpdate = allComments.find(comment => comment.id === commentId);
+                if (commentToUpdate) {
+                    commentToUpdate.enabled = isChecked;
+                    // In a real application, you would send an AJAX request here to update the backend
+                    console.log(`Comment ID: ${commentId} status updated to: ${isChecked}`);
+                }
+                // Reload comments to reflect potential filtering changes if status filter is active
+                loadComments();
+            });
+
+        });
+    </script>
+}
