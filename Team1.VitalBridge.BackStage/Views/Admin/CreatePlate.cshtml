@@ -121,8 +121,6 @@
                                 const element = e.target;
                                 if (element.id === "Preview" || element.closest("#Preview")) return;
                                 const selector = getUniqueSelector(element);
-                                console.log("Element:", element);
-                                console.log("選擇器路徑：", selector);
                                     // 找出目標元素
                             const target = document.querySelector(selector);
                             if (!target) return;

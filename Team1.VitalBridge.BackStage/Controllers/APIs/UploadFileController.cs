@@ -48,7 +48,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
             //var fileTablePath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
             //var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, fileTablePath);
-
+            
             //if (savedFileInfo.Length==0 || savedFileInfo.FilePath ==null)
             //    return BadRequest(savedFileInfo.FileName);
             //return Ok(new
@@ -59,7 +59,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             //});
         }
 
-        [HttpGet("GetFile")]
+        [HttpGet("GetFile/{fileName}")]
         public IActionResult GetFile(string fileName)
         {
             var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越
