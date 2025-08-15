@@ -17,6 +17,7 @@ public partial class OrganizationType
     [Required]
     [Column("name")]
     [StringLength(100)]
+    [Display(Name = "機構類型名稱")]
     public string Name { get; set; }
 
     public bool IsActive { get; set; }

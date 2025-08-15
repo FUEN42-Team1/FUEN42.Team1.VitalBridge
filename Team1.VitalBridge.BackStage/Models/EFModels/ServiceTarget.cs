@@ -17,6 +17,7 @@ public partial class ServiceTarget
     [Required]
     [Column("name")]
     [StringLength(100)]
+    [Display(Name = "服務對象名稱")]
     public string Name { get; set; }
 
     [Column("isActive")]

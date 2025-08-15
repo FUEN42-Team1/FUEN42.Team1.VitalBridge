@@ -17,6 +17,7 @@ public partial class RoomType
     [Required]
     [Column("name")]
     [StringLength(20)]
+    [Display(Name = "房型名稱")]
     public string Name { get; set; }
 
     [InverseProperty("RoomType")]
