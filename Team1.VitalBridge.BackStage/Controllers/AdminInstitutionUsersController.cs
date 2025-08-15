@@ -26,7 +26,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 .Include(u => u.InstitutionProfile)               // 使用者的機構業務資料
                     .ThenInclude(p => p.Institution)              // 機構
                 .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-                .Where(u => u.AccountType == "InstitutionUser")   // 依你實際條件
+                .Where(u => u.AccountType == "Institution")   // 依你實際條件
                 .OrderBy(u => u.Name)
                 .Select(u => new AdminInstitutionUserListItemVM
                 {

@@ -73,6 +73,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Name = vm.Name,
                 Info = vm.Info,
                 IsActive = vm.IsActive,
+                IsSystemDefault = false, // 新增的身分預設不是系統預設
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
