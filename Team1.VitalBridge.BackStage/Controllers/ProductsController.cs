@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.InteropServices;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
 
@@ -101,12 +102,16 @@ namespace Team1.VitalBridge.BackStage.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateProductViewModel vm)
         {
-            
-            // 1.基本驗證
-            if (ModelState.IsValid)
+
+			
+
+			Console.WriteLine("Controller Create 方法被執行");
+			// 1.基本驗證
+			if (!ModelState.IsValid)
             {
                 await LoadCategoryOptions(vm);
-                return View(vm);
+                await LoadShipOptions(vm); // 載入物流選項
+				return View(vm);
             }
 
             // 2.類別驗證
@@ -130,7 +135,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                     var category = allCategories.FirstOrDefault(c => c.Id == categoryId);
 
                     // 如果類別不存在，則添加錯誤訊息
-                    if (category != null) 
+                    if (category == null) 
                     {
                         ModelState.AddModelError("SelectedCategoryIds", "選擇的類別不存在");
                         break;
@@ -149,7 +154,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
             // 3. 物流選項驗證
             // 3.1 檢查是否有選擇至少一個物流方式
-            if (vm.SelectedCategoryIds == null || !vm.SelectedCategoryIds.Any())
+            if (vm.SelectedShipIds == null || !vm.SelectedShipIds.Any())
             {
 
                 ModelState.AddModelError("SelectedShipIds", "請至少選擇一個物流方式");
@@ -216,102 +221,121 @@ namespace Team1.VitalBridge.BackStage.Controllers
             {
                 // 重新載入類別選項
                 await LoadCategoryOptions(vm);
-                return View(vm);
+                await LoadShipOptions(vm); // 載入物流選項
+				return View(vm);
             }
 
             // 6. 驗證通過，開始建立資料
+            try {
+				// 建立商品實體
+				var product = new Product
+				{
+					ItemNumber = vm.ItemNumber,
+					Name = vm.Name,
+					Keypoint = vm.Keypoint ?? "", // 確保不為 null
+					ProductDescription = vm.ProductDescription ?? "", // 確保不為 null
+					Price = vm.Price,
+					Quantity = vm.Quantity,
+					IsActive = vm.IsActive, 
+					CreateAt = DateTime.Now, 
+					UpdateAt = DateTime.Now 
+				};
 
-            // 建立商品實體
-            var product = new Product
-            {
-                ItemNumber = vm.ItemNumber,
-                Name = vm.Name,
-                Keypoint = vm.Keypoint ?? "", // 確保不為 null
-                ProductDescription = vm.ProductDescription ?? "", // 確保不為 null
-                Price = vm.Price,
-                Quantity = vm.Quantity,
-            };
-
-            // 6.1 建立商品
-            _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync(); // 儲存商品以獲取 Id
+				// 6.1 建立商品
+				_context.Products.Add
+					(product);
+				await _context.SaveChangesAsync(); // 儲存商品以獲取 Id
 
 
-            // 6.2 處理圖片
-            var imageFileNames = new[]
-            {
+				// 6.2 處理圖片
+				var imageFileNames = new[]
+				{
                 // 宣告圖片檔案名稱，在 CreateProductViewModel 中已經定義了這些屬性
                 vm.Image1FileName,
-                vm.Image2FileName,
-                vm.Image3FileName,
-                vm.Image4FileName,
-                vm.Image5FileName,
-                vm.Image6FileName,
-                vm.Image7FileName,
-                vm.Image8FileName
-            };
+				vm.Image2FileName,
+				vm.Image3FileName,
+				vm.Image4FileName,
+				vm.Image5FileName,
+				vm.Image6FileName,
+				vm.Image7FileName,
+				vm.Image8FileName
+			};
 
-            for (int i = 0; i < imageFileNames.Length; i++)
-            {
-                // 宣告圖片檔案名稱
-                var fileName = imageFileNames[i];
+				for (int i = 0; i < imageFileNames.Length; i++)
+				{
+					// 宣告圖片檔案名稱
+					var fileName = imageFileNames[i];
 
-                // 如果檔案名稱不為空，則處理圖片
-                if (!string.IsNullOrWhiteSpace(fileName))
-                {
-                    // 取得圖片Id，運用 GetFileIdByFileNameAsync 方法，取FileName 取得對應的 FileId
-                    var fileId = await GetFileIdByFileNameAsync(fileName);
-                    if (fileId.HasValue)
-                    {
-                        // 建立商品圖片關聯
-                        var productImage = new ProductImage
-                        {
-                            ProductId = product.Id,
-                            FileId = fileId.Value,
-                            SortOrder = i + 1 // 圖片順序從1開始
-                        };
-                        _context.ProductImages.Add(productImage);
-                    }
-                }
-            }
-            // 6.3 建立商品類別關聯
-            if(vm.SelectedCategoryIds?.Any() == true)
-            {
-                //categoryId 是選中的類別Id，從 CreateProductViewModel 中取得
-                foreach (var categoryId in vm.SelectedCategoryIds)
-                {
-                    var productCategory = new ProductCategory
-                    {
-                        ProductId = product.Id,
-                        CategoryId = categoryId
-                    };
-                    _context.ProductCategories.Add(productCategory);
-                }
-            }
+					// 如果檔案名稱不為空，則處理圖片
+					if (!string.IsNullOrWhiteSpace(fileName))
+					{
+						// 取得圖片Id，運用 GetFileIdByFileNameAsync 方法，取FileName 取得對應的 FileId
+						var fileId = await GetFileIdByFileNameAsync(fileName);
+						if (fileId.HasValue)
+						{
+							// 建立商品圖片關聯
+							var productImage = new ProductImage
+							{
+								ProductId = product.Id,
+								FileId = fileId.Value,
+								SortOrder = i + 1 // 圖片順序從1開始
+							};
+							_context.ProductImages.Add(productImage);
+						}
+					}
+				}
+				// 6.3 建立商品類別關聯
+				if (vm.SelectedCategoryIds?.Any() == true)
+				{
+					//categoryId 是選中的類別Id，從 CreateProductViewModel 中取得
+					foreach (var categoryId in vm.SelectedCategoryIds)
+					{
+						var productCategory = new ProductCategory
+						{
+							ProductId = product.Id,
+							CategoryId = categoryId
+						};
+						_context.ProductCategories.Add(productCategory);
+					}
+				}
 
-            // 6.4 建立商品物流關聯
-            if (vm.SelectedShipIds?.Any() == true)
-            {
-				// shipId 是選中的物流方式Id，從 CreateProductViewModel 中取得
-				foreach (var shipId in vm.SelectedShipIds)
-                {
-					// 建立商品物流關聯
-					// ProductShip 是一個中介表，用來連接 Product 和 Ship
-					var productShip = new ProductShip
-                    {
-                        ProductId = product.Id,
-                        ShipId = shipId
-                    };
-                    _context.ProductShips.Add(productShip);
-                }
+				// 6.4 建立商品物流關聯
+				if (vm.SelectedShipIds?.Any() == true)
+				{
+					// shipId 是選中的物流方式Id，從 CreateProductViewModel 中取得
+					foreach (var shipId in vm.SelectedShipIds)
+					{
+						// 建立商品物流關聯
+						// ProductShip 是一個中介表，用來連接 Product 和 Ship
+						var productShip = new ProductShip
+						{
+							ProductId = product.Id,
+							ShipId = shipId,
+							IsActive = true // 預設為啟用狀態
+						};
+						_context.ProductShips.Add(productShip);
+					}
+				}
+
+				// 7. 儲存變更  
+				await _context.SaveChangesAsync();
+
+				// 7. 成功後導向首頁
+				// 8. 設定成功訊息並導向首頁 ← 新增這部分
+				TempData["SuccessMessage"] = "商品新增成功！";
+				return RedirectToAction("Index");
+
+
 			}
-
-			// 7. 儲存變更  
-			await _context.SaveChangesAsync();
-
-            // 7. 成功後導向首頁
-
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                // 處理例外情況
+                ModelState.AddModelError("", "建立商品時發生錯誤：" + ex.Message);
+                await LoadCategoryOptions(vm);
+                await LoadShipOptions(vm); // 載入物流選項
+                return View(vm);
+			}  
+				
         }
 
 

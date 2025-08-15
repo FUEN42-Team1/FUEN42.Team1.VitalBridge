@@ -610,164 +610,133 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script src="~/js/UploadImage.js"></script>
-    
+
     <script>
         $(document).ready(function() {
-            // 初始化頁面
             initializePage();
             initializeImageUpload();
             loadCategories();
-            // 移除 loadShipMethods() 因為現在直接從後端載入
-            
-            // 綁定事件
             bindEvents();
         });
 
-        // 初始化頁面
         function initializePage() {
-            // 設定狀態切換文字
             updateStatusText();
-            
-            // 價格輸入限制為整數
+
             $('#Price').on('input', function() {
                 var value = $(this).val();
                 if (value.includes('.')) {
                     $(this).val(Math.floor(value));
                 }
             });
+
+            $('#Keypoint').trigger('input');
         }
 
-        // 綁定事件
         function bindEvents() {
-            // 狀態切換
             $('#isActiveSwitch').change(updateStatusText);
-            
-            // 庫存和狀態聯動檢查
+
             $('#Quantity, #isActiveSwitch').change(function() {
                 var quantity = parseInt($('#Quantity').val()) || 0;
                 var isActive = $('#isActiveSwitch').prop('checked');
-                
+
                 if (quantity === 0 && isActive) {
                     showToast('警告', '庫存為0時建議不要上架商品', 'warning');
                 }
             });
 
-            // 表單提交前驗證
-            $('#productForm').submit(function(e) {
-                if (!validateForm()) {
-                    e.preventDefault();
+            $('#Price').on('input', function() {
+                let value = $(this).val();
+                value = value.replace(/[^\d]/g, '');
+                $(this).val(value);
+            });
+
+            $('#Quantity').on('input', function() {
+                let value = $(this).val();
+                value = value.replace(/[^\d]/g, '');
+                $(this).val(value);
+            });
+
+            $('#Keypoint').on('input', function() {
+                const maxLength = 250;
+                const currentLength = $(this).val().length;
+                const remaining = maxLength - currentLength;
+
+                $(this).siblings('.char-count').remove();
+
+                $(this).after('<small class="form-text text-muted char-count">' + currentLength + '/' + maxLength + ' 字</small>');
+
+                if (remaining < 20) {
+                    $(this).siblings('.char-count').removeClass('text-muted').addClass('text-warning');
+                }
+                if (remaining < 0) {
+                    $(this).siblings('.char-count').removeClass('text-warning').addClass('text-danger');
                 }
             });
         }
 
-        // 更新狀態文字
         function updateStatusText() {
             const isActive = $('#isActiveSwitch').prop('checked');
             $('#statusText').text(isActive ? '上架中' : '已下架');
         }
 
-        // 初始化圖片上傳功能
         function initializeImageUpload() {
-            const fileInput = $('#imageFileInput');
+            for (let i = 1; i <= 8; i++) {
+                setupImageSlot(i);
+            }
 
-            // 點擊上傳區域觸發檔案選擇
-            $('#mainUploadArea').click(function() {
-                fileInput.removeAttr('data-target-slot');
-                fileInput.click();
-            });
-
-            // 點擊圖片槽位觸發檔案選擇
-            $('.image-slot').click(function() {
-                if (!$(this).hasClass('has-image')) {
-                    fileInput.attr('data-target-slot', $(this).data('slot'));
-                    fileInput.click();
-                }
-            });
-
-            // 檔案選擇處理
-            fileInput.change(function() {
-                const files = this.files;
-                const targetSlot = $(this).attr('data-target-slot');
-                
-                if (files.length > 0) {
-                    if (targetSlot !== undefined) {
-                        // 單個槽位上傳
-                        uploadImageToSlot(files[0], parseInt(targetSlot));
-                    } else {
-                        // 批量上傳到空槽位
-                        uploadMultipleImages(files);
-                    }
-                }
-                
-                // 清除選擇的檔案和目標槽位
-                $(this).val('');
-                $(this).removeAttr('data-target-slot');
-            });
-
-            // 移除圖片按鈕
-            $(document).on('click', '.remove-btn', function(e) {
+            $(document).on('click', '.image-remove', function(e) {
                 e.stopPropagation();
-                const slot = $(this).closest('.image-slot');
-                removeImageFromSlot(slot.data('slot'));
+                const slot = $(this).closest('.image-preview').data('slot');
+                removeImageFromSlot(slot);
             });
         }
 
-        // 設定拖拽功能
-        function setupDragAndDrop() {
-            const mainUploadArea = $('#mainUploadArea');
-            const imageSlots = $('.image-slot');
+        function setupImageSlot(slotNumber) {
+            const fileInput = $('#fileInput' + slotNumber);
+            const uploadBtn = $('#uploadBtn' + slotNumber);
+            const preview = $('.image-preview[data-slot="' + (slotNumber - 1) + '"]');
 
-            // 主上傳區域拖拽
-            mainUploadArea.on('dragover dragenter', function(e) {
-                e.preventDefault();
-                $(this).addClass('dragover');
-            });
-
-            mainUploadArea.on('dragleave', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-            });
-
-            mainUploadArea.on('drop', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-                
-                const files = e.originalEvent.dataTransfer.files;
-                if (files.length > 0) {
-                    uploadMultipleImages(files);
+            fileInput.change(function() {
+                const file = this.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    showImagePreview(file, slotNumber - 1);
                 }
             });
 
-            // 個別槽位拖拽
-            imageSlots.on('dragover dragenter', function(e) {
-                e.preventDefault();
-                if (!$(this).hasClass('has-image')) {
-                    $(this).addClass('dragover');
+            uploadBtn.click(function() {
+                const file = fileInput[0].files[0];
+                if (!file) {
+                    showToast('錯誤', '請先選擇圖片檔案', 'error');
+                    return;
                 }
-            });
-
-            imageSlots.on('dragleave', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-            });
-
-            imageSlots.on('drop', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-                
-                if (!$(this).hasClass('has-image')) {
-                    const files = e.originalEvent.dataTransfer.files;
-                    if (files.length > 0) {
-                        uploadImageToSlot(files[0], $(this).data('slot'));
-                    }
-                }
+                uploadImageToSlot(file, slotNumber);
             });
         }
 
-        // 上傳圖片到指定槽位
-        function uploadImageToSlot(file, slotIndex) {
+        function showImagePreview(file, slotIndex) {
+            const preview = $('.image-preview[data-slot="' + slotIndex + '"]');
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.removeClass('empty').addClass('has-image');
+                var html = '<div class="image-number">' + (slotIndex + 1) + '</div>' +
+                          '<img src="' + e.target.result + '" alt="預覽圖片" />' +
+                          '<button type="button" class="image-remove">&times;</button>';
+                preview.html(html);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function uploadImageToSlot(file, slotNumber) {
+            const slotIndex = slotNumber - 1;
+            const uploadBtn = $('#uploadBtn' + slotNumber);
+            const preview = $('.image-preview[data-slot="' + slotIndex + '"]');
+
             if (!file.type.startsWith('image/')) {
                 showToast('錯誤', '請選擇圖片檔案', 'error');
                 return;
@@ -776,85 +745,62 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            // 顯示上傳中狀態
-            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
-            slot.html('<div class="spinner-border text-primary" role="status"><span class="visually-hidden">上傳中...</span></div>');
+            const originalText = uploadBtn.text();
+            uploadBtn.prop('disabled', true).text('上傳中...');
 
-            // 使用你們的上傳 API
             $.ajax({
-                url: '/api/UploadFile/Upload', // 根據你們的API路徑調整
+                url: '/api/UploadFile',
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    // 假設API返回 { fileName: "xxx.jpg", url: "..." }
-                    updateImageSlot(slotIndex, response.fileName, response.url || `/api/UploadFile/GetFile?fileName=${encodeURIComponent(response.fileName)}`);
-                    showToast('成功', '圖片上傳成功', 'success');
+                    console.log('上傳成功:', response);
+                    const fileName = response.fileName;
+                    const imageUrl = '/api/UploadFile/GetFile?fileName=' + encodeURIComponent(fileName);
+
+                    updateImageSlot(slotIndex, fileName, imageUrl);
+
+                    $('input[name="Image' + slotNumber + 'FileName"]').val(fileName);
+
+                    showToast('成功', '圖片 ' + slotNumber + ' 上傳成功', 'success');
                 },
-                error: function() {
-                    restoreImageSlot(slotIndex);
-                    showToast('錯誤', '圖片上傳失敗，請重試', 'error');
+                error: function(xhr, status, error) {
+                    console.error('圖片上傳失敗:', error);
+                    console.error('回應:', xhr.responseText);
+                    showToast('錯誤', '圖片 ' + slotNumber + ' 上傳失敗，請重試', 'error');
+
+                    removeImageFromSlot(slotIndex);
+                },
+                complete: function() {
+                    uploadBtn.prop('disabled', false).text(originalText);
                 }
             });
         }
 
-        // 批量上傳圖片
-        function uploadMultipleImages(files) {
-            let uploadCount = 0;
-            const maxImages = 8;
-
-            for (let i = 0; i < files.length && uploadCount < maxImages; i++) {
-                const file = files[i];
-                if (file.type.startsWith('image/')) {
-                    // 找到第一個空的槽位
-                    const emptySlot = $('.image-slot:not(.has-image)').first();
-                    if (emptySlot.length > 0) {
-                        uploadImageToSlot(file, emptySlot.data('slot'));
-                        uploadCount++;
-                    }
-                }
-            }
-
-            if (uploadCount === 0) {
-                showToast('提示', '沒有可用的圖片槽位', 'info');
-            }
-        }
-
-        // 更新圖片槽位
         function updateImageSlot(slotIndex, fileName, imageUrl) {
-            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
-            const slotLabel = slotIndex === 0 ? '主圖' : (slotIndex + 1).toString();
-            
-            slot.addClass('has-image').html(`
-                <div class="slot-label">${slotLabel}</div>
-                <img src="${imageUrl}" alt="商品圖片 ${slotIndex + 1}" />
-                <button type="button" class="remove-btn">&times;</button>
-            `);
+            const preview = $('.image-preview[data-slot="' + slotIndex + '"]');
 
-            // 更新對應的隱藏輸入框
-            $(`input[name="Image${slotIndex + 1}FileName"]`).val(fileName);
+            preview.removeClass('empty').addClass('has-image');
+            var html = '<div class="image-number">' + (slotIndex + 1) + '</div>' +
+                      '<img src="' + imageUrl + '" alt="商品圖片 ' + (slotIndex + 1) + '" />' +
+                      '<button type="button" class="image-remove">&times;</button>';
+            preview.html(html);
         }
 
-        // 恢復圖片槽位
-        function restoreImageSlot(slotIndex) {
-            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
-            const slotLabel = slotIndex === 0 ? '主圖' : (slotIndex + 1).toString();
-            
-            slot.removeClass('has-image').html(`
-                <div class="slot-label">${slotLabel}</div>
-                <div class="placeholder-text">+</div>
-                <button type="button" class="remove-btn">&times;</button>
-            `);
-        }
-
-        // 移除圖片
         function removeImageFromSlot(slotIndex) {
-            restoreImageSlot(slotIndex);
-            $(`input[name="Image${slotIndex + 1}FileName"]`).val('');
+            const preview = $('.image-preview[data-slot="' + slotIndex + '"]');
+            const slotNumber = slotIndex + 1;
+
+            preview.removeClass('has-image').addClass('empty');
+            var html = '<div class="image-number">' + slotNumber + '</div>' +
+                      '<button type="button" class="image-remove">&times;</button>';
+            preview.html(html);
+
+            $('input[name="Image' + slotNumber + 'FileName"]').val('');
+            $('#fileInput' + slotNumber).val('');
         }
 
-        // 載入類別選項
         function loadCategories() {
             $.ajax({
                 url: '/api/ProductCategoryApi',
@@ -868,214 +814,111 @@
             });
         }
 
-        // 渲染類別選項
         function renderCategories(categories) {
             const container = $('#categoryContainer');
             container.empty();
 
-            // 計算層級
             const categoriesWithLevel = categories.map(category => ({
-                ...category,
+                id: category.id,
+                name: category.name,
+                fatherId: category.fatherId,
                 level: category.fatherId != null ? 1 : 0
             }));
 
-            // 取得根類別
             const rootCategories = categoriesWithLevel.filter(c => c.level === 0);
 
             rootCategories.forEach(parent => {
-                // 檢查是否有子類別
                 const children = categoriesWithLevel.filter(c => c.fatherId === parent.id);
                 const hasChildren = children.length > 0;
 
-                // 父類別 (不可選擇如果有子類別)
-                const parentHtml = `
-                    <div class="category-item level-0 ${hasChildren ? 'disabled' : ''}">
-                        ${hasChildren ? parent.name + ' (請選擇子類別)' : `
-                            <label>
-                                <input type="checkbox" name="SelectedCategoryIds" value="${parent.id}" 
-                                       ${hasChildren ? 'disabled' : ''} />
-                                ${parent.name}
-                            </label>
-                        `}
-                    </div>
-                `;
-                container.append(parentHtml);
+                if (hasChildren) {
+                    const parentHtml = '<div class="category-item level-0 disabled">' +
+                                     parent.name + ' (請選擇子類別)</div>';
+                    container.append(parentHtml);
+                } else {
+                    const parentHtml = '<div class="category-item level-0">' +
+                                     '<label>' +
+                                     '<input type="checkbox" name="SelectedCategoryIds" value="' + parent.id + '" />' +
+                                     parent.name +
+                                     '</label>' +
+                                     '</div>';
+                    container.append(parentHtml);
+                }
 
-                // 子類別
                 children.forEach(child => {
-                    const childHtml = `
-                        <div class="category-item level-1">
-                            <label>
-                                <input type="checkbox" name="SelectedCategoryIds" value="${child.id}" />
-                                ${child.name}
-                            </label>
-                        </div>
-                    `;
+                    const childHtml = '<div class="category-item level-1">' +
+                                    '<label>' +
+                                    '<input type="checkbox" name="SelectedCategoryIds" value="' + child.id + '" />' +
+                                    child.name +
+                                    '</label>' +
+                                    '</div>';
                     container.append(childHtml);
                 });
             });
         }
 
-        // 載入運送方式
-        function loadShipMethods() {
-            $.ajax({
-                url: '/api/Ships', // 根據你們的API路徑調整
-                method: 'GET',
-                success: function(data) {
-                    renderShipMethods(data);
-                },
-                error: function() {
-                    $('#shipMethodContainer').html('<div class="text-danger">載入運送方式失敗</div>');
-                }
-            });
-        }
-
-        // 渲染運送方式
-        function renderShipMethods(ships) {
-            const container = $('#shipMethodContainer');
-            container.empty();
-
-            ships.forEach(ship => {
-                if (ship.isActive) {
-                    const shipHtml = `
-                        <div class="ship-method-item">
-                            <label>
-                                <input type="checkbox" name="SelectedShipIds" value="${ship.id}" />
-                                ${ship.shipMethodName}
-                            </label>
-                            <span class="ship-cost">NT$ ${ship.shipCost}</span>
-                        </div>
-                    `;
-                    container.append(shipHtml);
-                }
-            });
-        }
-
-        // 表單驗證
         function validateForm() {
             let isValid = true;
+            const errors = [];
 
-            // 檢查是否選擇了類別
-            if ($('input[name="SelectedCategoryIds"]:checked').length === 0) {
-                showToast('錯誤', '請至少選擇一個商品類別', 'error');
+            if (!$('#Name').val().trim()) {
+                errors.push('請輸入商品名稱');
                 isValid = false;
             }
 
-            // 檢查是否選擇了運送方式
-            if ($('input[name="SelectedShipIds"]:checked').length === 0) {
-                showToast('錯誤', '請至少選擇一個運送方式', 'error');
+            if (!$('#ItemNumber').val().trim()) {
+                errors.push('請輸入商品貨號');
                 isValid = false;
+            }
+
+            if (!$('#Keypoint').val().trim()) {
+                errors.push('請輸入商品簡述');
+                isValid = false;
+            }
+
+            if (!$('#ProductDescription').val().trim()) {
+                errors.push('請輸入商品描述');
+                isValid = false;
+            }
+
+            const price = parseFloat($('#Price').val());
+            if (!price || price <= 0) {
+                errors.push('請輸入有效的價格');
+                isValid = false;
+            }
+
+            if ($('input[name="SelectedCategoryIds"]:checked').length === 0) {
+                errors.push('請至少選擇一個商品類別');
+                isValid = false;
+            }
+
+            if ($('input[name="SelectedShipIds"]:checked').length === 0) {
+                errors.push('請至少選擇一個運送方式');
+                isValid = false;
+            }
+
+            if (!$('input[name="Image1FileName"]').val()) {
+                errors.push('請上傳主圖');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                const errorMessage = errors.join('<br>');
+                showToast('驗證錯誤', errorMessage, 'error');
             }
 
             return isValid;
         }
 
-        // 顯示 Toast 訊息
-        function showToast(title, message, type = 'info') {
-            const bgClass = {
-                'success': 'bg-success',
-                'error': 'bg-danger',
-                'warning': 'bg-warning',
-                'info': 'bg-info'
-            }[type] || 'bg-info';
-
-            const toastHtml = `
-                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="toast-header ${bgClass} text-white">
-                            <strong class="me-auto">${title}</strong>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            const toastContainer = document.createElement('div');
-            toastContainer.innerHTML = toastHtml;
-            document.body.appendChild(toastContainer);
-
-            // 3秒後自動關閉
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 3000);
-        }
-
-        // 上傳圖片到指定槽位 (更新為使用你們的API)
-        function uploadImageToSlot(file, slotIndex) {
-            if (!file.type.startsWith('image/')) {
-                showToast('錯誤', '請選擇圖片檔案', 'error');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            // 顯示上傳中狀態
-            const slot = $(`.image-slot[data-slot="${slotIndex}"]`);
-            const originalContent = slot.html();
-            slot.html('<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">上傳中...</span></div></div>');
-
-            // 使用你們的上傳 API
-            $.ajax({
-                url: '/api/UploadFile',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    // 根據你們的API回應格式調整
-                    const fileName = response.fileName;
-                    const imageUrl = `/api/UploadFile/GetFile?fileName=${encodeURIComponent(fileName)}`;
-                    updateImageSlot(slotIndex, fileName, imageUrl);
-                    showToast('成功', '圖片上傳成功', 'success');
-                },
-                error: function(xhr, status, error) {
-                    // 恢復原始內容
-                    slot.html(originalContent);
-                    console.error('圖片上傳失敗:', error);
-                    showToast('錯誤', '圖片上傳失敗，請重試', 'error');
-                }
-            });
-        }
-
-        // 載入運送方式 (使用正確的API路徑)
-        function loadShipMethods() {
-            // 模擬運送方式資料，你可以根據實際API調整
-            const mockShipData = [
-                { id: 1, shipMethodName: '宅配', shipCost: 100, isActive: true },
-                { id: 2, shipMethodName: '7-11 貨到付款', shipCost: 60, isActive: true },
-                { id: 3, shipMethodName: '7-11 純取貨', shipCost: 60, isActive: true }
-            ];
-            
-            renderShipMethods(mockShipData);
-            
-            // 如果有實際的運送方式API，取消註解並修改路徑
-            /*
-            $.ajax({
-                url: '/api/Ships', // 根據你們的API路徑調整
-                method: 'GET',
-                success: function(data) {
-                    renderShipMethods(data);
-                },
-                error: function() {
-                    $('#shipMethodContainer').html('<div class="text-danger">載入運送方式失敗</div>');
-                }
-            });
-            */
-        }
-
-        // 表單提交處理
         $('#productForm').on('submit', function(e) {
-            e.preventDefault();
-            
+            console.log('表單提交開始');
+
             if (!validateForm()) {
-                return;
+                console.log('表單驗證失敗');
+                e.preventDefault();
+                return false;
             }
 
-            // 收集選中的類別和運送方式
             const selectedCategories = [];
             $('input[name="SelectedCategoryIds"]:checked').each(function() {
                 selectedCategories.push(parseInt($(this).val()));
@@ -1086,71 +929,63 @@
                 selectedShips.push(parseInt($(this).val()));
             });
 
-            // 設定隱藏欄位值
-            if (selectedCategories.length > 0) {
-                // 為了配合後端模型綁定，需要建立多個隱藏欄位
-                selectedCategories.forEach((categoryId, index) => {
-                    if ($(`input[name="SelectedCategoryIds[${index}]"]`).length === 0) {
-                        $(this).append(`<input type="hidden" name="SelectedCategoryIds[${index}]" value="${categoryId}" />`);
-                    }
-                });
-            }
+            console.log('選中的類別:', selectedCategories);
+            console.log('選中的運送方式:', selectedShips);
 
-            if (selectedShips.length > 0) {
-                selectedShips.forEach((shipId, index) => {
-                    if ($(`input[name="SelectedShipIds[${index}]"]`).length === 0) {
-                        $(this).append(`<input type="hidden" name="SelectedShipIds[${index}]" value="${shipId}" />`);
-                    }
-                });
-            }
+            $('input[name^="SelectedCategoryIds["]').remove();
+            $('input[name^="SelectedShipIds["]').remove();
 
-            // 顯示提交中狀態
+            const form = $(this);
+            selectedCategories.forEach((categoryId, index) => {
+                form.append('<input type="hidden" name="SelectedCategoryIds[' + index + ']" value="' + categoryId + '" />');
+            });
+
+            selectedShips.forEach((shipId, index) => {
+                form.append('<input type="hidden" name="SelectedShipIds[' + index + ']" value="' + shipId + '" />');
+            });
+
             const submitBtn = $('#submitBtn');
-            const originalText = submitBtn.text();
             submitBtn.prop('disabled', true)
                      .html('<span class="spinner-border spinner-border-sm me-2" role="status"></span>處理中...');
 
-            // 提交表單
-            this.submit();
+            console.log('表單即將提交到後端');
+
+            return true;
         });
 
-        // 價格輸入格式化
-        $('#Price').on('input', function() {
-            let value = $(this).val();
-            // 移除非數字字元
-            value = value.replace(/[^\d]/g, '');
-            $(this).val(value);
-        });
+        function showToast(title, message, type) {
+            type = type || 'info';
 
-        // 庫存輸入格式化
-        $('#Quantity').on('input', function() {
-            let value = $(this).val();
-            // 移除非數字字元
-            value = value.replace(/[^\d]/g, '');
-            $(this).val(value);
-        });
+            const bgClass = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-info';
 
-        // 字數統計
-        $('#Keypoint').on('input', function() {
-            const maxLength = 250;
-            const currentLength = $(this).val().length;
-            const remaining = maxLength - currentLength;
-            
-            // 移除舊的字數提示
-            $(this).siblings('.char-count').remove();
-            
-            // 添加新的字數提示
-            $(this).after(`<small class="form-text text-muted char-count">${currentLength}/${maxLength} 字</small>`);
-            
-            if (remaining < 20) {
-                $(this).siblings('.char-count').removeClass('text-muted').addClass('text-warning');
-            }
-            if (remaining < 0) {
-                $(this).siblings('.char-count').removeClass('text-warning').addClass('text-danger');
-            }
-        });
+            const toastId = 'toast_' + Date.now();
 
-        // 觸發字數統計初始化
-        $('#Keypoint').trigger('input');
+            const toastHtml = '<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999" id="' + toastId + '">' +
+                            '<div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">' +
+                            '<div class="toast-header ' + bgClass + ' text-white">' +
+                            '<strong class="me-auto">' + title + '</strong>' +
+                            '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>' +
+                            '</div>' +
+                            '<div class="toast-body">' +
+                            message +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+
+            $('body').append(toastHtml);
+
+            setTimeout(function() {
+                $('#' + toastId).remove();
+            }, 5000);
+
+            $('#' + toastId + ' .btn-close').click(function() {
+                $('#' + toastId).remove();
+            });
+        }
     </script>
 }
