@@ -119,12 +119,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
-       
-
-
-
-
-
         //審核
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -214,8 +208,51 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
+        public IActionResult Create()
+        {
+            //新增機構
+            return View();
+        }
 
-        
+        //先暫時寫這樣 晚點回來檢查
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(AdminInstitutionCreateVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+            // 檢查機構代碼是否已存在
+            var existing = await _context.Institutions
+                .FirstOrDefaultAsync(i => i.InstitutionCode == vm.InstitutionCode);
+            if (existing != null)
+            {
+                ModelState.AddModelError("InstitutionCode", "機構代碼已存在。");
+                return View(vm);
+            }
+            // 新增機構
+            var institution = new Institution
+            {
+                InstitutionCode = vm.InstitutionCode,
+                Name = vm.InstitutionName,
+                Email = vm.InstitutionEmail,
+                Phone = vm.InstitutionPhone,
+                PrincipalName = vm.PrincipalName,
+                PrincipalPhone = vm.PrincipalPhone,
+                CityId = vm.CityId,
+                TownshipId = vm.TownshipId,
+                Address = vm.Address,
+                Status = "Pending",
+                IsPhysicalCheck = false, // 預設為 false
+                IsBanned = false // 預設為 false
+            };
+            _context.Institutions.Add(institution);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "機構已成功新增。";
+            return RedirectToAction("Index");
 
+
+        }
     }
 }

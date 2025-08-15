@@ -1,0 +1,55 @@
+﻿@model IEnumerable<AdminInstitutionUserListItemVM>
+
+@{
+    ViewData["Title"] = "機構員工清單";
+    string StatusBadge(string s) => s switch
+    {
+        "active" => "badge bg-success",
+        "frozen" => "badge bg-secondary",
+        "unverified" => "badge bg-warning text-dark",
+        "banned" => "badge bg-danger",
+        _ => "badge bg-light text-dark"
+    };
+}
+
+<div class="container-xxl py-4">
+    <h2 class="mb-3">@ViewData["Title"]</h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>會員編號</th>
+                    <th>姓名</th>
+                    <th style="min-width:260px;">Email / 電話</th>
+                    <th>機構</th>
+                    <th>狀態</th>
+                    <th>最後登入</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var x in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">@x.UserId</td>
+                        <td class="text-nowrap">@x.Name</td>
+                        <td>
+                            <div class="text-truncate" style="max-width:280px;">@x.Email</div>
+                            <div class="text-muted small">@x.Phone</div>
+                        </td>
+                        <td>
+                            <div>@x.InstitutionCode</div>
+                            <div class="text-muted small text-truncate" style="max-width:220px;">@x.InstitutionName</div>
+                        </td>
+                        <td>
+                            <span class="@StatusBadge(x.Status)">@x.Status</span>
+                        </td>
+                        <td class="text-nowrap">
+                            @(x.LastLoginAt?.ToString("yyyy/MM/dd HH:mm") ?? "-")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
