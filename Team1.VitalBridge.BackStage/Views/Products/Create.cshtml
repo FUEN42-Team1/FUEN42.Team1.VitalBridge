@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "新增商品";
 }
-
+@section Styles {
 <style>
     .product-form-container {
         max-width: 1200px;
@@ -36,8 +36,8 @@
 
     .image-upload-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
         margin-top: 20px;
     }
     
@@ -125,11 +125,45 @@
         min-height: 20px; /* 確保有固定高度，即使沒有文字 */
     }
 
-    @@keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
+
+    /* 處理按鈕*/
+        .btn-select {
+            background: #6c757d !important;
+            border: 1px solid #6c757d !important;
+            color: white !important;
+
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .btn-select:hover {
+                background: #5a6268 !important;
+                border-color: #545b62 !important;
+                color: white !important;
+            }
+
+        .btn-upload {
+            background: #21AD5B !important;
+            border: 1px solid #21AD5B !important;
+            color: white !important;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .btn-upload:hover {
+                background: #16763E !important;
+                border-color: #16763E !important;
+                color: white !important;
+            }
+
 
     .category-tree {
         max-height: 300px;
@@ -294,8 +328,20 @@
     .main-upload-area.dragover .upload-icon {
         color: #21AD5B;
     }
-</style>
 
+        .upload-controls{
+            display: flex;
+            gap: 8px;
+            justify-content: space-evenly;
+        
+        }
+
+        .keypointStyle{
+            height:100px;
+        }
+
+</style>
+}
 <div class="container-fluid">
     <div class="product-form-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -351,7 +397,7 @@
 
                         <div class="mb-3">
                             <label asp-for="Keypoint" class="form-label required-field">商品簡述</label>
-                            <input asp-for="Keypoint" class="form-control" placeholder="請輸入商品簡述（最多250字）" maxlength="250" />
+                            <textarea asp-for="Keypoint" class="form-control keypointStyle" rows="5" placeholder="請輸入商品簡述（最多250字）" maxlength="250"></textarea>
                             <span asp-validation-for="Keypoint" class="text-danger"></span>
                         </div>
                     </div>
@@ -372,7 +418,7 @@
             </div>
 
             <!-- 圖片上傳 -->
-            <div class="mb-4">
+            <div class="mb-4 ">
                 <h5 class="section-header">圖片</h5>
                 <p class="upload-instruction">建議尺寸 800x800px，支援 JPG、PNG 格式</p>
                 
@@ -1106,5 +1152,5 @@
 
         // 觸發字數統計初始化
         $('#Keypoint').trigger('input');
-   </script>
-   }
+    </script>
+}
