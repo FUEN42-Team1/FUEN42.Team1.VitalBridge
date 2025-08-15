@@ -59,7 +59,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             //});
         }
 
-        [HttpGet("GetFile/{fileName}")]
+        [HttpGet("GetFile")]
         public IActionResult GetFile(string fileName)
         {
             var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越

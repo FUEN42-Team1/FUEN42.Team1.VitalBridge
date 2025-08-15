@@ -19,7 +19,7 @@ function loadAdsByDate(dateStr) {
 
                 if (p.images.length === 0) {
                     const fileName = p.defaultImageFile.fileName;
-                    const fileUrl = `/api/UploadFile/GetFile/${encodeURIComponent(fileName)}`;
+                    const fileUrl = `/api/UploadFile/GetFile?fileName=${encodeURIComponent(fileName)}`;
                     html += `
                     <div class="carousel-item active">
                         <img src="${fileUrl}" title="${p.defaultImageIntroduct}" class="d-block w-100" alt="...">
@@ -29,7 +29,7 @@ function loadAdsByDate(dateStr) {
                     for (var image of p.images) {
                         const activeClass = count === 0 ? "active" : "";
                         const fileName = image.imageFile.fileName;
-                        const fileUrl = `/api/UploadFile/GetFile/${encodeURIComponent(fileName)}`;
+                        const fileUrl = `/api/UploadFile/GetFile?fileName=${encodeURIComponent(fileName)}`;
                         html += `
                         <div class="carousel-item ${activeClass}">
                             <img src="${fileUrl}" title="${image.introduct}" class="d-block w-100" alt="...">
