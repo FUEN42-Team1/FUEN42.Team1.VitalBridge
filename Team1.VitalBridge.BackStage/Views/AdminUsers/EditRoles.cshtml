@@ -1,0 +1,121 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels.Admin
+@model AdminEditRolesVM
+@{
+    ViewData["Title"] = "編輯管理員身分";
+}
+
+<div class="container-xxl py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <a asp-action="Details" asp-route-userId="@Model.UserId" class="btn btn-outline-secondary btn-sm">返回</a>
+    </div>
+
+    <style>
+        /* 隱藏原生核取方塊 */
+        .role-check {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 卡片基礎樣式 */
+        .role-card {
+            border-radius: 1rem;
+            border: 1px solid var(--bs-border-color);
+            padding: 0.9rem 1rem;
+            display: block;
+            cursor: pointer;
+            transition: .15s ease-in-out;
+            background: var(--bs-body-bg);
+            box-shadow: 0 1px 2px rgba(0,0,0,.04);
+        }
+
+            .role-card:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            }
+
+        /* 勾選後的高亮 */
+        .role-check:checked + .role-card {
+            border-color: var(--bs-success);
+            background: rgba(var(--bs-success-rgb), .06);
+            box-shadow: 0 0 0 .2rem rgba(var(--bs-success-rgb), .15);
+        }
+
+        /* 右上角的對勾徽章 */
+        .role-badge {
+            font-size: .75rem;
+            padding: .15rem .45rem;
+            border-radius: .5rem;
+            background: var(--bs-secondary-bg);
+            color: var(--bs-secondary-color);
+        }
+
+        .role-check:checked + .role-card .role-badge {
+            background: var(--bs-success);
+            color: #fff;
+        }
+
+        .role-code {
+            color: var(--bs-secondary-color);
+        }
+
+
+        /* 徽章：預設顯示 未選 */
+        .role-card .role-badge::after {
+            content: "未選";
+        }
+
+        /* 勾選後顯示 已選 */
+        .role-check:checked + .role-card .role-badge::after {
+            content: "已選";
+        }
+
+    </style>
+
+
+
+
+    <form asp-action="EditRoles" method="post" class="card p-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+
+
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">指派角色</label>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                @foreach (var r in Model.AllRoles)
+                {
+                    var isChecked = Model.SelectedRoles?.Contains(r.Code) ?? false;
+                    <div class="col">
+                        <!-- 隱藏的 checkbox 放前面，label 當卡片 -->
+                        <input class="role-check" type="checkbox"
+                               id="role-@r.Code"
+                               name="SelectedRoles"
+                               value="@r.Code"
+                               @(isChecked ? "checked" : "") />
+
+                        <label class="role-card" for="role-@r.Code">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <div class="fw-semibold">@r.Name</div>
+                                    <div class="role-code">(@r.Code)</div>
+                                </div>
+                                <span class="role-badge"></span>
+                            </div>
+                        </label>
+                    </div>
+                }
+            </div>
+        </div>
+
+
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">儲存</button>
+            <a asp-action="Details" asp-route-userId="@Model.UserId" class="btn btn-outline-secondary">取消</a>
+        </div>
+    </form>
+</div>

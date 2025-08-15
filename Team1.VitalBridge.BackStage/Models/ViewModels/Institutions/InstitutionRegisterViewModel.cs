@@ -2,7 +2,7 @@
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels.Institutions
 {
-    public class InstitutionRegisterLoginViewModel
+    public class InstitutionRegisterViewModel
     {
 
         [Display(Name = "機構代碼")]
@@ -67,5 +67,9 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels.Institutions
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "密碼和確認密碼不一致")]
         public string ConfirmPassword { get; set; }
+
+        public string ImageName { get; set; }
+        public string ImageUrl { get; set; }
+        public string MimeType { get; set; }
     }
 }

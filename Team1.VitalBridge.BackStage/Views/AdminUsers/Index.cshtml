@@ -1,0 +1,148 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.Admin.AdminUserListVM>
+@{
+    ViewData["Title"] = "管理員帳號清單";
+
+    string StatusText(string? s) => s switch
+    {
+        "active" => "正常",
+        "frozen" => "凍結",
+        "unverified" => "未開通",
+        "banned" => "停權",
+        _ => "-"
+    };
+
+    string StatusBadgeClass(string? s) => s switch
+    {
+        "active" => "bg-success",
+        "frozen" => "bg-warning text-dark",
+        "unverified" => "bg-secondary",
+        "banned" => "bg-danger",
+        _ => "bg-light text-dark"
+    };
+}
+
+<style>
+    .table-fixed {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+        .table-fixed th, .table-fixed td {
+            overflow: hidden;
+            vertical-align: middle;
+        }
+
+    /* 單行省略號 */
+    .ellipsis-1 {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    /* 操作欄位中的按鈕保持在一行 */
+    .actions {
+        white-space: nowrap;
+    }
+
+    /* Email、電話欄多行排列 */
+    .multi-line {
+        white-space: normal;
+        word-break: break-all;
+        line-height: 1.4;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">@ViewData["Title"]</h2>
+        <a class="btn btn-primary btn-sm" asp-action="Create">新增管理員</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle table-fixed">
+            <colgroup>
+                <col style="width:8%"> <!-- 名稱 -->
+                
+                 <col style="width:15%"> <!-- Email + 電話 --> 
+                <col style="width:8%"> <!-- 身分 -->
+                <col style="width:8%"> <!-- 狀態 -->
+                 <col style="width:23%"> <!-- 註記 --> 
+                 <col style="width:12%"> <!-- 最後執行動作 --> 
+                <col style="width:5%">  <!-- 操作 --> 
+            </colgroup>
+
+            <thead class="table-light">
+                <tr>
+                    <th>@Html.DisplayNameFor(m => m.First().Name)</th>
+                    <th>Email / 聯絡電話</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Roles)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Status)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().Note)</th>
+                    <th>@Html.DisplayNameFor(m => m.First().LastAdminActionAt)</th>
+                    @* <th class="text-end">操作</th> *@
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">目前沒有資料</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var x in Model)
+                    {
+                        var name = string.IsNullOrWhiteSpace(x.Name) ? "-" : x.Name;
+                        var email = string.IsNullOrWhiteSpace(x.Email) ? "-" : x.Email;
+                        var phone = string.IsNullOrWhiteSpace(x.Phone) ? "-" : x.Phone;
+                        var rolesText = x.Roles != null && x.Roles.Any() ? string.Join(", ", x.Roles) : "-";
+                        var note = string.IsNullOrWhiteSpace(x.Note) ? "-" : x.Note;
+                        var lastAct = x.LastAdminActionAt?.ToString("yyyy/MM/dd HH:mm") ?? "-";
+
+                        <tr>
+                            <td class="ellipsis-1" title="@name">@name</td>
+
+                            <!-- Email 第一行，電話第二行 -->
+                            <td class="multi-line">
+                                <div title="@email">@email</div>
+                                <div class="text-muted small" title="@phone">@phone</div>
+                            </td>
+
+                            <td class="ellipsis-1" title="@rolesText">@rolesText</td>
+
+                            <td>
+                                @{
+                                    var statusText = StatusText(x.Status);
+                                    var statusClass = StatusBadgeClass(x.Status);
+
+                                    bool isLocked = x.LockedUntil.HasValue && x.LockedUntil.Value > DateTime.UtcNow;
+                                }
+
+                                <span class="badge @statusClass">@statusText</span>
+
+                                @if (isLocked)
+                                {
+                                    <span class="badge bg-danger ms-1">
+                                        <i class="bi bi-lock-fill"></i> 已鎖定
+                                    </span>
+                                }
+                            </td>
+
+                            <!-- 註記：單行省略號 -->
+                            <td class="ellipsis-1" title="@note">@note</td>
+
+                            <td class="ellipsis-1" title="@lastAct">@lastAct</td>
+
+                            <td class="text-end actions">
+                                @* <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-userId="@x.UserId">編輯</a> *@
+                                <a class="btn btn-outline-secondary btn-sm ms-1" asp-action="Details" asp-route-userId="@x.UserId">檢視</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

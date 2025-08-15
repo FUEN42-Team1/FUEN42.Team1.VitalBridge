@@ -57,12 +57,33 @@ namespace Team1.VitalBridge.BackStage.Controllers
                .SingleOrDefaultAsync(au => au.Email == vm.Email);
 
 
-            // 驗證使用者是否存在且密碼正確
-            if (adminUser == null || !HashUtility.VerifyPassword(vm.Password, adminUser.Password))
+            // 驗證使用者是否存在
+            if (adminUser == null)
             {
                 ModelState.AddModelError("", "無效的電子郵件或密碼。");
                 return View(vm);
             }
+
+            //檢查密碼是否正確 若錯誤則增加失敗次數
+            if (!HashUtility.VerifyPassword(vm.Password, adminUser.Password))
+            {
+                // 增加登入失敗次數
+                adminUser.FailedLoginCount++;
+                // 如果失敗次數達到上限，則鎖定帳號
+                if (adminUser.FailedLoginCount >= 3)
+                {
+                    adminUser.LockedUntil = DateTime.MaxValue; // 永久鎖定
+                    ModelState.AddModelError("", $"您的帳號已被鎖定，鎖定至 {adminUser.LockedUntil:yyyy-MM-dd HH:mm:ss}");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "無效的電子郵件或密碼。");
+                }
+                _context.Users.Update(adminUser);
+                await _context.SaveChangesAsync();
+                return View(vm);
+            }
+
 
             // 檢查是否已驗證開通
             //if (adminUser.Status == "unverified")
@@ -115,11 +136,25 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 claims.AddRange(permissionCodes.Select(permissionCode => new Claim("Permission", permissionCode)));
             }
 
+            //將登入失敗次數歸0
+            //如果上鎖時間已過 順便清除
+            adminUser.FailedLoginCount = 0;
+            adminUser.LastLoginAt = DateTime.UtcNow;
+            if (adminUser.LockedUntil.HasValue && adminUser.LockedUntil.Value < DateTime.UtcNow)
+            {
+                adminUser.LockedUntil = null; // 清除鎖定時間
+            }
+            _context.Users.Update(adminUser);
+            await _context.SaveChangesAsync();
+
+
+
+
 
             // 生成 JWT Token
             // 確保 Expires 時間一致
             var expiresMinutes = double.Parse(_configuration["JwtSettings:ExpirationMinutes"]);
-            var jwtToken = _jwtService.GenerateToken(claims, expiresMinutes, "AdminAudience");// 生成 JWT Token
+            var jwtToken = _jwtService.GenerateToken(claims, expiresMinutes, "AdminJwtScheme");// 生成 JWT Token
             _jwtService.SetTokenCookie(jwtToken, expiresMinutes, Response, "admin_auth_token", "/Admin");// 將 JWT 存入 HttpOnly Cookie
 
             return RedirectToAction("Index", "Admin");

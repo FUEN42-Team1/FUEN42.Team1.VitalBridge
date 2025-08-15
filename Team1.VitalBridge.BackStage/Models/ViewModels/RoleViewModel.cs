@@ -42,5 +42,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         }
 
         public string RoleTypeName => RoleType.ToString();
+
+        public string RoleTypeShowName { get; set; }
     }
 }

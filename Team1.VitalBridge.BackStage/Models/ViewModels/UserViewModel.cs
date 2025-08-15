@@ -37,7 +37,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string? Address { get; set; }
 
         [Display(Name = "狀態")]
-        public string Status { get; set; } // 例如：Active, Inactive, Banned 等
+        public string Status { get; set; } 
 
         [Display(Name ="註冊時間")]
 

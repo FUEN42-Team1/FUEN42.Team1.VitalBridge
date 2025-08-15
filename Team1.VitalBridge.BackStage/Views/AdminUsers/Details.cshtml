@@ -1,0 +1,320 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels.Admin
+@model AdminUserDetailsVM
+@{
+    ViewData["Title"] = "管理員詳細資料";
+
+    // ===== 顯示字串與徽章樣式 =====
+    string status = (Model.Status ?? "").Trim();
+    string statusText = status switch
+    {
+        "active" => "正常",
+        "frozen" => "凍結",
+        "unverified" => "未開通",
+        "banned" => "停權",
+        _ => string.IsNullOrWhiteSpace(status) ? "未知" : status
+    };
+    string statusClass = status switch
+    {
+        "active" => "badge bg-success",
+        "frozen" => "badge bg-secondary",
+        "unverified" => "badge bg-warning text-dark",
+        "banned" => "badge bg-danger",
+        _ => "badge bg-light text-dark"
+    };
+
+    // 是否鎖定（以 UTC 判斷；若你存本地時間，可以改用 DateTime.Now）
+    bool isLocked = Model.LockedUntil.HasValue && Model.LockedUntil.Value > DateTime.UtcNow;
+    string lockedBadge = isLocked ? "badge bg-danger" : "badge bg-info";
+    string lockedText = Model.LockedUntil.HasValue
+        ? (isLocked ? $"鎖定中，至 {Model.LockedUntil:yyyy/MM/dd HH:mm}" : $"鎖定到期：{Model.LockedUntil:yyyy/MM/dd HH:mm}")
+        : "未鎖定";
+
+    string[] roles = Model.Roles ?? Array.Empty<string>();
+    string phoneText = string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone;
+    string noteText = string.IsNullOrWhiteSpace(Model.Note) ? "—" : Model.Note;
+    string emailText = string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email;
+
+    string fmt(DateTime? dt) => dt.HasValue ? dt.Value.ToString("yyyy/MM/dd HH:mm") : "—";
+
+    int failedCount = Model.FailedLoginCount ?? 0;
+    string lockedUntilText = Model.LockedUntil.HasValue
+        ? Model.LockedUntil.Value.ToString("yyyy/MM/dd HH:mm")
+        : "—";
+}
+
+<div class="container-xxl py-4">
+
+    @* ===== TempData 訊息區（可選） ===== *@
+    @if (TempData["Success"] is string s && !string.IsNullOrWhiteSpace(s))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @s
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Info"] is string i && !string.IsNullOrWhiteSpace(i))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @i
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] is string e && !string.IsNullOrWhiteSpace(e))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @e
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- 頁首與動作 -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1">@ViewData["Title"]</h2>
+            <div class="text-muted small">
+                編號：<code>@Model.UserId</code>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" asp-controller="AdminUsers" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> 返回清單
+            </a>
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editAdminModal">
+                <i class="bi bi-pencil-square me-1"></i> 編輯
+            </button>
+
+        </div>
+    </div>
+
+    <!-- 基本資訊 -->
+    <div class="row g-4">
+        <div class="col-12 col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="fw-semibold">基本資料</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="@statusClass">@statusText</span>
+                            <span class="@lockedBadge">@lockedText</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Name)</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Email)</dt>
+                        <dd class="col-sm-9 d-flex align-items-center gap-2">
+                            <span id="emailText">@emailText</span>
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        data-clipboard="#emailText"
+                                        aria-label="複製 Email">
+                                    複製
+                                </button>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Phone)</dt>
+                        <dd class="col-sm-9">@phoneText</dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Status)</dt>
+                        <dd class="col-sm-9 d-flex align-items-center gap-2">
+                            <span class="@statusClass">@statusText</span>
+                            <small class="text-muted">(@(string.IsNullOrWhiteSpace(Model.Status) ? "—" : Model.Status))</small>
+                        </dd>
+
+                        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Note)</dt>
+                        <dd class="col-sm-9">@noteText</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用狀態 -->
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                    <span class="fw-semibold">使用狀態</span>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @if (isLocked)
+                        {
+                            @* <span class="badge bg-danger">已鎖定</span> *@
+                            <form asp-action="ResetLock"
+                                  asp-controller="AdminUsers"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('確定要解除鎖定並清除累計登入失敗次數嗎？');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@Model.UserId" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-unlock"></i> 解除鎖定
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            @* <span class="badge bg-success">未鎖定</span> *@
+                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled title="目前未鎖定">
+                                <i class="bi bi-unlock"></i> 解除鎖定
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row gy-2">
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.FailedLoginCount)</div>
+                            <div class="fs-5">@failedCount</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.LockedUntil)</div>
+                            <div>
+                                @lockedUntilText
+                                @if (isLocked)
+                                {
+                                    <span class="text-muted small ms-1">(鎖定中)</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.LastLoginAt)</div>
+                            <div>@fmt(Model.LastLoginAt)</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.LastAdminActionAt)</div>
+                            <div>@fmt(Model.LastAdminActionAt)</div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row gy-2">
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.CreatedAt)</div>
+                            <div>@Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">@Html.DisplayNameFor(m => m.UpdatedAt)</div>
+                            <div>@Model.UpdatedAt.ToString("yyyy/MM/dd HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 角色/身分 -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-body d-flex align-items-center justify-content-between">
+                    <span class="fw-semibold">@Html.DisplayNameFor(m => m.Roles)</span>
+                    <a asp-action="EditRoles"
+                       asp-controller="AdminUsers"
+                       asp-route-userId="@Model.UserId"
+                       class="btn btn-sm btn-outline-primary">
+                        管理身分
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (roles.Length == 0)
+                    {
+                        <span class="text-muted">尚未指派任何身分</span>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var r in roles.OrderBy(x => x))
+                            {
+                                <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis border border-primary-subtle">@r</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+}
+
+@section Scripts {
+    <script>
+        // 複製按鈕（不依賴外部套件）
+        document.querySelectorAll('[data-clipboard]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sel = btn.getAttribute('data-clipboard');
+                const el = document.querySelector(sel);
+                const text = el ? (el.textContent || '').trim() : '';
+                if (!text) return;
+
+                navigator.clipboard.writeText(text).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '已複製！';
+                    setTimeout(() => btn.textContent = original, 1200);
+                }).catch(() => {
+                    alert('複製失敗，請手動選取。');
+                });
+            });
+        });
+    </script>
+
+
+}
+
+<button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#editAdminModal">
+    <i class="bi bi-pencil-square me-1"></i> 編輯
+</button>
+
+<div class="modal fade" id="editAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">編輯基本資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("_AdminEditForm",
+                         new Team1.VitalBridge.BackStage.Models.ViewModels.Admin.AdminEditVM
+                {
+                    UserId = Model.UserId,
+                    Name = Model.Name,
+                    Phone = Model.Phone,
+                    Note = Model.Note
+                })
+            </div>
+        </div>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+    (function () {
+      const shouldOpen =
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                 (TempData["OpenEditModal"]?.ToString() == "1")));
+
+      if (shouldOpen) {
+        const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+        modal.show();
+
+        const nameVal  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Name"] ?? ""));
+        const phoneVal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Phone"] ?? ""));
+        const noteVal  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["EditVM_Note"] ?? ""));
+
+        const form = document.getElementById('admin-edit-form');
+        if (form) {
+          if (nameVal)  form.querySelector('input[name="Name"]').value = nameVal;
+          if (phoneVal) form.querySelector('input[name="Phone"]').value = phoneVal;
+          if (noteVal)  form.querySelector('textarea[name="Note"]').value = noteVal;
+        }
+      }
+    })();
+</script>
