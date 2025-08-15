@@ -15,7 +15,7 @@ using Team1.VitalBridge.BackStage.Models.Service;
 using Team1.VitalBridge.BackStage.Models.Interfaces;
 
 namespace Team1.VitalBridge.BackStage
-{
+{ 
     public class Program
     {
         public static void Main(string[] args)
