@@ -182,8 +182,7 @@
                 return;
             }
             comments.forEach(comment => {
-                console.log('Rendering comment:',comment.commentContent, comment.Id, comment.IsEnabled);
-                const checked = comment.IsEnabled ? 'checked' : ''; // <-- must be 'checked' or empty string
+                const checked = comment.isEnabled ? 'checked' : ''; // <-- must be 'checked' or empty string
                 const row = `
                     <tr>
                         <td>${comment.articleTitle}</td>
@@ -191,7 +190,7 @@
                         <td>${comment.commentContent}</td>
                         <td>${comment.createdAt}</td>
                         <td>
-                            <input type="checkbox" data-comment-id="${comment.Id}" ${checked} aria-label="Toggle comment enabled status">
+                            <input type="checkbox" data-comment-id="${comment.id}" ${checked} aria-label="Toggle comment enabled status">
                         </td>
                     </tr>
                 `;

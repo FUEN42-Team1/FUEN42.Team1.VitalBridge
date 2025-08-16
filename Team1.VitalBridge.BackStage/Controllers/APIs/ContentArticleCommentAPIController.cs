@@ -30,6 +30,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             {
                 //query = query.Where(c => c.Member.Name.Contains(criteria.MemberName));
             }
+
             if (!string.IsNullOrEmpty(criteria.CommentContent))
             {
                 query = query.Where(c => c.Content.Contains(criteria.CommentContent));
