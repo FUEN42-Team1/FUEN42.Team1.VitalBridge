@@ -81,7 +81,7 @@
     <script>
         $(document).ready(function () {
             $("#routeInput").on('blur', function () {
-                const route = this.value.trim();
+                const route = "http://127.0.0.1:5500/"+this.value.trim();
                 const show = $("#Show")[0];
 
                 if (route !== "") {
@@ -146,9 +146,6 @@
 
                                 target.insertAdjacentElement("afterend", block);
 
-
-                            // 插入在目標元素後方
-                            target.insertAdjacentElement("afterend", block);
                                 // 🧠 將 selector 填入主頁 Location 欄位
                         // 使用 window.parent 取到外層 DOM
                         const locationInput = window.parent.document.querySelector('input[name="Location"]');
