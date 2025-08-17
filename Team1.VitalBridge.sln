@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Team1.VitalBridge.BackStage", "Team1.VitalBridge.BackStage\Team1.VitalBridge.BackStage.csproj", "{04BD1B1C-4B52-490F-AA67-C3473657C2DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Team1.VitalBridge.Frontend", "Team1.VitalBridge.Frontend\Team1.VitalBridge.Frontend.csproj", "{18CBE74F-6629-4E84-9EF8-010D5A1F1A8B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{04BD1B1C-4B52-490F-AA67-C3473657C2DB} = {04BD1B1C-4B52-490F-AA67-C3473657C2DB}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

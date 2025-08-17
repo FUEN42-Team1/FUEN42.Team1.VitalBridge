@@ -1,3 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using Team1.VitalBridge.Frontend.Interfaces;
+using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Models.Services;
 
 namespace Team1.VitalBridge.Frontend
 {
@@ -6,7 +13,7 @@ namespace Team1.VitalBridge.Frontend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            var cfg = builder.Configuration;//加的
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -14,6 +21,60 @@ namespace Team1.VitalBridge.Frontend
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+
+
+
+            // CORS：允許帶 Cookie（Credentials）
+            builder.Services.AddCors(o =>
+            {
+                o.AddPolicy("FE", p => p
+                    .WithOrigins(cfg.GetSection("Cors:Frontend").Get<string[]>())
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
+
+            // JWT（驗 Access Token）
+            builder.Services.AddAuthentication("Bearer")
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new()
+                    {
+                        ValidIssuer = cfg["Jwt:Issuer"],
+                        ValidAudience = cfg["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:AccessKey"]!)),
+                        ClockSkew = TimeSpan.FromSeconds(30)
+                    };
+                });
+
+
+
+            //DI注入
+            builder.Services.AddDbContext<AppDBContext>(options =>
+options.UseSqlServer(
+builder.Configuration.GetConnectionString("DefaultConnection"),
+sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+maxRetryCount: 10,  // 最多重試 10 次
+maxRetryDelay: TimeSpan.FromSeconds(30), // 重試之間的延遲時間
+errorNumbersToAdd: null // null 表示使用預設的 SQL Server 錯誤碼
+)
+)
+);
+
+            builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+
+
+
+
+
+
+
+
+
+            builder.Services.AddHttpContextAccessor();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -25,10 +86,21 @@ namespace Team1.VitalBridge.Frontend
 
             app.UseHttpsRedirection();
 
+
+
+
+
+
+
+
+            app.UseCors("FE");// 允許前端跨域請求，並帶上 Cookie（Credentials）
+            app.UseAuthentication();// 啟用身份驗證
             app.UseAuthorization();
 
 
             app.MapControllers();
+
+
 
             app.Run();
         }
