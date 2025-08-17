@@ -27,4 +27,8 @@ public partial class OrderStatus
     [ForeignKey("OrderId")]
     [InverseProperty("OrderStatuses")]
     public virtual Order Order { get; set; }
+
+    [ForeignKey("OrderStatusItemId")]
+    [InverseProperty("OrderStatuses")]
+    public virtual OrderStatusItem OrderStatusItem { get; set; }
 }

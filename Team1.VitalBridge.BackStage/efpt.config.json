@@ -4,7 +4,6 @@
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
-   "MinimumProductVersion": "2.6.0",
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Models\\EFModels",
@@ -176,7 +175,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[OrederStatusItem]",
+         "Name": "[dbo].[OrderStatusItem]",
          "ObjectType": 0
       },
       {
@@ -213,6 +212,10 @@
       },
       {
          "Name": "[dbo].[PaymentMethods]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[paymentStatus]",
          "ObjectType": 0
       },
       {
