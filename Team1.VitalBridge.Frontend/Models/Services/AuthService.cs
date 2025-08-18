@@ -74,27 +74,30 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
             // 發送驗證郵件
             string verifyLink = $"https://localhost:5500/verify?email={dto.Email}&token={ConfirmCodeToken}";
+            //輸出到debug控制台
+            Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
 
-            string sql = $@"
-    EXEC msdb.dbo.sp_send_dbmail
-    @profile_name = 'VitalBridge',
-    @recipients = '{dto.Email}', 
-    @subject = '【VitalBridge】帳號驗證信',
-    @body = '
-親愛的 {dto.Name} 您好：
 
-感謝您註冊 VitalBridge 平台。
-請點擊以下連結完成帳號驗證：
+            //            string sql = $@"
+            //    EXEC msdb.dbo.sp_send_dbmail
+            //    @profile_name = 'VitalBridge',
+            //    @recipients = '{dto.Email}', 
+            //    @subject = '【VitalBridge】帳號驗證信',
+            //    @body = '
+            //親愛的 {dto.Name} 您好：
 
-{verifyLink}
+            //感謝您註冊 VitalBridge 平台。
+            //請點擊以下連結完成帳號驗證：
 
-如果您沒有註冊過 VitalBridge，請忽略此封信件。
+            //{verifyLink}
 
--- VitalBridge 系統通知
-',
-    @body_format = 'TEXT';";
+            //如果您沒有註冊過 VitalBridge，請忽略此封信件。
 
-            _db.Database.ExecuteSqlRaw(sql);
+            //-- VitalBridge 系統通知
+            //',
+            //    @body_format = 'TEXT';";
+
+            //_db.Database.ExecuteSqlRaw(sql);
 
 
         }
@@ -192,6 +195,42 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 user.AccountType,
                 Roles = roles // 回傳角色名稱陣列
             };
+        }
+
+        public async Task SendPasswordResetEmailAsync(string email)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return; // 不洩漏帳號存在與否
+
+            // 產生 token
+            var token = Guid.NewGuid().ToString("N");
+            user.ResetPasswordConfirmCode = token;
+            user.ResetPasswordConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1);
+
+            await _db.SaveChangesAsync();
+
+            // 建立重設密碼連結
+            var resetLink = $"https://localhost:5500/reset-password?email={email}&token={token}";
+            Console.WriteLine($"發送重設密碼郵件到 {email}，連結：{resetLink}");
+
+            // TODO: 實際寄信
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(x =>
+                x.ResetPasswordConfirmCode == token &&
+                x.ResetPasswordConfirmCodeExpiresAt > DateTime.UtcNow);
+
+            if (user == null) return false;
+
+            user.Password = HashUtility.HashPassword(newPassword);
+            user.ResetPasswordConfirmCode = null;
+            user.ResetPasswordConfirmCodeExpiresAt = null;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         // ==== Helpers（服務內部） ====
