@@ -51,12 +51,55 @@
                     width: 100%;
                 }
         }
+
+        /* 特色服務詳情卡片樣式 */
+        .feature-service-detail-card {
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        }
+
+        .feature-service-detail-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .feature-service-detail-card .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+        }
+
+        /* 響應式調整特色服務卡片 */
+        @@media (max-width: 768px) {
+            .feature-service-detail-card .card-body {
+                min-height: 70px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .feature-service-detail-card .card-body {
+                min-height: 60px;
+            }
+        }
     </style>
 }
 
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">機構清單</h6>
+        <div class="row align-items-center">
+            <div class="col-sm-6">
+                <h6 class="m-0 font-weight-bold text-primary">機構清單</h6>
+            </div>
+            <div class="col-sm-6 text-end">
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus"></i> 新增機構
+                </a>
+            </div>
+        </div>
     </div>
     <div class="card-body">
         <div class="row mb-3">
@@ -123,6 +166,9 @@
                             </td>
                             <td class="text-center">
                                 <div class="action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> 編輯
+                                    </a>
                                     <button type="button" class="btn btn-info btn-sm"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detailsModal_@item.Id">
@@ -197,7 +243,7 @@
                             @if (!string.IsNullOrEmpty(organizationDetails.PhotoUrl))
                             {
                                 <div class="mb-3 text-center">
-                                    <img src="@organizationDetails.PhotoUrl" class="img-fluid rounded" alt="機構照片" style="max-height: 300px; object-fit: cover;">
+                                    <img src="/api/UploadFile/GetFile?fileName=@organizationDetails.PhotoUrl" class="img-fluid rounded" alt="機構照片" style="max-height: 300px; object-fit: cover;">
                                 </div>
                             }
                             <div class="row g-3">
@@ -220,7 +266,40 @@
                                     <p><strong>政府補助資訊:</strong> @string.Join(", ", organizationDetails.SubsidyInfoDescription)</p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>特色服務:</strong> @string.Join(", ", organizationDetails.FeatureServiceNames)</p>
+                                    <p><strong>特色服務:</strong></p>
+                                    @if (organizationDetails.FeatureServices != null && organizationDetails.FeatureServices.Any())
+                                    {
+                                        <div class="row">
+                                            @foreach (var featureService in organizationDetails.FeatureServices)
+                                            {
+                                                <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                                    <div class="card h-100 feature-service-detail-card">
+                                                        <div class="card-body text-center p-2">
+                                                            @if (!string.IsNullOrEmpty(featureService.ImageUrl))
+                                                            {
+                                                                <img src="/api/UploadFile/GetFile?fileName=@featureService.ImageUrl" 
+                                                                     alt="@featureService.Name" 
+                                                                     class="rounded mb-2" 
+                                                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="d-flex align-items-center justify-content-center bg-light border rounded mb-2 mx-auto" 
+                                                                     style="width: 40px; height: 40px; color: #6c757d;">
+                                                                    <i class="fas fa-image"></i>
+                                                                </div>
+                                                            }
+                                                            <small class="text-muted d-block">@featureService.Name</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">無特色服務</span>
+                                    }
                                 </div>
                                 <div class="col-12">
                                     <p><strong>服務對象:</strong> @string.Join(", ", organizationDetails.ServiceTargetNames)</p>

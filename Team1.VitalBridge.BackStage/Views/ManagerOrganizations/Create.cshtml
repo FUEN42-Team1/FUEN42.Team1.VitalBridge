@@ -1,0 +1,540 @@
+@model Team1.VitalBridge.BackStage.Models.ViewModels.ManagerOrganizationFormViewModel
+
+@{
+    ViewData["Title"] = "新增機構";
+    // 取得 ViewBag 中的多對多和房型選項
+    var allSubsidyInfos = ViewBag.AllSubsidyInfos as List<SelectListItem>;
+    var allFeatureServices = ViewBag.AllFeatureServices as List<SelectListItem>;
+    var allServiceTargets = ViewBag.AllServiceTargets as List<SelectListItem>;
+    var allRoomTypes = ViewBag.AllRoomTypes as List<SelectListItem>;
+}
+
+@section Styles {
+    <style>
+        .form-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #495057;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .room-block {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .room-block h6 {
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+        .image-preview {
+            max-height: 200px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        /* 服務選項新樣式 */
+        .service-row {
+            margin-bottom: 2rem;
+        }
+        .service-options-container {
+            background: #fafbfc;
+            border: 2px solid #e9ecef !important;
+        }
+        .service-row .form-label {
+            display: block;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+        
+        /* 特色服務卡片樣式 */
+        .feature-service-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .feature-service-card:hover {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f1f8ff 100%);
+            border-color: #2196f3;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+            transform: translateY(-1px);
+        }
+        .feature-service-card:has(input:checked) {
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0fff0 100%);
+            border-color: #28a745;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+        }
+        
+        /* 響應式網格 */
+        .service-options-container .col-md-3 {
+            padding: 0.25rem;
+        }
+        .service-options-container .form-check {
+            margin-bottom: 0;
+        }
+        .service-options-container .form-check-label {
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+        
+        /* Bootstrap 5 樣式增強 */
+        .form-check-input:checked {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .form-check-input:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* 圖示顏色 */
+        .text-success { color: #28a745 !important; }
+        .text-warning { color: #ffc107 !important; }
+        .text-info { color: #17a2b8 !important; }
+        
+        /* 響應式調整 */
+        @@media (max-width: 768px) {
+            .service-options-container .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            .service-row .form-label {
+                font-size: 1rem;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .service-options-container .col-md-3 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">新增機構</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">機構管理</a></li>
+                <li class="breadcrumb-item active" aria-current="page">新增機構</li>
+            </ol>
+        </nav>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <!-- 基本資訊 -->
+        <div class="form-section">
+            <h5 class="section-title">基本資訊</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="BedCount" class="form-label"></label>
+                        <input asp-for="BedCount" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="BedCount" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="AgeLimits" class="form-label"></label>
+                        <input asp-for="AgeLimits" class="form-control" placeholder="例：60歲以上" />
+                        <span asp-validation-for="AgeLimits" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="TypeId" class="form-label"></label>
+                        <select asp-for="TypeId" class="form-select" asp-items="@(ViewData["TypeId"] as SelectList)">
+                            <option value="">請選擇機構類型</option>
+                        </select>
+                        <span asp-validation-for="TypeId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="請輸入機構描述..."></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- 地址資訊 -->
+        <div class="form-section">
+            <h5 class="section-title">地址資訊</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="CityId" class="form-label"></label>
+                        <select asp-for="CityId" class="form-select" asp-items="@(ViewData["CityId"] as SelectList)" id="citySelect">
+                            <option value="">請選擇縣市</option>
+                        </select>
+                        <span asp-validation-for="CityId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="DistrictId" class="form-label"></label>
+                        <select asp-for="DistrictId" class="form-select" id="districtSelect">
+                            <option value="">請先選擇縣市</option>
+                        </select>
+                        <span asp-validation-for="DistrictId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label asp-for="MapUrl" class="form-label"></label>
+                        <input asp-for="MapUrl" class="form-control" placeholder="Google Maps 連結" />
+                        <span asp-validation-for="MapUrl" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Address" class="form-label"></label>
+                <input asp-for="Address" class="form-control" placeholder="詳細地址" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- 機構照片 -->
+        <div class="form-section">
+            <h5 class="section-title">機構照片</h5>
+            <div class="form-group mb-3">
+                <label class="form-label">機構照片</label>
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" id="fileInput" accept="image/*">
+                    <button id="upload" type="button" class="btn btn-outline-primary">上傳照片</button>
+                </div>
+                <div class="text-center mb-3">
+                    <img src="" alt="" id="showimage" class="img-fluid image-preview" style="display: none;" />
+                </div>
+                <div id="result" class="mb-2"></div>
+                <input asp-for="PhotoUrl" class="form-control" id="image" readonly placeholder="上傳照片後會顯示檔案名稱" />
+            </div>
+        </div>
+
+        <!-- 服務選項 -->
+        <div class="form-section">
+            <h5 class="section-title">服務選項</h5>
+            
+            <!-- 政府補助 - 第一排 -->
+            <div class="service-row mb-4">
+                <label asp-for="SelectedSubsidyInfoIds" class="form-label fw-bold mb-3">
+                    <i class="fas fa-hand-holding-usd me-2 text-success"></i>@Html.DisplayNameFor(m => m.SelectedSubsidyInfoIds)
+                </label>
+                <div class="service-options-container border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                    @if (ViewBag.AllSubsidyInfos != null)
+                    {
+                        <div class="row">
+                            @foreach (var item in ViewBag.AllSubsidyInfos)
+                            {
+                                <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="SelectedSubsidyInfoIds" value="@item.Value"
+                                               id="subsidyInfo_@item.Value" />
+                                        <label class="form-check-label" for="subsidyInfo_@item.Value">
+                                            @item.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="SelectedSubsidyInfoIds" class="text-danger"></span>
+            </div>
+
+            <!-- 特色服務 - 第二排 -->
+            <div class="service-row mb-4">
+                <label asp-for="SelectedFeatureServiceIds" class="form-label fw-bold mb-3">
+                    <i class="fas fa-star me-2 text-warning"></i>@Html.DisplayNameFor(m => m.SelectedFeatureServiceIds)
+                </label>
+                <div class="service-options-container border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                    @if (ViewBag.AllFeatureServices != null)
+                    {
+                        <div class="row">
+                            @foreach (var item in ViewBag.AllFeatureServices)
+                            {
+                                <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                    <div class="feature-service-card p-2 rounded">
+                                        <div class="form-check d-flex align-items-center">
+                                            <input class="form-check-input me-2 flex-shrink-0" type="checkbox" 
+                                                   name="SelectedFeatureServiceIds" value="@item.Value"
+                                                   id="featureService_@item.Value" />
+                                            <div class="feature-image-container me-2 flex-shrink-0">
+                                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                {
+                                                    <img src="/api/UploadFile/GetFile?fileName=@item.ImageUrl" alt="@item.Text" 
+                                                         class="rounded shadow-sm" style="width: 30px; height: 30px; object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex align-items-center justify-content-center bg-light border rounded shadow-sm" 
+                                                         style="width: 30px; height: 30px; color: #6c757d; font-size: 12px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <label class="form-check-label flex-grow-1 mb-0 small" 
+                                                   for="featureService_@item.Value" style="cursor: pointer;">
+                                                @item.Text
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="SelectedFeatureServiceIds" class="text-danger"></span>
+            </div>
+
+            <!-- 服務對象 - 第三排 -->
+            <div class="service-row mb-3">
+                <label asp-for="SelectedServiceTargetIds" class="form-label fw-bold mb-3">
+                    <i class="fas fa-users me-2 text-info"></i>@Html.DisplayNameFor(m => m.SelectedServiceTargetIds)
+                </label>
+                <div class="service-options-container border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                    @if (ViewBag.AllServiceTargets != null)
+                    {
+                        <div class="row">
+                            @foreach (var item in ViewBag.AllServiceTargets)
+                            {
+                                <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="SelectedServiceTargetIds" value="@item.Value"
+                                               id="serviceTarget_@item.Value" />
+                                        <label class="form-check-label" for="serviceTarget_@item.Value">
+                                            @item.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="SelectedServiceTargetIds" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- 房型管理 -->
+        <div class="form-section">
+            <h5 class="section-title">房型管理</h5>
+            <div class="mb-3">
+                <button type="button" id="addRoomBtn" class="btn btn-info">
+                    <i class="fas fa-plus"></i> 新增房型
+                </button>
+            </div>
+            <div id="roomsContainer">
+                <!-- 動態房型區塊會在這裡生成 -->
+            </div>
+        </div>
+
+        <!-- 提交按鈕 -->
+        <div class="form-section">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> 新增機構
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        let roomIndex = 0;
+
+        $(document).ready(function () {
+            // 初始化圖片上傳
+            var fileInput = $("#fileInput");
+            var resultDiv = $("#result");
+            var image = $("#image");
+            var showimage = $("#showimage");
+
+            ready(fileInput, showimage);
+
+            $("#upload").on('click', function () {
+                uploadFile(fileInput, resultDiv, image, showimage[0]);
+            });
+
+            // 縣市區域聯動
+            $('#citySelect').on('change', function () {
+                var cityId = $(this).val();
+                var districtSelect = $('#districtSelect');
+                
+                districtSelect.empty().append('<option value="">請選擇鄉鎮區</option>');
+                
+                if (cityId) {
+                    $.get('/api/ManagerOrganizations/districts', { cityId: cityId }, function (data) {
+                        $.each(data, function (index, item) {
+                            districtSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+                        });
+                    });
+                }
+            });
+
+            // 新增房型按鈕事件
+            $('#addRoomBtn').on('click', function () {
+                addRoomBlock();
+            });
+        });
+
+        function addRoomBlock() {
+            const container = document.getElementById('roomsContainer');
+            const newRoomBlock = document.createElement('div');
+            newRoomBlock.classList.add('room-block');
+            newRoomBlock.innerHTML = `
+                <h6><i class="fas fa-bed"></i> 房型 ${roomIndex + 1}</h6>
+                <input type="hidden" name="Rooms[${roomIndex}].Id" value="0" />
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="Rooms_${roomIndex}__RoomTypeId" class="form-label">房型</label>
+                            <select id="Rooms_${roomIndex}__RoomTypeId" name="Rooms[${roomIndex}].RoomTypeId" class="form-select">
+                                <option value="">請選擇房型</option>
+                                @if (allRoomTypes != null)
+                                {
+                                    @foreach (var item in allRoomTypes)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                            <span data-valmsg-for="Rooms[${roomIndex}].RoomTypeId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="Rooms_${roomIndex}__MonthlyPrice" class="form-label">月租價格</label>
+                            <input id="Rooms_${roomIndex}__MonthlyPrice" name="Rooms[${roomIndex}].MonthlyPrice" 
+                                   class="form-control" type="number" step="1" min="0" placeholder="請輸入價格" />
+                            <span data-valmsg-for="Rooms[${roomIndex}].MonthlyPrice" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label for="Rooms_${roomIndex}__RoomQuantity" class="form-label">房型數量</label>
+                            <input id="Rooms_${roomIndex}__RoomQuantity" name="Rooms[${roomIndex}].RoomQuantity" 
+                                   class="form-control" type="number" min="1" placeholder="請輸入數量" />
+                            <span data-valmsg-for="Rooms[${roomIndex}].RoomQuantity" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-check mb-3">
+                    <input type="checkbox" id="Rooms_${roomIndex}__HasDeposit" name="Rooms[${roomIndex}].HasDeposit" 
+                           value="true" class="form-check-input" onchange="toggleDepositFields(${roomIndex})" />
+                    <label class="form-check-label" for="Rooms_${roomIndex}__HasDeposit">是否需押金</label>
+                    <input type="hidden" name="Rooms[${roomIndex}].HasDeposit" value="false" />
+                </div>
+
+                <div id="depositFields_${roomIndex}" style="display:none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="Rooms_${roomIndex}__DepositAmount" class="form-label">押金金額</label>
+                                <input id="Rooms_${roomIndex}__DepositAmount" name="Rooms[${roomIndex}].DepositAmount" 
+                                       class="form-control" type="number" step="1" min="0" placeholder="請輸入押金金額" />
+                                <span data-valmsg-for="Rooms[${roomIndex}].DepositAmount" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="Rooms_${roomIndex}__DepositMonths" class="form-label">押金月數</label>
+                                <input id="Rooms_${roomIndex}__DepositMonths" name="Rooms[${roomIndex}].DepositMonths" 
+                                       class="form-control" type="number" step="0.1" min="0" placeholder="請輸入月數" />
+                                <span data-valmsg-for="Rooms[${roomIndex}].DepositMonths" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRoomBlock(this)">
+                        <i class="fas fa-trash"></i> 移除此房型
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRoomBlock);
+            roomIndex++;
+        }
+
+        function removeRoomBlock(button) {
+            button.closest('.room-block').remove();
+            updateRoomIndexes();
+        }
+
+        function updateRoomIndexes() {
+            const roomBlocks = document.querySelectorAll('.room-block');
+            roomBlocks.forEach((block, index) => {
+                block.querySelectorAll('[name^="Rooms["]').forEach(element => {
+                    const originalName = element.getAttribute('name');
+                    const newName = originalName.replace(/\[\d+\]/, `[${index}]`);
+                    element.setAttribute('name', newName);
+
+                    const originalId = element.getAttribute('id');
+                    if (originalId) {
+                        const newId = originalId.replace(/_\d+__/, `_${index}__`);
+                        element.setAttribute('id', newId);
+                    }
+                });
+                block.querySelector('h6').innerHTML = `<i class="fas fa-bed"></i> 房型 ${index + 1}`;
+                
+                // 重新綁定 onchange 事件
+                const hasDepositCheckbox = block.querySelector('[id$="__HasDeposit"]');
+                if (hasDepositCheckbox) {
+                    hasDepositCheckbox.onchange = () => toggleDepositFields(index);
+                }
+            });
+            roomIndex = roomBlocks.length;
+        }
+
+        function toggleDepositFields(index) {
+            const hasDepositCheckbox = document.getElementById(`Rooms_${index}__HasDeposit`);
+            const depositFields = document.getElementById(`depositFields_${index}`);
+            if (hasDepositCheckbox && depositFields) {
+                if (hasDepositCheckbox.checked) {
+                    depositFields.style.display = 'block';
+                } else {
+                    depositFields.style.display = 'none';
+                    document.getElementById(`Rooms_${index}__DepositAmount`).value = '';
+                    document.getElementById(`Rooms_${index}__DepositMonths`).value = '';
+                }
+            }
+        }
+    </script>
+}
