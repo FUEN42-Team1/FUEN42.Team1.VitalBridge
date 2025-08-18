@@ -428,46 +428,78 @@
                 $('#pageSize').val(pageSize);
             }
 
-            // 啟用/停用切換開關的邏輯 (使用 jQuery 和 Fetch API)
+            // 啟用/停用切換開關的邏輯 (使用 jQuery AJAX)
             $('.toggle-active-switch').on('change', function () {
                 const organizationId = $(this).data('id');
                 const organizationName = $(this).data('organization-name');
                 const isChecked = $(this).prop('checked');
                 const switchElement = $(this);
 
-                fetch(`@Url.Action("ToggleActive", "ManagerOrganizations")?id=${organizationId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '操作成功',
-                            text: `${organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    } else {
+                // 顯示載入中狀態
+                switchElement.prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("ToggleActive", "ManagerOrganizations")',
+                    type: 'POST',
+                    data: { id: organizationId },
+                    success: function(data) {
+                        if (data.success) {
+                            console.log('切換成功:', data);
+                            Swal.fire({
+                                icon: 'success',
+                                title: '操作成功',
+                                text: data.message || `${organizationName} 已成功${data.newIsActive ? '啟用' : '停用'}`,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            
+                            // 確保開關狀態與伺服器回傳一致
+                            switchElement.prop('checked', data.newIsActive);
+                        } else {
+                            console.error('切換失敗:', data);
+                            Swal.fire({
+                                icon: 'error',
+                                title: '操作失敗',
+                                text: data.message || '狀態切換失敗，請稍後再試。',
+                            });
+                            // 恢復原始狀態
+                            switchElement.prop('checked', !isChecked);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX 錯誤:', {xhr, status, error});
+                        
+                        let errorMessage = '操作過程中發生錯誤，請稍後再試。';
+                        
+                        // 嘗試解析錯誤訊息
+                        try {
+                            const errorData = JSON.parse(xhr.responseText);
+                            if (errorData.message) {
+                                errorMessage = errorData.message;
+                            }
+                        } catch (e) {
+                            if (xhr.status === 403) {
+                                errorMessage = '權限不足，請重新登入。';
+                            } else if (xhr.status === 404) {
+                                errorMessage = '找不到指定的機構。';
+                            } else if (xhr.status === 500) {
+                                errorMessage = '伺服器內部錯誤，請聯絡系統管理員。';
+                            }
+                        }
+                        
                         Swal.fire({
                             icon: 'error',
-                            title: '操作失敗',
-                            text: data.message,
+                            title: '系統錯誤',
+                            text: errorMessage
                         });
+                        
+                        // 恢復原始狀態
                         switchElement.prop('checked', !isChecked);
+                    },
+                    complete: function() {
+                        // 恢復開關可用狀態
+                        switchElement.prop('disabled', false);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: '系統錯誤',
-                        text: '操作過程中發生錯誤，請稍後再試。'
-                    });
-                    switchElement.prop('checked', !isChecked);
                 });
             });
         });

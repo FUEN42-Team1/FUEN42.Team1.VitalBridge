@@ -1,0 +1,65 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "?? Launch Frontend API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-frontend",
+      "program": "${workspaceFolder}/Team1.VitalBridge.Frontend/bin/Debug/net8.0/Team1.VitalBridge.Frontend.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Team1.VitalBridge.Frontend",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/swagger"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7184;http://localhost:5184"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "?? Launch BackStage Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-backstage",
+      "program": "${workspaceFolder}/Team1.VitalBridge.BackStage/bin/Debug/net8.0/Team1.VitalBridge.BackStage.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/Team1.VitalBridge.BackStage",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7242;http://localhost:5286"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      },
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "?? Launch Both Projects",
+      "configurations": [
+        "?? Launch Frontend API",
+        "?? Launch BackStage Web"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "VitalBridge",
+        "order": 1
+      }
+    }
+  ]
+}

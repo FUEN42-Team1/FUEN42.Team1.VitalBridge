@@ -400,20 +400,61 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
         [HttpPost]
         public async Task<IActionResult> ToggleActive(int id)
         {
-            var organization = await _context.Organizations.FindAsync(id);
-            if (organization == null)
-            {
-                return Json(new { success = false, message = "找不到此機構。" });
-            }
-
             try
             {
+                var organization = await _context.Organizations.FindAsync(id);
+                if (organization == null)
+                {
+                    _logger.LogWarning("嘗試切換不存在的機構狀態，機構 ID: {Id}", id);
+                    return Json(new { success = false, message = "找不到此機構。" });
+                }
+
+                var oldStatus = organization.IsActive;
                 organization.IsActive = !organization.IsActive;
-                await _context.SaveChangesAsync();
-                return Json(new { success = true, organizationName = organization.Name, newIsActive = organization.IsActive });
+                
+                // 記錄詳細的變更資訊
+                _logger.LogInformation("🔄 正在切換機構 '{Name}' (ID: {Id}) 的狀態：{OldStatus} → {NewStatus}", 
+                    organization.Name, organization.Id, oldStatus, organization.IsActive);
+                
+                // 明確標記實體已修改
+                _context.Entry(organization).State = EntityState.Modified;
+                
+                var result = await _context.SaveChangesAsync();
+                
+                if (result > 0)
+                {
+                    _logger.LogInformation("✅ 機構 '{Name}' (ID: {Id}) 狀態切換成功：{Status} (影響 {Rows} 筆資料)", 
+                        organization.Name, organization.Id, organization.IsActive ? "啟用" : "停用", result);
+                    
+                    // 驗證更新後的狀態 (重新查詢以確認)
+                    var verifyOrg = await _context.Organizations
+                        .AsNoTracking()
+                        .Where(o => o.Id == id)
+                        .Select(o => new { o.IsActive, o.IsDeleted })
+                        .FirstOrDefaultAsync();
+                    
+                    _logger.LogInformation("🔍 驗證機構 ID: {Id} 當前狀態：IsActive={IsActive}, IsDeleted={IsDeleted}", 
+                        id, verifyOrg?.IsActive, verifyOrg?.IsDeleted);
+                    
+                    var statusText = organization.IsActive ? "啟用" : "停用";
+                    return Json(new { 
+                        success = true, 
+                        organizationName = organization.Name, 
+                        newIsActive = organization.IsActive,
+                        message = $"機構 '{organization.Name}' 已{statusText}",
+                        verifiedStatus = verifyOrg?.IsActive // 回傳驗證後的狀態
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ 機構 '{Name}' (ID: {Id}) 狀態切換失敗：SaveChanges 回傳 0", 
+                        organization.Name, organization.Id);
+                    return Json(new { success = false, message = "資料庫更新失敗，請稍後再試。" });
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ 切換機構狀態時發生錯誤，機構 ID: {Id}", id);
                 return Json(new { success = false, message = "操作失敗，請稍後再試。" });
             }
         }

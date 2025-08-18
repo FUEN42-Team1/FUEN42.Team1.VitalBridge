@@ -902,3 +902,115 @@ public partial class AppDbContext : DbContext
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
+
+// ==================== Frontend 搜尋索引配置 ====================
+// 以下是針對前端機構搜尋功能的索引優化配置
+// 這些配置會在 OnModelCreatingPartial 方法中被呼叫
+
+public partial class AppDbContext
+{
+    /// <summary>
+    /// 配置前端搜尋優化的索引
+    /// </summary>
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
+    {
+        ConfigureFrontendSearchIndexes(modelBuilder);
+    }
+
+    /// <summary>
+    /// 前端機構搜尋功能索引配置
+    /// 專門針對前端機構搜尋功能進行索引優化
+    /// </summary>
+    /// <param name="modelBuilder">模型建構器</param>
+    private void ConfigureFrontendSearchIndexes(ModelBuilder modelBuilder)
+    {
+        // ==================== Organizations 表索引 ====================
+        
+        // 1. 文字搜尋複合索引 (Name + Address)
+        // 用於關鍵字搜尋: WHERE Name LIKE '%keyword%' OR Address LIKE '%keyword%'
+        modelBuilder.Entity<Organization>()
+            .HasIndex(o => new { o.Name, o.Address })
+            .HasDatabaseName("IX_Organizations_Name_Address_Search")
+            .HasFilter("IsActive = 1 AND IsDeleted = 0");
+
+        // 2. 狀態複合索引 (IsActive + IsDeleted + Id)
+        // 用於基本篩選條件，包含 Id 作為 covering index
+        modelBuilder.Entity<Organization>()
+            .HasIndex(o => new { o.IsActive, o.IsDeleted, o.Id })
+            .HasDatabaseName("IX_Organizations_Status_Covering")
+            .HasFilter("IsActive = 1 AND IsDeleted = 0");
+
+        // 3. 地區篩選複合索引 (CityId + DistrictId + IsActive + IsDeleted)
+        // 用於地區篩選: WHERE CityId = @cityId AND DistrictId = @districtId
+        modelBuilder.Entity<Organization>()
+            .HasIndex(o => new { o.CityId, o.DistrictId, o.IsActive, o.IsDeleted })
+            .HasDatabaseName("IX_Organizations_Location_Filter")
+            .HasFilter("IsActive = 1 AND IsDeleted = 0");
+
+        // 4. 機構類型篩選索引 (TypeId + IsActive + IsDeleted)
+        // 用於機構類型篩選: WHERE TypeId IN (@types)
+        modelBuilder.Entity<Organization>()
+            .HasIndex(o => new { o.TypeId, o.IsActive, o.IsDeleted })
+            .HasDatabaseName("IX_Organizations_Type_Filter")
+            .HasFilter("IsActive = 1 AND IsDeleted = 0");
+
+        // 5. 名稱排序索引 (Name + Id)
+        // 用於結果排序: ORDER BY Name, Id
+        modelBuilder.Entity<Organization>()
+            .HasIndex(o => new { o.Name, o.Id })
+            .HasDatabaseName("IX_Organizations_Name_Sort")
+            .HasFilter("IsActive = 1 AND IsDeleted = 0");
+
+        // ==================== OrganizationRooms 表索引 ====================
+        
+        // 6. 價格篩選複合索引 (OrganizationId + MonthlyPrice)
+        // 用於價格篩選和最低價格計算
+        modelBuilder.Entity<OrganizationRoom>()
+            .HasIndex(or => new { or.OrganizationId, or.MonthlyPrice })
+            .HasDatabaseName("IX_OrganizationRooms_Org_Price");
+
+        // 7. 最低價格查詢優化索引 (MonthlyPrice + OrganizationId)
+        // 針對 MIN(MonthlyPrice) GROUP BY OrganizationId 查詢優化
+        modelBuilder.Entity<OrganizationRoom>()
+            .HasIndex(or => new { or.MonthlyPrice, or.OrganizationId })
+            .HasDatabaseName("IX_OrganizationRooms_Price_Org_MinCalc");
+
+        // ==================== OrganizationFeatureServices 表索引 ====================
+        
+        // 8. 關聯查詢索引 (OrganizationId + FeatureServiceId)
+        // 用於特色服務關聯查詢和 JOIN 操作
+        modelBuilder.Entity<OrganizationFeatureService>()
+            .HasIndex(ofs => new { ofs.OrganizationId, ofs.FeatureServiceId })
+            .HasDatabaseName("IX_OrganizationFeatureServices_Org_Feature");
+
+        // 9. 反向查詢索引 (FeatureServiceId + OrganizationId)
+        // 用於從特色服務查詢機構
+        modelBuilder.Entity<OrganizationFeatureService>()
+            .HasIndex(ofs => new { ofs.FeatureServiceId, ofs.OrganizationId })
+            .HasDatabaseName("IX_OrganizationFeatureServices_Feature_Org");
+
+        // ==================== 輔助資料表索引 ====================
+
+        // 10. 城市名稱索引 (用於下拉選單排序)
+        modelBuilder.Entity<City>()
+            .HasIndex(c => c.Name)
+            .HasDatabaseName("IX_Cities_Name_Sort");
+
+        // 11. 鄉鎮區複合索引 (CityId + Name)
+        modelBuilder.Entity<Township>()
+            .HasIndex(t => new { t.CityId, t.Name })
+            .HasDatabaseName("IX_Townships_City_Name");
+
+        // 12. 機構類型索引 (IsActive + Name)
+        modelBuilder.Entity<OrganizationType>()
+            .HasIndex(ot => new { ot.IsActive, ot.Name })
+            .HasDatabaseName("IX_OrganizationTypes_Active_Name")
+            .HasFilter("IsActive = 1");
+
+        // 13. 特色服務索引 (IsActive + Name)
+        modelBuilder.Entity<FeatureService>()
+            .HasIndex(fs => new { fs.IsActive, fs.Name })
+            .HasDatabaseName("IX_FeatureServices_Active_Name")
+            .HasFilter("IsActive = 1");
+    }
+}
