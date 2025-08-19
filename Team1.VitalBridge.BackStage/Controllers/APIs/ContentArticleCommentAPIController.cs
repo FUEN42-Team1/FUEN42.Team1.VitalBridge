@@ -38,11 +38,11 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
             if (criteria.Status == "enabled")
             {
-                query = query.Where(c => c.IsPinned);
+                query = query.Where(c => c.IsEnabled);
             }
             else if (criteria.Status == "disabled")
             {
-                query = query.Where(c => !c.IsPinned);
+                query = query.Where(c => !c.IsEnabled);
             }
 
             //map the query results to DTOs
@@ -55,7 +55,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 //MemberId = c.Member.Id, // Assuming Member is a navigation property
                 ParentCommentId = c.ParentCommentId,
                 CommentContent = c.Content,
-                IsEnabled = c.IsPinned,
+                IsEnabled = c.IsEnabled,
                 CreatedAt = c.CreatedAt
             }).ToList();
 
@@ -70,7 +70,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 return NotFound();
 
 
-            comment.IsPinned = !comment.IsPinned; // Toggle the status
+            comment.IsEnabled = !comment.IsEnabled; // Toggle the status
             _context.Comments.Update(comment);
             await _context.SaveChangesAsync();
 
