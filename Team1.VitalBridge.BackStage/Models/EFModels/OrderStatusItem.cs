@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-[Table("OrederStatusItem")]
-[Index("Name", Name = "UQ__OrederSt__72E12F1BF2434481", IsUnique = true)]
-public partial class OrederStatusItem
+[Table("OrderStatusItem")]
+[Index("Name", Name = "UQ__OrederSt__72E12F1B1C823B18", IsUnique = true)]
+public partial class OrderStatusItem
 {
     [Key]
     [Column("id")]
@@ -20,4 +20,7 @@ public partial class OrederStatusItem
     [Column("name")]
     [StringLength(20)]
     public string Name { get; set; }
+
+    [InverseProperty("OrderStatusItem")]
+    public virtual ICollection<OrderStatus> OrderStatuses { get; set; } = new List<OrderStatus>();
 }

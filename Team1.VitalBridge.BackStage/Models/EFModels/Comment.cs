@@ -27,8 +27,8 @@ public partial class Comment
     [Column("content")]
     public string Content { get; set; }
 
-    [Column("isPinned")]
-    public bool IsPinned { get; set; }
+    [Column("isEnabled")]
+    public bool IsEnabled { get; set; }
 
     [Column("updatedAt", TypeName = "datetime")]
     public DateTime UpdatedAt { get; set; }

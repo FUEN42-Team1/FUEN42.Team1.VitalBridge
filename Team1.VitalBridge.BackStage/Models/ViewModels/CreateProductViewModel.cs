@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Team1.VitalBridge.BackStage.Models.Interfaces;
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
-    public class CreateProductViewModel
-    {
+    public class CreateProductViewModel: IProductViewModel
+	{
         
         [Display(Name = "商品貨號")]
         [Required(ErrorMessage = "請輸入{0}")]

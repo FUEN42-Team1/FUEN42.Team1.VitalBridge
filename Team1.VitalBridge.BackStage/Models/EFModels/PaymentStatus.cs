@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Models.EFModels;
 
-public partial class ServiceTarget
+[Table("paymentStatus")]
+public partial class PaymentStatus
 {
     [Key]
     [Column("id")]
@@ -16,12 +17,9 @@ public partial class ServiceTarget
 
     [Required]
     [Column("name")]
-    [StringLength(100)]
+    [StringLength(20)]
     public string Name { get; set; }
 
-    [Column("isActive")]
-    public bool IsActive { get; set; }
-
-    [InverseProperty("ServiceTarget")]
-    public virtual ICollection<OrganizationServiceTarget> OrganizationServiceTargets { get; set; } = new List<OrganizationServiceTarget>();
+    [InverseProperty("StatusNavigation")]
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

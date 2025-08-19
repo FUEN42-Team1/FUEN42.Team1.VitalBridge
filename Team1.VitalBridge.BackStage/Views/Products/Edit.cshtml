@@ -1,137 +1,136 @@
-﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.CreateProductViewModel
+﻿@model Team1.VitalBridge.BackStage.Models.ViewModels.EditProductViewModel
 
 @{
-    ViewData["Title"] = "新增商品";
+    ViewData["Title"] = "編輯商品";
 }
 @section Styles {
-<style>
-    .product-form-container {
-        max-width: 1200px;
-        margin: 20px auto;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        padding: 30px;
-    }
+    <style>
+        .product-form-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
 
-    .section-header {
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 15px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #21AD5B;
-    }
+        .section-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #21AD5B;
+        }
 
-    .image-upload-container {
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        text-align: center;
-        background: #fafafa;
-        transition: all 0.3s ease;
-        min-height: 200px;
-        position: relative;
-    }
+        .image-upload-container {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            min-height: 200px;
+            position: relative;
+        }
 
-    .image-upload-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
-        margin-top: 20px;
-    }
-    
-    .image-upload-item {
-        border: 2px dashed #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        background: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-    
-    .image-upload-item:hover {
-        border-color: #21AD5B;
-        background: #f0fff4;
-    }
-    
-    .image-preview {
-        width: 100%;
-        aspect-ratio: 1; /* 正方形 */
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        background: white;
-        overflow: hidden;
-        position: relative;
-        margin-bottom: 15px;
-    }
-    
-    .image-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .image-number {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 600;
-        z-index: 2;
-    }
-    
-    .image-remove {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: #dc3545;
-        color: white;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        border: none;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        z-index: 2;
-        transition: all 0.3s ease;
-    }
-    
-    .image-remove:hover {
-        background: #c82333;
-        transform: scale(1.1);
-    }
-    
-    .image-preview.has-image .image-remove {
-        display: flex;
-    }
-    
-    .main-image-label {
-        text-align: center;
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 10px;
-        min-height: 20px; /* 確保有固定高度，即使沒有文字 */
-    }
+        .image-upload-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-upload-item {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+            .image-upload-item:hover {
+                border-color: #21AD5B;
+                background: #f0fff4;
+            }
+
+        .image-preview {
+            width: 100%;
+            aspect-ratio: 1; /* 正方形 */
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: white;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+            .image-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .image-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .image-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+            .image-remove:hover {
+                background: #c82333;
+                transform: scale(1.1);
+            }
+
+        .image-preview.has-image .image-remove {
+            display: flex;
+        }
+
+        .main-image-label {
+            text-align: center;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            min-height: 20px; /* 確保有固定高度，即使沒有文字 */
+        }
 
 
-    /* 處理按鈕*/
+        /* 處理按鈕*/
         .btn-select {
             background: #6c757d !important;
             border: 1px solid #6c757d !important;
             color: white !important;
-
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 13px;
@@ -165,196 +164,195 @@
             }
 
 
-    .category-tree {
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 15px;
-        background: #f8f9fa;
-    }
+        .category-tree {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
 
-    .category-item {
-        margin-bottom: 8px;
-    }
+        .category-item {
+            margin-bottom: 8px;
+        }
 
-    .category-item.level-0 {
-        font-weight: 600;
-        color: #333;
-    }
+            .category-item.level-0 {
+                font-weight: 600;
+                color: #333;
+            }
 
-    .category-item.level-1 {
-        margin-left: 20px;
-        color: #666;
-    }
+            .category-item.level-1 {
+                margin-left: 20px;
+                color: #666;
+            }
 
-    .category-item.level-1 input[type="checkbox"] {
-        margin-right: 8px;
-    }
+                .category-item.level-1 input[type="checkbox"] {
+                    margin-right: 8px;
+                }
 
-    .category-item.level-0.disabled {
-        color: #999;
-        font-style: italic;
-    }
+            .category-item.level-0.disabled {
+                color: #999;
+                font-style: italic;
+            }
 
-    .ship-method-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 15px 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        background: #f8f9fa;
-        transition: all 0.3s ease;
-    }
+        .ship-method-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
 
-    .ship-method-item:hover {
-        border-color: #21AD5B;
-        background: #f0fff4;
-    }
+            .ship-method-item:hover {
+                border-color: #21AD5B;
+                background: #f0fff4;
+            }
 
-    .ship-method-info {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
+        .ship-method-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
 
-    .ship-method-name {
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 4px;
-    }
+        .ship-method-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
 
-    .ship-cost {
-        color: #21AD5B;
-        font-weight: 600;
-        font-size: 14px;
-    }
+        .ship-cost {
+            color: #21AD5B;
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-    .ship-method-switch {
-        display: flex;
-        align-items: center;
-    }
+        .ship-method-switch {
+            display: flex;
+            align-items: center;
+        }
 
-    /* 自定義 Switch 樣式 */
-    .form-switch .form-check-input {
-        width: 3rem;
-        height: 1.5rem;
-        background-color: #e9ecef; /* 改為淺灰色背景 */
-        border: 1px solid #ced4da; /* 加上邊框 */
-        transition: all 0.3s ease;
-    }
+        /* 自定義 Switch 樣式 */
+        .form-switch .form-check-input {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #e9ecef; /* 改為淺灰色背景 */
+            border: 1px solid #ced4da; /* 加上邊框 */
+            transition: all 0.3s ease;
+        }
 
-    .form-switch .form-check-input:checked {
-        background-color: #21AD5B;
-        border-color: #21AD5B;
-    }
+            .form-switch .form-check-input:checked {
+                background-color: #21AD5B;
+                border-color: #21AD5B;
+            }
 
-    .form-switch .form-check-input:focus {
-        box-shadow: 0 0 0 0.25rem rgba(33, 173, 91, 0.25);
-        border-color: #21AD5B;
-    }
+            .form-switch .form-check-input:focus {
+                box-shadow: 0 0 0 0.25rem rgba(33, 173, 91, 0.25);
+                border-color: #21AD5B;
+            }
 
-    .form-switch .form-check-input:not(:checked):hover {
-        background-color: #f8f9fa; /* hover 時更亮一點 */
-        border-color: #adb5bd;
-    }
+            .form-switch .form-check-input:not(:checked):hover {
+                background-color: #f8f9fa; /* hover 時更亮一點 */
+                border-color: #adb5bd;
+            }
 
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #eee;
-    }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
 
-    .btn-primary {
-        background-color: #21AD5B;
-        border-color: #21AD5B;
-        padding: 10px 30px;
-        font-weight: 500;
-    }
+        .btn-primary {
+            background-color: #21AD5B;
+            border-color: #21AD5B;
+            padding: 10px 30px;
+            font-weight: 500;
+        }
 
-    .btn-primary:hover {
-        background-color: #16763E;
-        border-color: #16763E;
-    }
+            .btn-primary:hover {
+                background-color: #16763E;
+                border-color: #16763E;
+            }
 
-    .btn-secondary {
-        padding: 10px 30px;
-        font-weight: 500;
-    }
+        .btn-secondary {
+            padding: 10px 30px;
+            font-weight: 500;
+        }
 
-    .upload-instruction {
-        color: #666;
-        font-size: 14px;
-        margin-top: 10px;
-    }
+        .upload-instruction {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
 
-    .required-field::after {
-        content: " *";
-        color: #dc3545;
-    }
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
 
-    .toast {
-        min-width: 300px;
-    }
+        .toast {
+            min-width: 300px;
+        }
 
-    /* 圖片上傳區域樣式 */
-    .main-upload-area {
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        padding: 40px 20px;
-        text-align: center;
-        background: #fafafa;
-        margin-bottom: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+        /* 圖片上傳區域樣式 */
+        .main-upload-area {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #fafafa;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    .main-upload-area:hover {
-        border-color: #21AD5B;
-        background: #f0fff4;
-    }
+            .main-upload-area:hover {
+                border-color: #21AD5B;
+                background: #f0fff4;
+            }
 
-    .upload-icon {
-        font-size: 48px;
-        color: #ddd;
-        margin-bottom: 15px;
-    }
+        .upload-icon {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
 
-    .main-upload-area.dragover .upload-icon {
-        color: #21AD5B;
-    }
+        .main-upload-area.dragover .upload-icon {
+            color: #21AD5B;
+        }
 
-        .upload-controls{
+        .upload-controls {
             display: flex;
             gap: 8px;
             justify-content: space-evenly;
-        
         }
 
-        .keypointStyle{
-            height:100px;
+        .keypointStyle {
+            height: 100px;
         }
 
-</style>
+    </style>
 }
 <div class="container-fluid">
     <div class="product-form-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">新增商品</h2>
+            <h2 class="mb-0">編輯商品</h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="@Url.Action("Index", "Products")">商品管理</a></li>
-                    <li class="breadcrumb-item active">新增商品</li>
+                    <li class="breadcrumb-item active">編輯商品</li>
                 </ol>
             </nav>
         </div>
 
-        <form asp-action="Create" method="post" id="productForm">
+        <form asp-action="Edit" method="post" id="productForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
             <!-- 基本資訊 -->
@@ -362,7 +360,8 @@
                 <div class="col-md-6">
                     <div class="mb-4">
                         <h5 class="section-header">基本資訊</h5>
-                        
+                        <input asp-for="Id" type="hidden" />
+
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label required-field">品名</label>
                             <input asp-for="Name" class="form-control" placeholder="請輸入商品名稱" />
@@ -421,7 +420,7 @@
             <div class="mb-4 ">
                 <h5 class="section-header">圖片</h5>
                 <p class="upload-instruction">建議尺寸 800x800px，支援 JPG、PNG 格式</p>
-                
+
                 <!-- 圖片網格 -->
                 <div class="image-upload-grid" id="imageGrid">
                     <!-- 主圖 -->
@@ -437,7 +436,7 @@
                             <button type="button" class="btn btn-upload" id="uploadBtn1">上傳圖片</button>
                         </div>
                     </div>
-                    
+
                     <!-- 圖片2 -->
                     <div class="image-upload-item">
                         <div class="main-image-label"></div> <!-- 空白標籤 -->
@@ -573,7 +572,7 @@
                                 </div>
                                 <div class="ship-method-switch">
                                     <div class="form-check form-switch">
-                                        <input type="checkbox" class="form-check-input" name="SelectedShipIds" value="@ship.Id" 
+                                        <input type="checkbox" class="form-check-input" name="SelectedShipIds" value="@ship.Id"
                                                id="ship_@ship.Id" @(Model.SelectedShipIds != null && Model.SelectedShipIds.Contains(ship.Id) ? "checked" : "") />
                                         <label class="form-check-label" for="ship_@ship.Id"></label>
                                     </div>
@@ -603,7 +602,7 @@
             <!-- 操作按鈕 -->
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="history.back()">取消</button>
-                <button type="submit" class="btn btn-primary" id="submitBtn">確定</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">確定修改</button>
             </div>
         </form>
     </div>
@@ -619,9 +618,56 @@
         $(document).ready(function() {
             initializePage();
             initializeImageUpload();
+            setTimeout(function() {
+                initializeExistingImages();// 初始化已存在的圖片
+            }, 100);
             loadCategories();
             bindEvents();
+            
         });
+
+        // 初始化已存在的圖片方法
+        function initializeExistingImages(){
+
+
+           for (i=1;i<=8;i++){
+               console.log('處理圖片位置',i);
+               // 我的檔名是Image1FileName、Image2FileName
+
+               // 建構隱藏欄位的name屬性
+               var inputName = 'Image'+i+ 'FileName';
+               // console.log('隱藏欄位名稱:', inputName);
+
+                // 取得檔名
+                // 原因:Image1FileName 會有值，是因為在controller Get的Edit方法 有抓到值，並透過EditViewModel 傳遞 給Image1FileName
+                var fileName = $('input[name="'+inputName+'"]').val();
+                // console.log('取得檔名:',fileName)
+
+                // 檢查檔名是否存在且不為空
+
+                if(fileName && fileName.trim()!=='') {
+                    // console.log('找到圖片檔案:',fileName)
+
+                    // 轉換成索引：Image1FileName 對應 slot 0, Image2FileName 對應 slot 1...
+                    var slotIndex = i - 1;
+                    // console.log('對應的slot索引:',slotIndex);
+
+                    // 建構圖片URL
+                    var imageUrl ='/api/UploadFile/GetFile?fileName='+encodeURIComponent(fileName);
+                    // console.log('建構的圖片 URL：', imageUrl);
+
+                    // 更新圖片顯示
+                    updateImageSlot(slotIndex, fileName, imageUrl);
+                    // console.log('已更新 slot', slotIndex, '的圖片顯示');
+
+                    console.log (slotIndex, fileName, imageUrl);
+                       
+                }
+
+
+           }
+
+        }
 
         function initializePage() {
             updateStatusText();
@@ -660,6 +706,7 @@
                 $(this).val(value);
             });
 
+            // 關鍵字長度檢查
             $('#Keypoint').on('input', function() {
                 const maxLength = 250;
                 const currentLength = $(this).val().length;
@@ -807,13 +854,17 @@
                 method: 'GET',
                 success: function(data) {
                     renderCategories(data);
+                    // 延遲一點再設定選中狀態，確保 DOM 更新完成
+                    setTimeout(function() {
+                        setSelectedCategories();
+                    }, 50);
                 },
                 error: function() {
                     $('#categoryContainer').html('<div class="text-danger">載入類別失敗</div>');
                 }
             });
         }
-
+        
         function renderCategories(categories) {
             const container = $('#categoryContainer');
             container.empty();
@@ -854,6 +905,16 @@
                                     '</div>';
                     container.append(childHtml);
                 });
+            });
+        }
+
+        // ✅ 新增：設定選中類別的函數
+        function setSelectedCategories() {
+            // 從伺服器端模型取得已選類別ID
+            const selectedCategoryIds = @Html.Raw(Json.Serialize(Model.SelectedCategoryIds ?? new List<int>()));
+
+            selectedCategoryIds.forEach(categoryId => {
+                $('input[name="SelectedCategoryIds"][value="' + categoryId + '"]').prop('checked', true);
             });
         }
 

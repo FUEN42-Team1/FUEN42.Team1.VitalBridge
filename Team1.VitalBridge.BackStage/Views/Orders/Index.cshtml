@@ -1,0 +1,323 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+@model OrderListViewModel
+@{
+    ViewData["Title"] = "訂單列表";
+}
+@section Styles {
+<!-- 自定義樣式 -->
+<style>
+    .nav-pills .nav-link {
+        border-radius: 20px;  /* 更圓的邊角 */
+        margin: 0 5px;
+        padding: 8px 16px;
+        transition: all 0.15s ease-in-out;
+        background-color: #f8f9fa;  /* 淺灰背景 */
+        color: #6c757d;  /* 灰色文字 */
+        border: 1px solid #e9ecef;
+    }
+    
+    .nav-pills .nav-link:hover {
+        background-color: #e9ecef;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: #6bb77b;  /* 你系統的綠色 */
+        color: #ffffff;  /* 確保白色文字 */
+        border-color: #6bb77b;
+        font-weight: 500;
+    }
+    
+    .nav-pills .nav-link.active .badge {
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        color: #6bb77b !important;
+    }
+    
+    /* 其他樣式保持不變 */
+</style>
+}
+
+<div class="container-fluid">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark">訂單管理</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">首頁</a></li>
+                    <li class="breadcrumb-item active">訂單列表</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 搜尋區塊 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       name="keyword" 
+                                       value="@Model.Search.Keyword" 
+                                       placeholder="搜尋訂單編號、會員名稱">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" name="pageSize" onchange="this.form.submit()">
+                                 @foreach (var size in new[] { 10, 20, 50 })
+                                    {
+                                        <option value="@size" selected="@(Model.Search.PageSize == size)">顯示 @size 筆</option>
+                                    }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>搜尋
+                            </button>
+                        </div>
+                        <!-- 隱藏欄位保持狀態篩選 -->
+                        <input type="hidden" name="status" value="@Model.Search.StatusFilter">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 狀態 Tab 區塊 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <ul class="nav nav-pills nav-fill">
+                        @foreach (var option in Model.StatusOptions)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(option.IsActive ? "active" : "")" 
+                                   href="@Url.Action("Index", new { 
+                                       status = option.StatusId, 
+                                       keyword = Model.Search.Keyword,
+                                       pageSize = Model.Search.PageSize 
+                                   })">
+                                    @option.StatusName
+                                    <span class="badge @(option.IsActive ? "bg-light text-primary" : "bg-secondary") ms-1">
+                                        @option.Count
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 訂單列表表格 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-center" style="width: 15%">訂單編號</th>
+                                    <th scope="col" class="text-center" style="width: 12%">成立日期</th>
+                                    <th scope="col" class="text-center" style="width: 12%">會員名稱</th>
+                                    <th scope="col" class="text-center" style="width: 10%">付款狀態</th>
+                                    <th scope="col" class="text-center" style="width: 12%">物流方式</th>
+                                    <th scope="col" class="text-center" style="width: 10%">訂單狀態</th>
+                                    <th scope="col" class="text-center" style="width: 12%">金額</th>
+                                
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Orders.Any())
+                                {
+                                    @foreach (var order in Model.Orders)
+                                    {
+                                        <tr>
+                                            <td class="text-center fw-bold">
+                                                <a href="@Url.Action("Details", new { id = order.Id })" 
+                                                   class="text-decoration-none">
+                                                    @order.OrderNumber
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                @order.CreatedAt.ToString("yyyy/MM/dd HH:mm")
+                                            </td>
+                                            <td class="text-center">@order.CustomerName</td>
+                                            <td class="text-center">
+                                                @switch (order.PaymentStatus)
+                                                {
+                                                    case "待付款":
+                                                        <span class="badge bg-warning text-dark">@order.PaymentStatus</span>
+                                                        break;
+                                                    case "已付款":
+                                                        <span class="badge bg-success">@order.PaymentStatus</span>
+                                                        break;
+                                                    case "已退款":
+                                                        <span class="badge bg-info">@order.PaymentStatus</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@order.PaymentStatus</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td class="text-center">@order.ShippingMethod</td>
+                                            <td class="text-center">
+                                                @{
+                                                    var statusBadgeClass = order.CurrentStatusId switch
+                                                    {
+                                                        1 => "bg-warning text-dark", // 未付款
+                                                        2 => "bg-info", // 待出貨
+                                                        3 => "bg-primary", // 已出貨
+                                                        4 => "bg-success", // 已完成
+                                                        5 => "bg-warning", // 退貨中
+                                                        6 => "bg-secondary", // 已退貨
+                                                        7 => "bg-danger", // 已取消
+                                                        _ => "bg-secondary"
+                                                    };
+                                                    
+                                                    var statusName = order.CurrentStatusId switch
+                                                    {
+                                                        1 => "未付款",
+                                                        2 => "待出貨",
+                                                        3 => "已出貨",
+                                                        4 => "已完成",
+                                                        5 => "退貨中",
+                                                        6 => "已退貨",
+                                                        7 => "已取消",
+                                                        _ => "未知狀態"
+                                                    };
+                                                }
+                                                <span class="badge @statusBadgeClass">@statusName</span>
+                                            </td>
+                                            <td class="text-center fw-bold text-success">
+                                                NT$ @order.TotalAmount.ToString("N0")
+                                            </td>
+                                            
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                            <h5>沒有找到符合條件的訂單</h5>
+                                            <p class="mb-0">請調整搜尋條件或狀態篩選</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分頁區塊 -->
+    @if (Model.Pagination.TotalCount > 0)
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <!-- 分頁資訊 -->
+                    <div class="text-muted">
+                        第 @Model.Pagination.StartIndex - @Model.Pagination.EndIndex 筆資料，
+                        共 @Model.Pagination.TotalCount 筆，共 @Model.Pagination.TotalPages 頁
+                    </div>
+
+                    <!-- 分頁按鈕 -->
+                    @if (Model.Pagination.TotalPages > 1)
+                    {
+                        <nav aria-label="訂單分頁">
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- 第一頁 -->
+                                <li class="page-item @(!Model.Pagination.HasPreviousPage ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Index", new { 
+                                           page = 1, 
+                                           status = Model.Search.StatusFilter,
+                                           keyword = Model.Search.Keyword,
+                                           pageSize = Model.Search.PageSize 
+                                       })">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+
+                                <!-- 上一頁 -->
+                                <li class="page-item @(!Model.Pagination.HasPreviousPage ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Index", new { 
+                                           page = Model.Pagination.CurrentPage - 1, 
+                                           status = Model.Search.StatusFilter,
+                                           keyword = Model.Search.Keyword,
+                                           pageSize = Model.Search.PageSize 
+                                       })">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+
+                                <!-- 頁碼 -->
+                                @{
+                                    var startPage = Math.Max(1, Model.Pagination.CurrentPage - 2);
+                                    var endPage = Math.Min(Model.Pagination.TotalPages, Model.Pagination.CurrentPage + 2);
+                                }
+
+                                @for (int i = startPage; i <= endPage; i++)
+                                {
+                                    <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                                        <a class="page-link" 
+                                           href="@Url.Action("Index", new { 
+                                               page = i, 
+                                               status = Model.Search.StatusFilter,
+                                               keyword = Model.Search.Keyword,
+                                               pageSize = Model.Search.PageSize 
+                                           })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                <!-- 下一頁 -->
+                                <li class="page-item @(!Model.Pagination.HasNextPage ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Index", new { 
+                                           page = Model.Pagination.CurrentPage + 1, 
+                                           status = Model.Search.StatusFilter,
+                                           keyword = Model.Search.Keyword,
+                                           pageSize = Model.Search.PageSize 
+                                       })">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+
+                                <!-- 最後一頁 -->
+                                <li class="page-item @(!Model.Pagination.HasNextPage ? "disabled" : "")">
+                                    <a class="page-link" 
+                                       href="@Url.Action("Index", new { 
+                                           page = Model.Pagination.TotalPages, 
+                                           status = Model.Search.StatusFilter,
+                                           keyword = Model.Search.Keyword,
+                                           pageSize = Model.Search.PageSize 
+                                       })">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

@@ -119,7 +119,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Id = id,
                 Content = comment?.Content ?? string.Empty,
                 ParentCommentId = comment?.ParentCommentId,
-                IsPinned = comment?.IsPinned ?? false,
+                IsPinned = comment?.IsEnabled ?? false,
                 CreatedAt = comment?.CreatedAt ?? DateTime.Now,
                 //MemberName = comment?.Member?.Name ?? string.Empty, // Assuming Member is a navigation property
                 ContentId = comment?.ContentId ?? 0, // Assuming ContentId is the ID of the content the comment belongs to
@@ -141,7 +141,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 // Update the comment properties
                 comment.Content = vm.Content;
                 comment.ParentCommentId = vm.ParentCommentId;
-                comment.IsPinned = vm.IsPinned;
+                comment.IsEnabled = vm.IsPinned;
                 comment.CreatedAt = vm.CreatedAt;
                 // Assuming MemberName and ContentTitle are not editable, so we don't update them
                 comment.ContentId = vm.ContentId; // Assuming this is the ID of the content the comment belongs to
