@@ -22,7 +22,7 @@
             <tr>
                 <td>@item.Id</td>
                 <td class="fw-semibold">@item.Name</td>
-                <td class="text-muted"><a href="@item.Route">@item.Route</a></td>
+                <td class="text-muted"><a href="http://127.0.0.1:5500/@item.Route.TrimStart('/')">@item.Route</a></td>
                 <td>
                     <div class="form-check form-switch justify-content-center d-flex">
                         <input type="checkbox"
@@ -122,35 +122,65 @@
                 if (route !== "") {
                   $("#preview-container").show();
 
-                  show.src = route + "?isIframe=true";
+                  show.src = "https://localhost:7184/VitalBridge"+route;
 
-                  show.onload = function () {
-                    try {
-                      const iframeDoc = show.contentDocument || show.contentWindow.document;
+                          show.onload = function () {
+                              const iframeDoc = show.contentDocument || show.contentWindow.document;
+                              const iframeBody = iframeDoc.body;
 
-                      iframeDoc.addEventListener("click", (e) => {
-                        const link = e.target.closest("a");
-                        if (link && link.href) {
-                          e.preventDefault();
-                        }
+                              const script = iframeDoc.createElement('script');
+                              script.src = '/assets/js/LoadPlate.js';
+                              iframeDoc.head.appendChild(script);
 
-                      });
 
-                    } catch (err) {
-                      
-                    }
-                  };
+                              // 建立日期控制區塊
+                              const dateControlDiv = iframeDoc.createElement("div");
+                              dateControlDiv.className = "d-flex justify-content-center align-items-center gap-3 my-4";
+                              dateControlDiv.innerHTML = `
+                                <button id="prevDay" class="btn btn-primary">&larr;</button>
+                                <input type="date" id="publishDate" class="form-control w-auto" />
+                                <button id="nextDay" class="btn btn-primary">&rarr;</button>
+                              `;
+                              iframeBody.insertBefore(dateControlDiv, iframeBody.firstChild);
+
+                              // 綁定事件（直接在父層 JS）
+                              const dateInput = iframeDoc.querySelector('#publishDate');
+                              const prevBtn = iframeDoc.querySelector('#prevDay');
+                              const nextBtn = iframeDoc.querySelector('#nextDay');
+
+                              const today = new Date().toISOString().slice(0, 10);
+                              dateInput.value = today;
+
+                              function adjustDate(days) {
+                                let currentDate = dateInput.value ? new Date(dateInput.value) : new Date();
+                                currentDate.setDate(currentDate.getDate() + days);
+
+                                const yyyy = currentDate.getFullYear();
+                                const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+                                const dd = String(currentDate.getDate()).padStart(2, '0');
+                                const newDate = `${yyyy}-${mm}-${dd}`;
+                                dateInput.value = newDate;
+                                show.contentWindow.loadAdsByDate(dateInput.value);
+                              }
+
+                              dateInput.addEventListener('change', () => {
+                                  show.contentWindow.loadAdsByDate(dateInput.value);
+                              });
+
+                              prevBtn.addEventListener('click', () => adjustDate(-1));
+                              nextBtn.addEventListener('click', () => adjustDate(1));
+
+                              // 阻止 iframe 中的連結跳轉
+                              iframeDoc.addEventListener("click", (e) => {
+                                const link = e.target.closest("a");
+                                if (link && link.href) {
+                                  e.preventDefault();
+                                }
+                              });
+                            };
                 }
-                // if (route !== "") {
-                //     $("#preview-container").show();
-                //     show.src = route+"?isIframe=true";
-                //     const iframeDoc = show.contentDocument || show.contentWindow.document;
-
-                //     iframeDoc.addEventListener("click", (e) => {
-                //       console.log("iframe 裡面被點了：", e.target);
-                //     });
                 
-                // }
+
             });
         });
     </script>

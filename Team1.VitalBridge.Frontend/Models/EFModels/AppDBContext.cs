@@ -91,7 +91,7 @@ public partial class AppDBContext : DbContext
 
     public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
 
-    public virtual DbSet<OrederStatusItem> OrederStatusItems { get; set; }
+    public virtual DbSet<OrderStatusItem> OrderStatusItems { get; set; }
 
     public virtual DbSet<Organization> Organizations { get; set; }
 
@@ -110,6 +110,8 @@ public partial class AppDBContext : DbContext
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
+
+    public virtual DbSet<PaymentStatus> PaymentStatuses { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
@@ -593,9 +595,13 @@ public partial class AppDBContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.OrderStatuses)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__OrderStat__order__0B5CAFEA");
+
+            entity.HasOne(d => d.OrderStatusItem).WithMany(p => p.OrderStatuses)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderStatus_OrderStatusItem");
         });
 
-        modelBuilder.Entity<OrederStatusItem>(entity =>
+        modelBuilder.Entity<OrderStatusItem>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__OrederSt__3213E83F7790D53E");
         });
@@ -701,6 +707,10 @@ public partial class AppDBContext : DbContext
             entity.HasOne(d => d.PayMethod).WithMany(p => p.Payments)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Payment__payMeth__18B6AB08");
+
+            entity.HasOne(d => d.StatusNavigation).WithMany(p => p.Payments)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Payment_paymentStaus");
         });
 
         modelBuilder.Entity<PaymentMethod>(entity =>
@@ -708,6 +718,11 @@ public partial class AppDBContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__PaymentM__3213E83FE9116208");
 
             entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<PaymentStatus>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_paymentStaus");
         });
 
         modelBuilder.Entity<Permission>(entity =>

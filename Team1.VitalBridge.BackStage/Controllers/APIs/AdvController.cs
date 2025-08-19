@@ -24,7 +24,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         {
             var plate = _context.Plates
                 .Include(p=>p.DefaultImageFile)
-                .Where(p=>p.Route==route && p.Enable)
+                .Where(p=>(p.Route==route || "/VitalBridge" + p.Route== route) && p.Enable)
                 .OrderBy(p => p.Id)
                 .Select(p => new
                 {

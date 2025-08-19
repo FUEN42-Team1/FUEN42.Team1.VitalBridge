@@ -22,10 +22,8 @@ public partial class Payment
     [Column("payMethodId")]
     public int PayMethodId { get; set; }
 
-    [Required]
     [Column("status")]
-    [StringLength(50)]
-    public string Status { get; set; }
+    public int Status { get; set; }
 
     [Column("paidAt", TypeName = "datetime")]
     public DateTime? PaidAt { get; set; }
@@ -50,4 +48,8 @@ public partial class Payment
     [ForeignKey("PayMethodId")]
     [InverseProperty("Payments")]
     public virtual PaymentMethod PayMethod { get; set; }
+
+    [ForeignKey("Status")]
+    [InverseProperty("Payments")]
+    public virtual PaymentStatus StatusNavigation { get; set; }
 }
