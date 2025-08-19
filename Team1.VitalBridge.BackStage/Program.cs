@@ -21,6 +21,8 @@ namespace Team1.VitalBridge.BackStage
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddReverseProxy()
+            .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -171,7 +173,7 @@ namespace Team1.VitalBridge.BackStage
                 app.UseHsts();
             }
             app.UseCors();
-
+            app.MapReverseProxy();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
