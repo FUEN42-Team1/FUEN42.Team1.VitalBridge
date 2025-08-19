@@ -6,7 +6,7 @@
 <h1 class="mb-4 text-primary fw-bold">通知管理</h1>
 
 <p>
-    <button type="button" class="btn btn-outline-primary rounded-pill px-4 mb-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#CreateNotify">
+    <button type="button" class="btn btn-outline-primary rounded-pill px-4 mb-3 shadow-sm btn-createNotify">
         ＋ 新增通知
     </button>
 </p>
@@ -233,7 +233,7 @@
                     data: 'id',
                     render: function (data, type, row) {
                       return `<div class="btn-group btn-group-sm">
-                                <button type="button" class="btn btn-outline-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#staticBackdrop" data-id =${data}>
+                                <button type="button" class="btn btn-outline-warning rounded-pill btn-editNitify" data-id =${data}>
                                     編輯
                                 </button>
                                 <button type="button" class="btn btn-outline-danger rounded-pill btn-delete" data-id =${data}>
@@ -318,10 +318,9 @@
             });
 
             //編輯通知
-            $('#staticBackdrop').on('show.bs.modal', function (event) {
-              const button = $(event.relatedTarget);
-              const id = button.data('id');
-
+            $(document).on('click','.btn-editNitify', function (event) {
+              var id = $(this).data('id');
+              $('#staticBackdrop').modal("show");
               $('#modalBodyContent').html(`正在載入 ID 為 <strong>${id}</strong> 的資料...`);
 
                 $.ajax({
@@ -530,7 +529,10 @@
                         ]
                     });
             });
-
+            //開啟新增通知視窗
+            $(document).on('click','.btn-createNotify',function(e){
+                $('#CreateNotify').modal("show");
+            });
             //送出新增通知表單
             $(document).on('click','.btn-create',function(e){
                   const payload = {
