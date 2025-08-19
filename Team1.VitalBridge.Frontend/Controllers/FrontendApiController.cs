@@ -191,9 +191,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     _logger.LogInformation("?? 關鍵字篩選 (Keyword='{Keyword}') 後機構數量: {Count}", keyword, keywordCount);
                 }
 
-                // 計算總筆數（在應用其他 Include 前）
+                // ?p???`????]?b???Ψ?L Include ?e?^
                 var totalCount = await query.CountAsync();
-                _logger.LogInformation("?? 最終篩選結果總數: {TotalCount}", totalCount);
+                _logger.LogInformation("?? ???z???G?`??: {TotalCount}", totalCount);
 
                 // 如果沒有任何結果，記錄詳細的 debug 資訊
                 if (totalCount == 0)
@@ -217,18 +217,19 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     _logger.LogInformation("?? 最近的 5 個機構狀態: {@RecentOrgs}", recentlyModified);
                 }
 
-                // 應用 Include 和排序 - 使用 IX_Organizations_Name_Sort 索引
+                // ???? Include ?M??? - ??? IX_Organizations_Name_Sort ????
                 var organizationsQuery = query
                     .Include(o => o.City)
                     .Include(o => o.District)
                     .Include(o => o.Type)
                     .Include(o => o.OrganizationFeatureServices.Where(ofs => ofs.FeatureService.IsActive))
                         .ThenInclude(ofs => ofs.FeatureService)
+                        .ThenInclude(fs => fs.File)  // 新增：包含檔案資訊
                     .Include(o => o.OrganizationRooms)
-                    .OrderBy(o => o.Name)    // 使用排序索引
-                    .ThenBy(o => o.Id);      // 確保穩定排序
+                    .OrderBy(o => o.Name)    // ??α?????
+                    .ThenBy(o => o.Id);      // ?T?O??w???
 
-                // 分頁查詢
+                // ?????d??
                 var organizations = await organizationsQuery
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
@@ -246,22 +247,41 @@ namespace Team1.VitalBridge.Frontend.Controllers
                         Description = o.Description,
                         MapUrl = o.MapUrl,
                         PhotoUrl = o.PhotoUrl,
-                        // 計算最低月租價格 - 使用 IX_OrganizationRooms_Price_Org_MinCalc 索引
+                        // ?p???C?????? - ??? IX_OrganizationRooms_Price_Org_MinCalc ????
                         MinPrice = o.OrganizationRooms.Any() ? 
                             o.OrganizationRooms.Min(r => r.MonthlyPrice) : null,
-                        // 取得特色服務名稱列表 - 使用 IX_OrganizationFeatureServices_Org_Feature 索引
+                        // 保留原有的特色服務名稱列表（向後相容）
                         FeatureServices = o.OrganizationFeatureServices
                             .Where(ofs => ofs.FeatureService.IsActive)
-                            .Select(ofs => ofs.FeatureService.Name)
+                            .Take(6)  // 限制最多顯示6個特色服務
+                            .Select(ofs => new FeatureServiceDto
+                            {
+                                Id = ofs.FeatureService.Id,
+                                Name = ofs.FeatureService.Name,
+                                ImageUrl = ofs.FeatureService.FileId.HasValue ? 
+                                    ofs.FeatureService.File.FileName : null
+                            })
+                            .ToList(),
+                        // 新增：特色服務詳細資訊（包含圖片）- 限制最多6個
+                        FeatureServicesWithImages = o.OrganizationFeatureServices
+                            .Where(ofs => ofs.FeatureService.IsActive)
+                            .Take(6)  // 限制最多顯示6個特色服務
+                            .Select(ofs => new FeatureServiceDto
+                            {
+                                Id = ofs.FeatureService.Id,
+                                Name = ofs.FeatureService.Name,
+                                ImageUrl = ofs.FeatureService.FileId.HasValue ? 
+                                    ofs.FeatureService.File.FileName : null
+                            })
                             .ToList()
                     })
                     .ToListAsync();
 
                 var duration = DateTime.UtcNow - startTime;
                 _logger.LogInformation(
-                    "? 機構搜尋完成 - 關鍵字: '{Keyword}', 城市: {CityId}, 鄉鎮: {DistrictId}, 類型: [{Types}], 最高價格: {MaxPrice}, " +
-                    "結果: {Count}/{Total}, 頁碼: {Page}/{PageSize}, 耗時: {Duration}ms",
-                    request.Keyword ?? "無",
+                    "? ???c?j?M???? - ????r: '{Keyword}', ????: {CityId}, ?m??: {DistrictId}, ????: [{Types}], ???????: {MaxPrice}, " +
+                    "???G: {Count}/{Total}, ???X: {Page}/{PageSize}, ???: {Duration}ms",
+                    request.Keyword ?? "?L",
                     request.CityId ?? 0,
                     request.DistrictId ?? 0,
                     string.Join(",", request.OrganizationTypes),
@@ -277,13 +297,159 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     totalCount, 
                     request.Page, 
                     request.PageSize, 
-                    $"機構搜尋完成，找到 {totalCount} 筆結果");
+                    $"???c?j?M?????A??? {totalCount} ?????G");
             }
             catch (Exception ex)
             {
                 var duration = DateTime.UtcNow - startTime;
-                _logger.LogError(ex, "? 機構搜尋失敗，耗時: {Duration}ms", duration.TotalMilliseconds);
-                return HandleException(ex, "搜尋機構時發生錯誤");
+                _logger.LogError(ex, "? ???c?j?M????A???: {Duration}ms", duration.TotalMilliseconds);
+                return HandleException(ex, "?j?M???c??o????~");
+            }
+        }
+
+        /// <summary>
+        /// 前台專用：機構搜尋 - 包含完整的特色服務圖片資訊
+        /// </summary>
+        /// <param name="request">搜尋需求</param>
+        /// <returns>機構搜尋結果</returns>
+        [HttpPost("organizations-with-images")]
+        public async Task<IActionResult> SearchOrganizationsWithImages([FromBody] FrontendSearchRequest request)
+        {
+            var startTime = DateTime.UtcNow;
+            
+            try
+            {
+                // 驗證模型
+                var validationResult = ValidateModelState();
+                if (validationResult != null) return validationResult;
+
+                // 清空 ChangeTracker 以確保數據最新狀態
+                _context.ChangeTracker.Clear();
+
+                // 建立基本查詢
+                var query = _context.Organizations
+                    .AsNoTracking()
+                    .Where(o => o.IsActive && !o.IsDeleted)
+                    .AsQueryable();
+
+                // 地區過濾
+                if (request.CityId.HasValue && request.CityId > 0)
+                {
+                    query = query.Where(o => o.CityId == request.CityId.Value);
+                    
+                    if (request.DistrictId.HasValue && request.DistrictId > 0)
+                    {
+                        query = query.Where(o => o.DistrictId == request.DistrictId.Value);
+                    }
+                }
+
+                // 機構類型過濾
+                if (request.OrganizationTypes.Any())
+                {
+                    query = query.Where(o => request.OrganizationTypes.Contains(o.TypeId));
+                }
+
+                // 價格過濾
+                if (request.MaxPrice.HasValue && request.MaxPrice > 0)
+                {
+                    query = query.Where(o => o.OrganizationRooms.Any(r => r.MonthlyPrice <= request.MaxPrice.Value));
+                }
+
+                // 關鍵字搜尋
+                if (!string.IsNullOrWhiteSpace(request.Keyword))
+                {
+                    var keyword = request.Keyword.Trim();
+                    query = query.Where(o => 
+                        EF.Functions.Like(o.Name, $"%{keyword}%") || 
+                        EF.Functions.Like(o.Address, $"%{keyword}%"));
+                }
+
+                // 計算總數量
+                var totalCount = await query.CountAsync();
+
+                // 查詢詳細資料
+                var organizationsQuery = query
+                    .Include(o => o.City)
+                    .Include(o => o.District)
+                    .Include(o => o.Type)
+                    .Include(o => o.OrganizationFeatureServices.Where(ofs => ofs.FeatureService.IsActive))
+                        .ThenInclude(ofs => ofs.FeatureService)
+                        .ThenInclude(fs => fs.File)
+                    .Include(o => o.OrganizationRooms)
+                    .OrderBy(o => o.Name)
+                    .ThenBy(o => o.Id);
+
+                // 分頁查詢
+                var organizations = await organizationsQuery
+                    .Skip((request.Page - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .Select(o => new
+                    {
+                        id = o.Id,
+                        name = o.Name,
+                        typeName = o.Type.Name,
+                        typeId = o.TypeId,
+                        cityName = o.City.Name,
+                        districtName = o.District.Name,
+                        address = o.Address,
+                        bedCount = o.BedCount,
+                        ageLimits = o.AgeLimits,
+                        description = o.Description,
+                        mapUrl = o.MapUrl,
+                        photoUrl = o.PhotoUrl,
+                        minPrice = o.OrganizationRooms.Any() ? 
+                            o.OrganizationRooms.Min(r => r.MonthlyPrice) : (decimal?)null,
+                        // 特色服務 - 包含圖片資訊，限制最多6個
+                        featureServices = o.OrganizationFeatureServices
+                            .Where(ofs => ofs.FeatureService.IsActive)
+                            .Take(6)
+                            .Select(ofs => new
+                            {
+                                id = ofs.FeatureService.Id,
+                                name = ofs.FeatureService.Name,
+                                imageUrl = ofs.FeatureService.FileId.HasValue ? 
+                                    ofs.FeatureService.File.FileName : null
+                            })
+                            .ToList()
+                    })
+                    .ToListAsync();
+
+                var duration = DateTime.UtcNow - startTime;
+                _logger.LogInformation(
+                    "機構搜尋完成 - 關鍵字: '{Keyword}', 結果: {Count}/{Total}, 頁次: {Page}/{PageSize}, 耗時: {Duration}ms",
+                    request.Keyword ?? "無",
+                    organizations.Count,
+                    totalCount,
+                    request.Page,
+                    request.PageSize,
+                    duration.TotalMilliseconds);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"機構搜尋完成，共找到 {totalCount} 筆結果",
+                    data = organizations,
+                    pagination = new
+                    {
+                        totalCount,
+                        pageNumber = request.Page,
+                        pageSize = request.PageSize,
+                        totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize)
+                    },
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                var duration = DateTime.UtcNow - startTime;
+                _logger.LogError(ex, "機構搜尋錯誤，耗時: {Duration}ms", duration.TotalMilliseconds);
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "搜尋機構時發生錯誤",
+                    error = ex.Message,
+                    timestamp = DateTime.UtcNow
+                });
             }
         }
 
@@ -457,6 +623,84 @@ namespace Team1.VitalBridge.Frontend.Controllers
             catch (Exception ex)
             {
                 return HandleException(ex, "強制刷新時發生錯誤");
+            }
+        }
+
+        /// <summary>
+        /// 除錯用：檢查特色服務的圖片資料
+        /// </summary>
+        /// <returns>特色服務圖片資料</returns>
+        [HttpGet("debug/feature-services-images")]
+        public async Task<IActionResult> DebugFeatureServicesImages()
+        {
+            try
+            {
+                var data = await _context.FeatureServices
+                    .AsNoTracking()
+                    .Include(fs => fs.File)
+                    .Where(fs => fs.IsActive)
+                    .Select(fs => new
+                    {
+                        Id = fs.Id,
+                        Name = fs.Name,
+                        FileId = fs.FileId,
+                        FileName = fs.File != null ? fs.File.FileName : null,
+                        ImageUrl = fs.FileId.HasValue ? fs.File.FileName : null,
+                        FullImageUrl = fs.FileId.HasValue ? 
+                            $"http://localhost:7242/api/UploadFile/GetFile?fileName={fs.File.FileName}" : null
+                    })
+                    .ToListAsync();
+
+                return SuccessResponse(data, "特色服務圖片資料查詢成功");
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "查詢特色服務圖片資料時發生錯誤");
+            }
+        }
+
+        /// <summary>
+        /// 除錯用：檢查機構的特色服務資料
+        /// </summary>
+        /// <returns>機構特色服務資料</returns>
+        [HttpGet("debug/organizations-with-features")]
+        public async Task<IActionResult> DebugOrganizationsWithFeatures()
+        {
+            try
+            {
+                var data = await _context.Organizations
+                    .AsNoTracking()
+                    .Include(o => o.OrganizationFeatureServices)
+                        .ThenInclude(ofs => ofs.FeatureService)
+                        .ThenInclude(fs => fs.File)
+                    .Where(o => o.IsActive && !o.IsDeleted && o.OrganizationFeatureServices.Any())
+                    .Take(3)
+                    .Select(o => new
+                    {
+                        OrganizationId = o.Id,
+                        OrganizationName = o.Name,
+                        FeatureServices = o.OrganizationFeatureServices
+                            .Where(ofs => ofs.FeatureService.IsActive)
+                            .Select(ofs => new
+                            {
+                                Id = ofs.FeatureService.Id,
+                                Name = ofs.FeatureService.Name,
+                                FileId = ofs.FeatureService.FileId,
+                                FileName = ofs.FeatureService.File != null ? ofs.FeatureService.File.FileName : null,
+                                ImageUrl = ofs.FeatureService.FileId.HasValue ? 
+                                    ofs.FeatureService.File.FileName : null,
+                                FullImageUrl = ofs.FeatureService.FileId.HasValue ? 
+                                    $"http://localhost:7242/api/UploadFile/GetFile?fileName={ofs.FeatureService.File.FileName}" : null
+                            })
+                            .ToList()
+                    })
+                    .ToListAsync();
+
+                return SuccessResponse(data, "機構特色服務資料查詢成功");
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex, "查詢機構特色服務資料時發生錯誤");
             }
         }
     }

@@ -66,13 +66,28 @@ namespace Team1.VitalBridge.Frontend.Models.DTOs
         public decimal? MinPrice { get; set; }
 
         /// <summary>
-        /// 特色服務名稱列表
+        /// 特色服務詳細資訊（包含圖片資訊）
         /// </summary>
-        public List<string> FeatureServices { get; set; } = new List<string>();
+        public List<FeatureServiceDto> FeatureServices { get; set; } = new List<FeatureServiceDto>();
+
+        /// <summary>
+        /// 特色服務詳細資訊（包含圖片）- 向後相容
+        /// </summary>
+        public List<FeatureServiceDto> FeatureServicesWithImages { get; set; } = new List<FeatureServiceDto>();
 
         /// <summary>
         /// 機構照片URL
         /// </summary>
         public string? PhotoUrl { get; set; }
+    }
+
+    /// <summary>
+    /// 特色服務 DTO，包含圖片資訊
+    /// </summary>
+    public class FeatureServiceDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
     }
 }

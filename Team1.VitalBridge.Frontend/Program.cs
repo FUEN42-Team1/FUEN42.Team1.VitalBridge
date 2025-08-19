@@ -37,6 +37,15 @@ namespace Team1.VitalBridge.Frontend
                         .AllowAnyHeader();          // 允許所有標頭
                 });
                 
+                options.AddPolicy("FileProtocolPolicy", policy =>
+                {
+                    policy
+                        .SetIsOriginAllowed(_ => true)  // 允許所有來源，包括 file://
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();        // 支援認證 cookies
+                });
+                
                 options.AddPolicy("StrictPolicy", policy =>
                 {
                     policy
@@ -105,7 +114,10 @@ namespace Team1.VitalBridge.Frontend
             // 5. 背景服務 - 自動啟動 HTML
             builder.Services.AddHostedService<FrontendLauncherService>();
 
-            // 6. 日誌設定
+            // 6. HTTP ???A?? - ????O?? API ????????
+            builder.Services.AddHttpClient();
+
+            // 7. ??x?]?w
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
@@ -150,7 +162,7 @@ namespace Team1.VitalBridge.Frontend
             app.UseHttpsRedirection();
 
             // 4. CORS 中間件（必須在 Authorization 之前）
-            app.UseCors("FrontendPolicy");
+            app.UseCors("FileProtocolPolicy");
 
             // 5. 靜態檔案服務（如果需要）
             app.UseStaticFiles();
