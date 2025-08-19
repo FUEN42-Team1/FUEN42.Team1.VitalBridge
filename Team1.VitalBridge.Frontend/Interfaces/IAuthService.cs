@@ -9,5 +9,7 @@ namespace Team1.VitalBridge.Frontend.Interfaces
         Task<TokenRes> RefreshAsync();
         Task LogoutAsync();
         Task<object?> GetUserInfoAsync(int userId);
+        Task SendPasswordResetEmailAsync(string email);
+        Task<bool> ResetPasswordAsync(string token, string newPassword);
     }
 }

@@ -55,5 +55,24 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
             return Ok(userInfo);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+        {
+            await _auth.SendPasswordResetEmailAsync(dto.Email);
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            if (dto.NewPassword != dto.ConfirmPassword)
+                return BadRequest("密碼不一致");
+
+            var result = await _auth.ResetPasswordAsync(dto.Token, dto.NewPassword);
+            if (!result)
+                return BadRequest("Token 無效或已過期");
+            return Ok();
+        }
     }
 }
