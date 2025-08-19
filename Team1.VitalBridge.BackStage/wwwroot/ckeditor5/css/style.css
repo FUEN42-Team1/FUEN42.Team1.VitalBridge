@@ -9,7 +9,7 @@
 :root {
 	--ck-content-font-family: 'Lato';
 }
-
+ 
 .main-container {
 	font-family: var(--ck-content-font-family);
 	width: fit-content;

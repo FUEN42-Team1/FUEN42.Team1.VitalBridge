@@ -21,6 +21,19 @@
         public DateTime? CreatedAtFrom { get; set; }
         public DateTime? CreatedAtTo { get; set; }
     }
+
+    public class ContentArticleCommentCriteriaDTO
+    {
+        public string? ArticleTitle { get; set; }      // filter by article title
+        public string? MemberName { get; set; }        // filter by member name
+        public string? CommentContent { get; set; }    // filter by comment content
+        public string? Status { get; set; } = "all";   // "all", "enabled", "disabled"
+    }
+
+    public class ContentArticleCommentEditDTO
+    {
+        public int Id { get; set; } 
+    }
     public class ContentArticleCommentDisplayDTO
     {
         public int Id { get; set; } // Hidden in the view

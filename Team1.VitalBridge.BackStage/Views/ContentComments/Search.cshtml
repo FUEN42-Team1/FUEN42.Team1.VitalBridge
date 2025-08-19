@@ -119,12 +119,12 @@
 
         <!-- Pagination Controls -->
         <div class="pagination-controls">
+            <div class="pagination-info">Page 1 of 10 (Static)</div>
             <div class="pagination-buttons">
-                <button>First (Static)</button>
-                <button>Previous (Static)</button>
-                <span class="pagination-info">Page 1 of 10 (Static)</span>
-                <button>Next (Static)</button>
-                <button>Last (Static)</button>
+                <button id="firstPageBtn">First</button>
+                <button id="prevPageBtn">Previous</button>
+                <button id="nextPageBtn">Next</button>
+                <button id="lastPageBtn">Last</button>
             </div>
         </div>
 
@@ -150,30 +150,24 @@
          * AJAX call to backend, gather data base on filters and pagination
          * returns {object} An object containing the paginated comments and total count.
         */
+        
         function fetchAndFilterComments() {
-            // Simulate server-side filtering
-            let tempFiltered = allComments.filter(comment => {
-                const matchesArticleTitle = comment.articleTitle.toLowerCase().includes(currentFilters.articleTitle.toLowerCase());
-                const matchesMemberName = comment.memberName.toLowerCase().includes(currentFilters.memberName.toLowerCase());
-                const matchesCommentContent = comment.commentContent.toLowerCase().includes(currentFilters.commentContent.toLowerCase());
-                const matchesStatus = currentFilters.status === 'all' ||
-                                      (currentFilters.status === 'enabled' && comment.enabled) ||
-                                      (currentFilters.status === 'disabled' && !comment.enabled);
-                return matchesArticleTitle && matchesMemberName && matchesCommentContent && matchesStatus;
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: '/api/ContentArticleCommentAPI',
+                    type: 'GET',
+                    data: {
+                        ArticleTitle: currentFilters.articleTitle,
+                        MemberName: currentFilters.memberName,
+                        CommentContent: currentFilters.commentContent,
+                        Status: currentFilters.status
+                    },
+                    success: resolve,
+                    error: reject
+                });
             });
-
-            filteredComments = tempFiltered; // Update the global filteredComments
-
-            const totalComments = filteredComments.length;
-            const startIndex = (currentPage - 1) * rowsPerPage;
-            const endIndex = startIndex + rowsPerPage;
-            const paginatedComments = filteredComments.slice(startIndex, endIndex);
-
-            return {
-                data: paginatedComments,
-                total: totalComments
-            };
         }
+
 
         /**
          * Renders the comments into the table body.
@@ -187,9 +181,8 @@
                 $tbody.append(`<tr><td colspan="5" class="text-center py-4 text-gray-500">No comments found matching your criteria.</td></tr>`);
                 return;
             }
-
             comments.forEach(comment => {
-                const checked = comment.enabled ? 'checked' : '';
+                const checked = comment.isEnabled ? 'checked' : ''; // <-- must be 'checked' or empty string
                 const row = `
                     <tr>
                         <td>${comment.articleTitle}</td>
@@ -224,10 +217,27 @@
          * basically, summing it all up.
          * This function is called when the page loads or when filters are applied.
          */
-        function loadComments() {
-            const result = fetchAndFilterComments();
-            renderTable(result.data);
-            updatePaginationInfo(result.total);
+        async function loadComments() {
+            filteredComments = await fetchAndFilterComments();
+            const totalComments = filteredComments.length;
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedComments = filteredComments.slice(startIndex, endIndex);
+            renderTable(paginatedComments);
+            updatePaginationInfo(totalComments);
+        }
+
+        function updateCommentStatus(id) {
+            return new Promise(function(resolve, reject) {
+                $.ajax({
+                    url: '/api/ContentArticleCommentAPI',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ Id: id }),
+                    success: resolve,
+                    error: reject
+                });
+            });
         }
 
         $(document).ready(function(){
@@ -283,19 +293,14 @@
 
             // Event listener for comment status toggles (checkboxes)
             // Using event delegation since rows are dynamically added/removed
-            $('#commentsTableBody').on('change', 'input[type="checkbox"]', function() {
+            $('#commentsTableBody').on('change', 'input[type="checkbox"]', async function() {
                 const commentId = $(this).data('comment-id');
-                const isChecked = $(this).is(':checked');
 
-                // Update the enabled status in our simulated data
-                const commentToUpdate = allComments.find(comment => comment.id === commentId);
-                if (commentToUpdate) {
-                    commentToUpdate.enabled = isChecked;
-                    // In a real application, you would send an AJAX request here to update the backend
-                    console.log(`Comment ID: ${commentId} status updated to: ${isChecked}`);
-                }
+                //Update the comment status via AJAX
+                await updateCommentStatus(commentId);
+
                 // Reload comments to reflect potential filtering changes if status filter is active
-                loadComments();
+                await loadComments();
             });
 
         });
