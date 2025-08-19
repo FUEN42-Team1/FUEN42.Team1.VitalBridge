@@ -41,14 +41,14 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 {
                     savedFileInfo.FileName,
                     savedFileInfo.Length,
-                    FilePath = Url.Action("GetFile", "UploadFile/"+ savedFileInfo.FileName)
+                    FilePath = Url.Action("GetFile", "UploadFile/" + savedFileInfo.FileName)
                 });
             }
 
 
             //var fileTablePath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
             //var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, fileTablePath);
-            
+
             //if (savedFileInfo.Length==0 || savedFileInfo.FilePath ==null)
             //    return BadRequest(savedFileInfo.FileName);
             //return Ok(new
@@ -57,6 +57,38 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             //    savedFileInfo.Length,
             //    FilePath = Url.Action("GetFile", "UploadFile", new { fileName = savedFileInfo.FileName })
             //});
+        }
+        [HttpGet("GetFile/{fileName}")]
+        public IActionResult GetFile2(string fileName)
+        {
+            var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越
+
+            using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
+            {
+                var filePath = Path.Combine(FileTableUNCPath, safeFileName);
+
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound();
+
+                var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+
+                Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
+
+                return File(fileBytes, contentType);
+            }
+
+
+            //var fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+            //var filePath = Path.Combine(fileTablePath, safeFileName);
+
+            //if (!System.IO.File.Exists(filePath))
+            //    return NotFound();
+
+            //var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+            //var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            //return File(fileBytes, contentType);
         }
 
         [HttpGet("GetFile")]
