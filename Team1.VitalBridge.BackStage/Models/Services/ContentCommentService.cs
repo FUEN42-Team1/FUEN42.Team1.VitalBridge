@@ -21,7 +21,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 ContentTitle = c.ContentNavigation.Title,
                 ParentCommentId = c.ParentCommentId,
                 Content = c.Content,
-                IsPinned = c.IsEnabled,
+                IsEnabled = c.IsEnabled,
                 CreatedAt = c.CreatedAt
             }).ToList();
             return dto;

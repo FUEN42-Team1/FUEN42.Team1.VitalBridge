@@ -10,7 +10,7 @@
         public string ContentTitle { get; set; }
         public int? ParentCommentId { get; set; }
         public string Content { get; set; }
-        public bool IsPinned { get; set; }
+        public bool IsEnabled { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 

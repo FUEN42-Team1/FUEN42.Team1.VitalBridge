@@ -34,7 +34,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Content = c.Content.Length > 10
                  ? c.Content.Substring(0, 7)+ "..."
                  : c.Content.PadRight(10),
-                IsPinned = c.IsPinned,
+                IsPinned = c.IsEnabled,
                 CreatedAt = c.CreatedAt
             }).ToList();
 
@@ -44,36 +44,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
         // GET: ContentCommentsController/Search
         public async Task<ActionResult> Search()
         {
-            await _service.GetAllCommentsAsync();
             return View();
-            ContentCommentSearchViewModel? SearchVM;
-            if (SearchVM == null)
-            {
-                SearchVM = new ContentCommentSearchViewModel();
-            }
-
-            var criteria = new ContentCommentListCritriaDTO
-            {
-                //ContentTitle = SearchVM.ContentTitle
-
-            };
-
-            var results = await _service.SearchCommentAsync(criteria);
-
-            var vm = results.Select(c => new ContentCommentListViewModel_I
-            {
-                Id = c.Id,
-                //MemberName = c.MemberName,
-                ContentTitle = c.ContentTitle,
-                ParentCommentId = c.ParentCommentId,
-                Content = c.Content.Length > 10
-                 ? c.Content.Substring(0, 7) + "..."
-                 : c.Content.PadRight(10),
-                IsPinned = c.IsPinned,
-                CreatedAt = c.CreatedAt
-            }).ToList();
-
-            return View(vm);
+            
         }
 
         
