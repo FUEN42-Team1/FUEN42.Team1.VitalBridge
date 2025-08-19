@@ -1,10 +1,14 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.Frontend.Interfaces;
+using Team1.VitalBridge.Frontend.Middleware;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
+using Team1.VitalBridge.Frontend.Services;
 
 namespace Team1.VitalBridge.Frontend
 {
