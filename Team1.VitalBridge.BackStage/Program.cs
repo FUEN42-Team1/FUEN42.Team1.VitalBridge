@@ -27,6 +27,19 @@ namespace Team1.VitalBridge.BackStage
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // 添加 CORS 服務 - 支援 file:// 協議
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFileProtocol", policy =>
+                {
+                    policy
+                        .SetIsOriginAllowed(_ => true)  // 允許所有來源，包括 file://
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+
 			// 註冊 IProductCategoryRepository,ProductCategoryService>到DI
 			builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 			builder.Services.AddScoped<ProductCategoryService>();
@@ -154,15 +167,6 @@ namespace Team1.VitalBridge.BackStage
 
 
 
-
-
-
-
-
-
-
-
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -177,6 +181,9 @@ namespace Team1.VitalBridge.BackStage
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            // 添加 CORS 中間件 - 必須在 UseRouting 之前
+            app.UseCors("AllowFileProtocol");
+
             app.UseRouting();
             app.MapControllers();
 
@@ -186,6 +193,15 @@ namespace Team1.VitalBridge.BackStage
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            // ================== 應用程式啟動 ==================
+            
+            // 記錄啟動資訊
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("VitalBridge BackStage 後台管理系統正在啟動...");
+            logger.LogInformation("環境: {Environment}", app.Environment.EnvironmentName);
+            logger.LogInformation("後台管理端點: https://localhost:7242");
+            logger.LogInformation("?? 後台機構管理功能已準備就緒");
 
             app.Run();
         }

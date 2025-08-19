@@ -6,7 +6,7 @@
    "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": null,
-   "OutputPath": "Models\/EFModels",
+   "OutputPath": "Models\\EFModels",
    "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "Team1.VitalBridge.Frontend",
    "Schemas": null,
