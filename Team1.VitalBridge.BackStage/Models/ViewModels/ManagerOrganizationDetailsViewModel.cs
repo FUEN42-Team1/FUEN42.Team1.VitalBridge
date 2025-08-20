@@ -47,6 +47,9 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Display(Name = "特色服務")]
         public List<string> FeatureServiceNames { get; set; } = new List<string>();
 
+        [Display(Name = "特色服務詳細資訊")]
+        public List<FeatureServiceDetailViewModel> FeatureServices { get; set; } = new List<FeatureServiceDetailViewModel>();
+
         [Display(Name = "服務對象")]
         public List<string> ServiceTargetNames { get; set; } = new List<string>();
 
@@ -60,5 +63,12 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public bool IsActive { get; set; }
 
         public bool IsDeleted { get; set; }
+    }
+
+    public class FeatureServiceDetailViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
