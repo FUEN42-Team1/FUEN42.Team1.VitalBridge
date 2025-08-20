@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // 加入這行
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.DTOs;
+using Team1.VitalBridge.Frontend.Models.EFModels;
 
 
 namespace Team1.VitalBridge.Frontend.Controllers
@@ -13,8 +16,15 @@ namespace Team1.VitalBridge.Frontend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _auth;
+        private readonly AppDbContext _context;
 
-        public AuthController(IAuthService auth) => _auth = auth;
+        //public AuthController(IAuthService auth) => _auth = auth;
+
+        public AuthController(AppDbContext context, IAuthService auth)
+        {
+            this._auth = auth;
+            this._context = context;
+        }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
@@ -73,6 +83,44 @@ namespace Team1.VitalBridge.Frontend.Controllers
             if (!result)
                 return BadRequest("Token 無效或已過期");
             return Ok();
+        }
+        [Authorize]
+        [HttpGet("getNotify")]
+        public async Task<ActionResult<object>> getNotify()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+            var data = _context.NotifyUsers.Where(u => u.UserId == userId && u.IsRead ==false)
+                .Include(u => u.Notify)
+                .ThenInclude(n => n.Categories)
+                .Where(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now))
+                .Take(3)
+                .Select(u => new
+                {
+                    u.Notify.Title,
+                    u.Notify.Text,
+                    u.Notify.NotifysUrl,
+                    SendDate = u.Notify.SendDate.ToString("yyyy年MM月dd日 tt hh:mm", new System.Globalization.CultureInfo("zh-TW")),
+                    u.Notify.Categories.Name,
+                    u.IsRead
+                })
+                .ToList();
+            if (data.Count == 0) return NotFound();
+            return Ok(data);
+        }
+
+        [Authorize]
+        [HttpGet("getAllNotify")]
+        public async Task<ActionResult<object>> getAllNotify()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+            var data = _context.NotifyUsers.Where(u => u.UserId == userId)
+                .Include(u => u.Notify).Where(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now))
+                .ToList();
+            return Ok(data);
         }
     }
 }
