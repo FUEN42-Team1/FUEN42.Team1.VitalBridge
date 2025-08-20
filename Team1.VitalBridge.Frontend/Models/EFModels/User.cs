@@ -96,6 +96,12 @@ public partial class User
     [InverseProperty("Customer")]
     public virtual Cart Cart { get; set; }
 
+    [InverseProperty("Member")]
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    [InverseProperty("Member")]
+    public virtual ICollection<Content> Contents { get; set; } = new List<Content>();
+
     [InverseProperty("Customer")]
     public virtual ICollection<CouponRecord> CouponRecords { get; set; } = new List<CouponRecord>();
 

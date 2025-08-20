@@ -50,7 +50,7 @@ namespace Team1.VitalBridge.Frontend
 
 
             //DIª`¤J
-            builder.Services.AddDbContext<AppDBContext>(options =>
+            builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseSqlServer(
 builder.Configuration.GetConnectionString("DefaultConnection"),
 sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(

@@ -53,4 +53,8 @@ public partial class Content
 
     [InverseProperty("Content")]
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();
+
+    [ForeignKey("MemberId")]
+    [InverseProperty("Contents")]
+    public virtual User Member { get; set; }
 }

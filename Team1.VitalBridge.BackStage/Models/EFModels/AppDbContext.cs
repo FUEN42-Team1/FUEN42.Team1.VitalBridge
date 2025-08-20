@@ -263,6 +263,10 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Comments__conten__7C4F7684");
 
+            entity.HasOne(d => d.Member).WithMany(p => p.Comments)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Comments_Users");
+
             entity.HasOne(d => d.ParentComment).WithMany(p => p.InverseParentComment).HasConstraintName("FK__Comments__parent__7B5B524B");
         });
 
@@ -273,6 +277,10 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.ContentCategory).WithMany(p => p.Contents)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Contents__conten__73BA3083");
+
+            entity.HasOne(d => d.Member).WithMany(p => p.Contents)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Contents_Users");
         });
 
         modelBuilder.Entity<ContentCategory>(entity =>

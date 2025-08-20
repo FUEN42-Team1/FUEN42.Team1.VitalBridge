@@ -12,12 +12,12 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
     public class AuthService : IAuthService
     {
-        private readonly AppDBContext _db;
+        private readonly AppDbContext _db;
         private readonly IJwtService _jwt;
         private readonly IConfiguration _cfg;
         private readonly IHttpContextAccessor _http;
 
-        public AuthService(AppDBContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http)
+        public AuthService(AppDbContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http)
         {
             _db = db; _jwt = jwt; _cfg = cfg; _http = http;
         }

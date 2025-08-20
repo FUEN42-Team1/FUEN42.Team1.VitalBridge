@@ -43,6 +43,10 @@ public partial class Comment
     [InverseProperty("ParentComment")]
     public virtual ICollection<Comment> InverseParentComment { get; set; } = new List<Comment>();
 
+    [ForeignKey("MemberId")]
+    [InverseProperty("Comments")]
+    public virtual User Member { get; set; }
+
     [ForeignKey("ParentCommentId")]
     [InverseProperty("InverseParentComment")]
     public virtual Comment ParentComment { get; set; }
