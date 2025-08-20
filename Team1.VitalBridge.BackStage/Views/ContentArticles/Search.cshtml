@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Search Articles";
 }
+@section Styles {
+    <link rel="stylesheet" href="~/css/AdminArticle.css" />
+}
 
 @{
     // Check if TempData contains a success message
@@ -25,133 +28,345 @@
 
 
 
+<div class="pageBody">
+    <div class="container">
+        
 
-<h2>Search Articles</h2>
+        <!-- Search and Filter Area -->
+        <div class="search-filter-area">
+            <h2>Manage Article Contents</h2>
+            <form action="#" method="get">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="Keyword">Keyword</label>
+                        <input type="text" id="Keyword" name="Keyword" placeholder="Search title, member, category">
+                    </div>
 
-<!-- Toggle Button -->
-<button class="btn btn-outline-secondary mb-3" id="toggleAdvancedSearch" type="button">
-    Show Advanced Search
-</button>
+                    <div class="form-group">
+                        <label for="Status">Status</label>
+                        <select id="Status" name="Status">
+                            <option value="">-- All --</option>
+                            <option value="0">Draft</option>
+                            <option value="1">Published</option>
+                            <option value="2">Archived</option>
+                        </select>
+                    </div>
 
+                    <div class="form-group">
+                        <label>View Count Range</label>
+                        <div class="date-inputs">
+                            <input type="number" id="MinViewCount" name="MinViewCount" placeholder="Min">
+                            <input type="number" id="MaxViewCount" name="MaxViewCount" placeholder="Max">
+                        </div>
+                    </div>
 
-<!-- Collapsible advanced search form -->
-<div class="collapse" id="advancedSearchForm">
-    <form method="get" asp-action="Search" class="mb-4">
-        <div class="form-group">
-            <label for="Keyword">Keyword</label>
-            <input type="text" class="form-control" name="Keyword" placeholder="Search title, member, category" />
+                    <div class="form-group date-range">
+                        <label>Created At Range</label>
+                        <div class="date-inputs">
+                            <input type="date" id="CreatedAtStart" name="CreatedAtStart">
+                            <input type="date" id="CreatedAtEnd" name="CreatedAtEnd">
+                        </div>
+                    </div>
+
+                    <div class="form-group date-range">
+                        <label>Updated At Range</label>
+                        <div class="date-inputs">
+                            <input type="date" id="UpdatedAtStart" name="UpdatedAtStart">
+                            <input type="date" id="UpdatedAtEnd" name="UpdatedAtEnd">
+                        </div>
+                    </div>
+                </div>
+                <button class="action-button">Filter</button>
+            </form>
         </div>
 
-        <div class="form-group mt-2">
-            <label for="Status">Status</label>
-            <select name="Status" class="form-select">
-                <option value="">-- All --</option>
-                <option value="0">Draft</option>
-                <option value="1">Published</option>
-                <option value="2">Archived</option>
-                <!-- Add actual status mappings here -->
+        <!-- Create New Article Button -->
+        <a class="btn btn-primary" asp-action="Create">Create New Article</a>
+
+        <!-- Rows Per Page Selector -->
+        <div class="rows-per-page-area">
+            <label for="rowsPerPage">Rows Per Page:</label>
+            <select id="rowsPerPage">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="100">100</option>
             </select>
         </div>
 
-        <div class="form-group mt-2">
-            <label>View Count Range</label>
-            <div class="d-flex">
-                <input type="number" class="form-control me-2" name="MinViewCount" placeholder="Min" />
-                <input type="number" class="form-control" name="MaxViewCount" placeholder="Max" />
+        <!-- Articles Table Display -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Cover</th>
+                        <th>Category</th>
+                        <th>Member</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="articlesTableBody">
+                    <!-- Data will be populated here by JavaScript, right now it is just samples -->
+                    <!-- Sample Data Rows -->
+                    <tr>
+                        <td>The Rise of Green Technology</td>
+                        <td><img src="https://placehold.co/80x50/34D399/FFFFFF?text=Tech" alt="Cover" class="table-cover-img"></td>
+                        <td>Technology</td>
+                        <td>Jane Doe</td>
+                        <td>Published</td>
+                        <td>1250</td>
+                        <td>2023-09-15</td>
+                        <td>2023-09-20</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Exploring Deep Sea Creatures</td>
+                        <td><img src="https://placehold.co/80x50/60A5FA/FFFFFF?text=Ocean" alt="Cover" class="table-cover-img"></td>
+                        <td>Science</td>
+                        <td>John Smith</td>
+                        <td>Draft</td>
+                        <td>80</td>
+                        <td>2024-01-10</td>
+                        <td>2024-01-10</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benefits of Mindfulness Meditation</td>
+                        <td><img src="https://placehold.co/80x50/C084FC/FFFFFF?text=Mind" alt="Cover" class="table-cover-img"></td>
+                        <td>Health</td>
+                        <td>Emily White</td>
+                        <td>Archived</td>
+                        <td>450</td>
+                        <td>2023-11-01</td>
+                        <td>2023-11-05</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>A Guide to Urban Gardening</td>
+                        <td><img src="https://placehold.co/80x50/F87171/FFFFFF?text=Garden" alt="Cover" class="table-cover-img"></td>
+                        <td>Lifestyle</td>
+                        <td>Michael Green</td>
+                        <td>Published</td>
+                        <td>980</td>
+                        <td>2024-03-20</td>
+                        <td>2024-03-22</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>History of the Olympic Games</td>
+                        <td><img src="https://placehold.co/80x50/22D3EE/FFFFFF?text=Sport" alt="Cover" class="table-cover-img"></td>
+                        <td>Sports</td>
+                        <td>Sarah Brown</td>
+                        <td>Published</td>
+                        <td>2100</td>
+                        <td>2023-07-01</td>
+                        <td>2023-07-01</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <!-- More sample data can be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <div class="pagination-info">No data (Static)</div>
+            <div class="pagination-buttons">
+                <button id="firstPageBtn">First</button>
+                <button id="prevPageBtn">Previous</button>
+                <button id="nextPageBtn">Next</button>
+                <button id="lastPageBtn">Last</button>
             </div>
         </div>
 
-        <div class="form-group mt-2">
-            <label>Created At Range</label>
-            <div class="d-flex">
-                <input type="date" class="form-control me-2" name="CreatedAtStart" />
-                <input type="date" class="form-control" name="CreatedAtEnd" />
-            </div>
-        </div>
-
-        <div class="form-group mt-2">
-            <label>Updated At Range</label>
-            <div class="d-flex">
-                <input type="date" class="form-control me-2" name="UpdatedAtStart" />
-                <input type="date" class="form-control" name="UpdatedAtEnd" />
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">Search</button>
-    </form>
+    </div>
 </div>
-
-@* create a new content *@
-<div class="mb-3">
-    <a class="btn btn-success" asp-action="Create">Create New Article</a>
-</div>
-
-@if (Model != null && Model.Any())
-{
-    <table class="table table-bordered" id="myTable">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Cover</th>
-                <th>Category</th>
-                <th>Member</th>
-                <th>Status</th>
-                <th>Views</th>
-                <th>Created</th>
-                <th>Updated</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var article in Model)
-            {
-                <tr>
-                    <td>@article.Title</td>
-                    <td>
-                        @if (article.CoverPic != null)
-                        {
-                            <img src="data:image/png;base64,@Convert.ToBase64String(article.CoverPic)" style="max-height: 50px;" />
-                        }
-                    </td>
-                    <td>@article.CategoryName</td>
-                    <td>@article.MemberName</td>
-                    <td>@article.Status</td>
-                    <td>@article.ViewCount</td>
-                    <td>@article.CreatedAt.ToString("yyyy-MM-dd")</td>
-                    <td>@article.UpdatedAt.ToString("yyyy-MM-dd")</td>
-                    <td>
-                        <a class="btn btn-outline-warning rounded-pill btn-sm" asp-action="Edit" asp-route-id="@article.Id">Edit</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No articles found.</p>
-}
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('#myTable').DataTable();
+        // Global variables for article management
+        // API data 
+        const allArticles = [];
+        let currentPage = 1;
+        // Assuming you have an input with id 'articleRowsPerPage' for articles
+        let rowsPerPage = parseInt($('#rowsPerPage').val());
+        let filteredArticles = []; // Stores articles after applying search filters
+        let currentArticleFilters = {
+            Keyword: '', // Searches title, member, category
+            Status: '',  // 0: Draft, 1: Published, 2: Archived, "": All
+            MinViewCount: '',
+            MaxViewCount: '',
+            CreatedAtStart: '',
+            CreatedAtEnd: '',
+            UpdatedAtStart: '',
+            UpdatedAtEnd: ''
+        };
 
-             // Using pure jQuery for the toggle button
-            $('#toggleAdvancedSearch').click(function() {
-                const form = $('#advancedSearchForm');
-                const button = $(this);
+        /**
+         * API call to fetch and filter article data.
+         * Filters the `allArticles` array based on `currentArticleFilters`.
+         * returns {Promise<Array<object>>} A promise that resolves with the filtered articles.
+         */
+        function fetchAndFilterArticles() {
+            return new Promise(function(resolve, reject){
+                $.ajax({
+                    url: '/api/ContentArticleContentAPI',
+                    type: 'GET',
+                    data: {
+                        Keyword: currentArticleFilters.Keyword,
+                        Status: currentArticleFilters.Status,
+                        MinViewCount: currentArticleFilters.MinViewCount,
+                        MaxViewCount: currentArticleFilters.MaxViewCount,
+                        CreatedAtStart: currentArticleFilters.CreatedAtStart,
+                        CreatedAtEnd: currentArticleFilters.CreatedAtEnd,
+                        UpdatedAtStart: currentArticleFilters.UpdatedAtStart,
+                        UpdatedAtEnd: currentArticleFilters.UpdatedAtEnd
+                    },
+                    success: resolve,
+                    error: reject
+                });
+            });
+        }
 
-                // Check if the form is currently visible
-                if (form.hasClass('show')) {
-                    form.collapse('hide');
-                    button.text('Show Advanced Search');
-                } else {
-                    form.collapse('show');
-                    button.text('Hide Advanced Search');
+        /**
+         * Renders the articles into the table body.
+         * param {Array<object>} articles - An array of article objects to display.
+         */
+        function renderArticlesTable(articles) {
+            const $tbody = $('#articlesTableBody'); // Make sure this ID matches your table's tbody
+            $tbody.empty(); // Clear existing rows
+
+            if (articles.length === 0) {
+                $tbody.append(`<tr><td colspan="9" class="text-center py-4 text-gray-500">No articles found matching your criteria.</td></tr>`);
+                return;
+            }
+
+                       // cover image dead
+
+            articles.forEach(article => {
+                const row = `
+                    <tr>
+                        <td>${article.title}</td>
+                        <td></td>
+                        <td>${article.category}</td>
+                        <td>${article.memberName}</td>
+                        <td>${article.status}</td>
+                        <td>${article.views}</td>
+                        <td>${article.createdAt}</td>
+                        <td>${article.updatedAt}</td>
+                        <td>
+                            <a class="edit-button" href="/ContentArticles/Edit/${article.id}">Edit</a>
+                        </td>
+                    </tr>
+                `;
+                $tbody.append(row);
+            });
+        }
+
+        /**
+         * Updates the pagination info and button states.
+         * param {number} totalCount - The total number of filtered comments.
+         */
+        function updatePaginationInfo(totalCount) {
+            const totalPages = Math.ceil(totalCount / rowsPerPage);
+            $('.pagination-info').text(`Page ${currentPage} of ${totalPages}`);
+
+            $('#firstPageBtn').prop('disabled', currentPage === 1); // disable if on first page
+            $('#prevPageBtn').prop('disabled', currentPage === 1); // disable if on first page
+            $('#nextPageBtn').prop('disabled', currentPage === totalPages || totalPages === 0); // disable if on last page or no pages
+            $('#lastPageBtn').prop('disabled', currentPage === totalPages || totalPages === 0); // disable if on last page or no pages
+        }
+
+        /**
+         * Orchestrates the fetching, rendering, and pagination updates for articles.
+         * This function is called when the page loads or when filters are applied.
+         */
+        async function loadArticles() {
+            filteredArticles = await fetchAndFilterArticles();
+            const totalArticles = filteredArticles.length;
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
+            renderArticlesTable(paginatedArticles);
+            updatePaginationInfo(totalArticles);
+        }
+
+        // Event listeners (example, you'd integrate these with your actual HTML)
+        $(document).ready(function() {
+            // Set initial rows per page
+            rowsPerPage = parseInt($('#rowsPerPage').val());
+
+            // Initial load of articles
+            loadArticles();
+
+            // Event listener for the filter button (assuming you have one with class 'action-button')
+            $('.action-button').on('click', async function(e) {
+                e.preventDefault(); // Prevents the form from submitting and refreshing the page
+                currentArticleFilters.Keyword = $('#Keyword').val();
+                currentArticleFilters.Status = $('#Status').val();
+                currentArticleFilters.MinViewCount = $('#MinViewCount').val();
+                currentArticleFilters.MaxViewCount = $('#MaxViewCount').val();
+                currentArticleFilters.CreatedAtStart = $('#CreatedAtStart').val();
+                currentArticleFilters.CreatedAtEnd = $('#CreatedAtEnd').val();
+                currentArticleFilters.UpdatedAtStart = $('#UpdatedAtStart').val();
+                currentArticleFilters.UpdatedAtEnd = $('#UpdatedAtEnd').val();
+
+                currentPage = 1; // Reset to first page on filter change
+                await loadArticles();
+            });
+
+            // Event listener for Rows Per Page select
+            $('#rowsPerPage').on('change', function() {
+                rowsPerPage = parseInt($(this).val());
+                currentPage = 1; // Reset to first page when rows per page changes
+               loadArticles();
+            });
+
+            // Event listeners for pagination buttons
+            $('#firstPageBtn').on('click', function() {
+                currentPage = 1;
+                loadArticles();
+            });
+
+            $('#prevPageBtn').on('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadArticles();
                 }
             });
+
+            $('#nextPageBtn').on('click', function() {
+                const totalPages = Math.ceil(filteredArticles.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadArticles();
+                }
+            });
+
+            $('#lastPageBtn').on('click', function() {
+                const totalPages = Math.ceil(filteredArticles.length / rowsPerPage);
+                currentPage = totalPages;
+                loadArticles();
+            });
         });
+
+        
     </script>
 
 }

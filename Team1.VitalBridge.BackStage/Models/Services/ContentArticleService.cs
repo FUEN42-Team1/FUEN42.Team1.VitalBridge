@@ -27,6 +27,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             // Map DTO to Entity
             var entity = new Content
             {
+                MemberId= article.MemberId, // Assuming MemberId is provided in the DTO
                 Title = article.Title,
                 Content1 = article.Content,
                 ContentCategoryId = article.ContentCategoryId,
