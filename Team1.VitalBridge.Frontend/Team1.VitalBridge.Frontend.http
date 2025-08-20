@@ -4,3 +4,76 @@ GET {{Team1.VitalBridge.Frontend_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+# 機構查詢API測試
+
+# 取得縣市列表
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/cities
+Accept: application/json
+
+###
+
+# 取得鄉鎮區列表 (以縣市ID=1為例)
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/cities/1/districts
+Accept: application/json
+
+###
+
+# 取得機構類型列表
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/organization-types
+Accept: application/json
+
+###
+
+# 取得特色服務列表
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/feature-services
+Accept: application/json
+
+###
+
+# 搜尋機構 (基本搜尋)
+POST {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/search
+Content-Type: application/json
+
+{
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# 搜尋機構 (關鍵字搜尋)
+POST {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/search
+Content-Type: application/json
+
+{
+  "keyword": "護理",
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# 搜尋機構 (完整搜尋參數)
+POST {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/search
+Content-Type: application/json
+
+{
+  "keyword": "長照",
+  "cityId": 1,
+  "districtId": 1,
+  "organizationTypeIds": [1, 2],
+  "minPrice": 10000,
+  "maxPrice": 50000,
+  "featureServiceIds": [1, 2, 3],
+  "page": 1,
+  "pageSize": 10
+}
+
+###
+
+# 取得機構詳細資料 (以機構ID=1為例)
+GET {{Team1.VitalBridge.Frontend_HostAddress}}/api/Organizations/1
+Accept: application/json
+
+###
