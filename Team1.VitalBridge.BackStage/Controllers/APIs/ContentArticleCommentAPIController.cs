@@ -16,6 +16,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         {
             this._context = context;
         }
+
         [HttpGet]
         public async Task<IEnumerable<ContentArticleCommentDisplayDTO?>> Get([FromQuery] ContentArticleCommentCriteriaDTO criteria)
         {
