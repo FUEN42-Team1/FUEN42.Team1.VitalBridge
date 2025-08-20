@@ -50,7 +50,12 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return View(vm);
         }
 
-        
+        public async Task<IActionResult> SearchNew()
+        {
+            return View();
+        }
+
+
         // GET: ContentArticles/Create
         public IActionResult Create()
         {
@@ -73,6 +78,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Content = vm.Content,
                 ContentCategoryId = vm.ContentCategoryId,
                 CoverPic = vm.CoverPic,
+               MemberId = 1, // Assuming a default member ID for now, replace with actual logic
                 // 修正：將 ContentArticleStatus 轉型為 int
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
             };

@@ -28,7 +28,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
             if (!string.IsNullOrEmpty(criteria.MemberName))
             {
-                //query = query.Where(c => c.Member.Name.Contains(criteria.MemberName));
+                query = query.Where(c => c.Member.Name.Contains(criteria.MemberName));
             }
 
             if (!string.IsNullOrEmpty(criteria.CommentContent))
@@ -51,8 +51,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 Id = c.Id,
                 ArticleTitle = c.ContentNavigation.Title,
                 ArticleId = c.ContentNavigation.Id,
-                //MemberName = c.Member.Name, // Assuming Member is a navigation property
-                //MemberId = c.Member.Id, // Assuming Member is a navigation property
+                MemberName = c.Member.Name,
+                MemberId = c.Member.Id,
                 ParentCommentId = c.ParentCommentId,
                 CommentContent = c.Content,
                 IsEnabled = c.IsEnabled,

@@ -1,0 +1,209 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ContentArticleListViewModel>
+@{
+    ViewData["Title"] = "Search Articles";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/AdminArticle.css" />
+}
+
+@{
+    // Check if TempData contains a success message
+    if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    // Check if TempData contains an error message (optional, but good practice)
+    if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
+
+
+
+<div class="pageBody">
+    <div class="container">
+        
+
+        <!-- Search and Filter Area -->
+        <div class="search-filter-area">
+            <h2>Manage Article Contents</h2>
+            <form action="#" method="get">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="Keyword">Keyword</label>
+                        <input type="text" id="Keyword" name="Keyword" placeholder="Search title, member, category">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Status">Status</label>
+                        <select id="Status" name="Status">
+                            <option value="">-- All --</option>
+                            <option value="0">Draft</option>
+                            <option value="1">Published</option>
+                            <option value="2">Archived</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>View Count Range</label>
+                        <div class="date-inputs">
+                            <input type="number" name="MinViewCount" placeholder="Min">
+                            <input type="number" name="MaxViewCount" placeholder="Max">
+                        </div>
+                    </div>
+
+                    <div class="form-group date-range">
+                        <label>Created At Range</label>
+                        <div class="date-inputs">
+                            <input type="date" name="CreatedAtStart">
+                            <input type="date" name="CreatedAtEnd">
+                        </div>
+                    </div>
+
+                    <div class="form-group date-range">
+                        <label>Updated At Range</label>
+                        <div class="date-inputs">
+                            <input type="date" name="UpdatedAtStart">
+                            <input type="date" name="UpdatedAtEnd">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="action-button">Filter</button>
+            </form>
+        </div>
+
+        <!-- Create New Article Button -->
+        <a class="btn btn-primary" href="#">Create New Article</a>
+
+        <!-- Rows Per Page Selector -->
+        <div class="rows-per-page-area">
+            <label for="rowsPerPage">Rows Per Page:</label>
+            <select id="rowsPerPage">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+
+        <!-- Articles Table Display -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Cover</th>
+                        <th>Category</th>
+                        <th>Member</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="articlesTableBody">
+                    <!-- Sample Data Rows -->
+                    <tr>
+                        <td>The Rise of Green Technology</td>
+                        <td><img src="https://placehold.co/80x50/34D399/FFFFFF?text=Tech" alt="Cover" class="table-cover-img"></td>
+                        <td>Technology</td>
+                        <td>Jane Doe</td>
+                        <td>Published</td>
+                        <td>1250</td>
+                        <td>2023-09-15</td>
+                        <td>2023-09-20</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Exploring Deep Sea Creatures</td>
+                        <td><img src="https://placehold.co/80x50/60A5FA/FFFFFF?text=Ocean" alt="Cover" class="table-cover-img"></td>
+                        <td>Science</td>
+                        <td>John Smith</td>
+                        <td>Draft</td>
+                        <td>80</td>
+                        <td>2024-01-10</td>
+                        <td>2024-01-10</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Benefits of Mindfulness Meditation</td>
+                        <td><img src="https://placehold.co/80x50/C084FC/FFFFFF?text=Mind" alt="Cover" class="table-cover-img"></td>
+                        <td>Health</td>
+                        <td>Emily White</td>
+                        <td>Archived</td>
+                        <td>450</td>
+                        <td>2023-11-01</td>
+                        <td>2023-11-05</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>A Guide to Urban Gardening</td>
+                        <td><img src="https://placehold.co/80x50/F87171/FFFFFF?text=Garden" alt="Cover" class="table-cover-img"></td>
+                        <td>Lifestyle</td>
+                        <td>Michael Green</td>
+                        <td>Published</td>
+                        <td>980</td>
+                        <td>2024-03-20</td>
+                        <td>2024-03-22</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>History of the Olympic Games</td>
+                        <td><img src="https://placehold.co/80x50/22D3EE/FFFFFF?text=Sport" alt="Cover" class="table-cover-img"></td>
+                        <td>Sports</td>
+                        <td>Sarah Brown</td>
+                        <td>Published</td>
+                        <td>2100</td>
+                        <td>2023-07-01</td>
+                        <td>2023-07-01</td>
+                        <td>
+                            <a class="edit-button" href="#">Edit</a>
+                        </td>
+                    </tr>
+                    <!-- More sample data can be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <div class="pagination-info">Page 1 of 10 (Static)</div>
+            <div class="pagination-buttons">
+                <button id="firstPageBtn">First</button>
+                <button id="prevPageBtn">Previous</button>
+                <button id="nextPageBtn">Next</button>
+                <button id="lastPageBtn">Last</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            
+        });
+    </script>
+
+}
