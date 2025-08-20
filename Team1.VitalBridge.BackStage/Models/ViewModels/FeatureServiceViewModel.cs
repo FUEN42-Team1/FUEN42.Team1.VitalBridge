@@ -6,7 +6,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
     {
         public int Id { get; set; }
 
-        [Display(Name = "特色服務名稱")]
+        [Display(Name = "特色服務")]
         [Required(ErrorMessage = "請輸入{0}")]
         [StringLength(100)]
         public string Name { get; set; }
