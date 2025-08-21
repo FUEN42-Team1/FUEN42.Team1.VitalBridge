@@ -26,7 +26,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
         // GET: ContentArticles/Search
-        public async Task<IActionResult> Search([FromQuery] ContentArticleListCritriaDTO? criteria)
+        public async Task<IActionResult> SearchOld([FromQuery] ContentArticleListCritriaDTO? criteria)
         {
             if (criteria == null)
             {
@@ -50,7 +50,12 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return View(vm);
         }
 
-        
+        public async Task<IActionResult> Search()
+        {
+            return View();
+        }
+
+
         // GET: ContentArticles/Create
         public IActionResult Create()
         {
@@ -64,15 +69,21 @@ namespace Team1.VitalBridge.BackStage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ContentArticleCreateViewModel vm)
         {
-
             if (!ModelState.IsValid) return View(vm);
+
+            using var ms = new MemoryStream();
+            if (vm.CoverPic != null && vm.CoverPic.Length > 0)
+                await vm.CoverPic.CopyToAsync(ms);
+
+                
 
             var dto = new ContentArticleCreateDTO
             {
                 Title = vm.Title,
                 Content = vm.Content,
                 ContentCategoryId = vm.ContentCategoryId,
-                CoverPic = vm.CoverPic,
+                CoverPic = ms.ToArray(),
+                MemberId = 1, // Assuming a default member ID for now, replace with actual logic
                 // 修正：將 ContentArticleStatus 轉型為 int
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
             };
@@ -152,6 +163,14 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return RedirectToAction("Search", "ContentArticles");
         }
 
-        
+        public async Task<IActionResult> GetCoverPic(int id)
+        {
+            var content = await _context.Contents.FindAsync(id);
+            if (content?.CoverPic != null)
+            {
+                return File(content.CoverPic, "image/jpeg"); // or detect type dynamically
+            }
+            return File("~/images/no-image.png", "image/png"); // fallback if no pic
+        }
     }
 }

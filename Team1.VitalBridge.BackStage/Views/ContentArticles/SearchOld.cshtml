@@ -1,0 +1,157 @@
+﻿@model IEnumerable<Team1.VitalBridge.BackStage.Models.ViewModels.ContentArticleListViewModel>
+@{
+    ViewData["Title"] = "Search Articles";
+}
+
+@{
+    // Check if TempData contains a success message
+    if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    // Check if TempData contains an error message (optional, but good practice)
+    if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}
+
+
+
+
+<h2>Search Articles</h2>
+
+<!-- Toggle Button -->
+<button class="btn btn-outline-secondary mb-3" id="toggleAdvancedSearch" type="button">
+    Show Advanced Search
+</button>
+
+
+<!-- Collapsible advanced search form -->
+<div class="collapse" id="advancedSearchForm">
+    <form method="get" asp-action="Search" class="mb-4">
+        <div class="form-group">
+            <label for="Keyword">Keyword</label>
+            <input type="text" class="form-control" name="Keyword" placeholder="Search title, member, category" />
+        </div>
+
+        <div class="form-group mt-2">
+            <label for="Status">Status</label>
+            <select name="Status" class="form-select">
+                <option value="">-- All --</option>
+                <option value="0">Draft</option>
+                <option value="1">Published</option>
+                <option value="2">Archived</option>
+                <!-- Add actual status mappings here -->
+            </select>
+        </div>
+
+        <div class="form-group mt-2">
+            <label>View Count Range</label>
+            <div class="d-flex">
+                <input type="number" class="form-control me-2" name="MinViewCount" placeholder="Min" />
+                <input type="number" class="form-control" name="MaxViewCount" placeholder="Max" />
+            </div>
+        </div>
+
+        <div class="form-group mt-2">
+            <label>Created At Range</label>
+            <div class="d-flex">
+                <input type="date" class="form-control me-2" name="CreatedAtStart" />
+                <input type="date" class="form-control" name="CreatedAtEnd" />
+            </div>
+        </div>
+
+        <div class="form-group mt-2">
+            <label>Updated At Range</label>
+            <div class="d-flex">
+                <input type="date" class="form-control me-2" name="UpdatedAtStart" />
+                <input type="date" class="form-control" name="UpdatedAtEnd" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Search</button>
+    </form>
+</div>
+
+@* create a new content *@
+<div class="mb-3">
+    <a class="btn btn-success" asp-action="Create">Create New Article</a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered" id="myTable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Cover</th>
+                <th>Category</th>
+                <th>Member</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var article in Model)
+            {
+                <tr>
+                    <td>@article.Title</td>
+                    <td>
+                        @if (article.CoverPic != null)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(article.CoverPic)" style="max-height: 50px;" />
+                        }
+                    </td>
+                    <td>@article.CategoryName</td>
+                    <td>@article.MemberName</td>
+                    <td>@article.Status</td>
+                    <td>@article.ViewCount</td>
+                    <td>@article.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>@article.UpdatedAt.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a class="btn btn-outline-warning rounded-pill btn-sm" asp-action="Edit" asp-route-id="@article.Id">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No articles found.</p>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#myTable').DataTable();
+
+             // Using pure jQuery for the toggle button
+            $('#toggleAdvancedSearch').click(function() {
+                const form = $('#advancedSearchForm');
+                const button = $(this);
+
+                // Check if the form is currently visible
+                if (form.hasClass('show')) {
+                    form.collapse('hide');
+                    button.text('Show Advanced Search');
+                } else {
+                    form.collapse('show');
+                    button.text('Hide Advanced Search');
+                }
+            });
+        });
+    </script>
+
+}

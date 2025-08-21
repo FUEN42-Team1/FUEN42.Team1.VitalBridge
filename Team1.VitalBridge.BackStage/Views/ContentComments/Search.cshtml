@@ -13,7 +13,7 @@
         <!-- Search and Filter Area -->
         <div class="search-filter-area">
             <h2>Manage Article Comments</h2>
-            <div class="search-grid">
+            <div class="form-grid">
                 <div class="form-group">
                     <label for="articleTitleSearch">Search by Article Title</label>
                     <input type="text" id="articleTitleSearch" placeholder="Enter article title">
@@ -35,8 +35,8 @@
                     </select>
                 </div>
             </div>
-            <button class="apply-filters-button">
-                Apply Filters (Static)
+            <button class="action-button">
+                Apply Filters
             </button>
         </div>
 
@@ -134,7 +134,8 @@
 
 @section Scripts {
     <script>
-        // Simulated API data
+        // Global variables for comment management
+        // API data
         const allComments = [];
         let currentPage = 1;
         let rowsPerPage = parseInt($('#rowsPerPage').val());
@@ -248,7 +249,7 @@
             loadComments();
 
             // Event listener for Apply Filters button
-            $('.apply-filters-button').on('click', function() {
+            $('.action-button').on('click', function() {
                 currentFilters.articleTitle = $('#articleTitleSearch').val();
                 currentFilters.memberName = $('#memberNameSearch').val();
                 currentFilters.commentContent = $('#commentContentSearch').val();

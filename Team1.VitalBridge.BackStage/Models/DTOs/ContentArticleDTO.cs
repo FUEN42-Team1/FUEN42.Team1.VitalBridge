@@ -4,6 +4,29 @@
     {
     }
 
+    public class ContentArticleContentDisplayDTO
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string CoverUrl { get; set; }
+        public string Category { get; set; }
+        public string MemberName { get; set; }
+        public string Status { get; set; }
+        public int Views { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+    public class ContentArticleContentCriteriaDTO
+    {
+        public string? Keyword { get; set; }
+        public int? Status { get; set; } // Consider using an enum for better type safety if possible
+        public int? MinViewCount { get; set; } // Nullable int for optional filter
+        public int? MaxViewCount { get; set; } // Nullable int for optional filter
+        public DateTime? CreatedAtStart { get; set; } // Nullable DateTime for optional filter
+        public DateTime? CreatedAtEnd { get; set; } // Nullable DateTime for optional filter
+        public DateTime? UpdatedAtStart { get; set; } // Nullable DateTime for optional filter
+        public DateTime? UpdatedAtEnd { get; set; } // Nullable DateTime for optional filter
+    }
     public class ContentArticleListDTO
     {
         public int Id { get; set; }
@@ -70,8 +93,9 @@
     {
         public string Title { get; set; }
         public string Content { get; set; }
+        public int MemberId { get; set; } // MemberId of the author
         public int ContentCategoryId { get; set; }
-        public IFormFile? CoverPic { get; set; } // Base64 encoded image
+        public byte[] CoverPic { get; set; } // Base64 encoded image
         public int Status { get; set; } // efmodel is int , but view model is string for display purposes
     }
     public class ContentArticleEditDTO
@@ -83,4 +107,6 @@
         public IFormFile? CoverPic { get; set; } // Base64 encoded image
         public int Status { get; set; } // efmodel is int , but view model is string for display purposes
     }
+
+
 }

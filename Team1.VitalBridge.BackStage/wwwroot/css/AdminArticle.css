@@ -55,20 +55,20 @@
         margin-bottom: 16px; /* mb-4 */
     }
 
-.search-grid {
+.form-grid {
     display: grid;
     grid-template-columns: 1fr; /* grid-cols-1 */
     gap: 16px; /* gap-4 */
 }
 
 @media (min-width: 768px) { /* md: */
-    .search-grid {
+    .form-grid {
         grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
     }
 }
 
 @media (min-width: 1024px) { /* lg: */
-    .search-grid {
+    .form-grid {
         grid-template-columns: repeat(4, 1fr); /* lg:grid-cols-4 */
     }
 }
@@ -102,7 +102,17 @@
     background-color: #ffffff; /* bg-white */
 }
 
-.apply-filters-button {
+/* New CSS for horizontal date/number inputs */
+.date-inputs {
+    display: flex;
+    gap: 10px; /* Space between the two inputs */
+}
+
+    .date-inputs input {
+        flex: 1; /* Makes each input take up equal space within the flex container */
+    }
+
+.action-button {
     margin-top: 24px; /* mt-6 */
     padding: 10px 24px; /* px-6 py-2 */
     background-color: #2563eb; /* bg-blue-600 */
@@ -113,11 +123,11 @@
     cursor: pointer;
 }
 
-    .apply-filters-button:hover {
+    .action-button:hover {
         background-color: #1d4ed8; /* hover:bg-blue-700 */
     }
 
-    .apply-filters-button:focus {
+    .action-button:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5), 0 0 0 4px rgba(59, 130, 246, 0.3); /* focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 */
     }
@@ -155,7 +165,7 @@
             border-color: #3b82f6; /* focus:ring-blue-500 */
         }
 
-/* Comments Table Display */
+/* Table Display */
 .table-container {
     overflow-x: auto; /* Enables horizontal scroll when content overflows */
     border-radius: 8px; /* rounded-lg */
