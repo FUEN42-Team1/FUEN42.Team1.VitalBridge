@@ -31,7 +31,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 Title = article.Title,
                 Content1 = article.Content,
                 ContentCategoryId = article.ContentCategoryId,
-                //CoverPic = article.CoverPic, CoverPic MediaId
+                CoverPic = article.CoverPic, 
                 Status = article.Status,
                 ViewCount = 0, // Initial view count
                 CreatedAt = DateTime.UtcNow,
