@@ -26,11 +26,24 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
         public async Task RegisterAsync(RegisterDto dto)
         {
+
             if (await _db.Users.AnyAsync(x => x.Email == dto.Email))
                 throw new InvalidOperationException("Email 已被註冊");
 
+
+            var roleId = await _db.Roles
+                .Where(r => r.RoleCode == "Member")
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (roleId == 0) // 如果是 int 主鍵
+                throw new InvalidOperationException("系統沒有預設角色 Member，請先建立角色資料");
+
             // Email驗證碼
             var ConfirmCodeToken = Guid.NewGuid().ToString("N");
+
+
+
 
             //建立user物件
             var user = new User
@@ -46,28 +59,33 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            _db.Users.Add(user);
+
 
             //建立MemberProfile物件
             var MemberProfile = new MemberProfile
             {
-                UserId = user.Id
+                User = user,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
-            _db.MemberProfiles.Add(MemberProfile);
+
 
 
             //建立UserRoles物件（假設預設角色為 "Member"）
             var userRole = new UserRole
             {
-                UserId = user.Id,
-                RoleId = await _db.Roles.Where(r => r.Name == "Member").Select(r => r.Id).FirstOrDefaultAsync(),
+                User = user,
+                RoleId = roleId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
 
             };
 
             _db.UserRoles.Add(userRole);
 
 
+            _db.AddRange(user, MemberProfile, userRole);
             await _db.SaveChangesAsync();
 
 
@@ -108,6 +126,36 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             if (user == null) throw new UnauthorizedAccessException("帳號或密碼錯誤");
             if (!HashUtility.VerifyPassword(dto.Password, user.Password))
                 throw new UnauthorizedAccessException("帳號或密碼錯誤");
+            if (user.Status == "banned")
+                throw new UnauthorizedAccessException("帳號已停權");
+            if (DateTime.UtcNow < user.LockedUntil)
+            {
+                var remaining = user.LockedUntil - DateTime.UtcNow;
+
+                string msg;
+                if (remaining.Value.TotalMinutes < 60)
+                {
+                    // 只顯示分鐘
+                    var minutes = (int)Math.Ceiling(remaining.Value.TotalMinutes);
+                    msg = $"帳號已鎖定，請 {minutes} 分鐘後再試";
+                }
+                else
+                {
+                    // 顯示 小時 + 分鐘
+                    int hours = (int)remaining.Value.TotalHours;
+                    int minutes = remaining.Value.Minutes;
+                    msg = $"帳號已鎖定，請 {hours} 小時 {minutes} 分鐘後再試";
+                }
+
+                throw new UnauthorizedAccessException(msg);
+            }
+            if (user.Status == "unverified")
+                throw new UnauthorizedAccessException("帳號尚未驗證，請先驗證後再登入");
+            if (user.Status == "frozen")
+                throw new UnauthorizedAccessException("帳號已凍結，請聯繫管理員");
+
+
+
 
             // TODO: 你的角色取得邏輯
             var roles = await GetUserRolesAsync(user.Id);

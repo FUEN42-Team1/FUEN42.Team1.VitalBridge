@@ -33,9 +33,34 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok();
         }
 
+        //[HttpPost("login")]
+        //public async Task<ActionResult<TokenRes>> Login(LoginDto dto)
+        //    => await _auth.LoginAsync(dto);
+
         [HttpPost("login")]
-        public async Task<ActionResult<TokenRes>> Login(LoginDto dto)
-            => await _auth.LoginAsync(dto);
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            try
+            {
+                var token = await _auth.LoginAsync(dto);
+                return Ok(new { success = true, data = token });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch
+            {
+                return StatusCode(500, new { success = false, message = "伺服器錯誤" });
+            }
+        }
+
+
+
 
         [HttpPost("refresh")]
         public async Task<ActionResult<TokenRes>> Refresh()
