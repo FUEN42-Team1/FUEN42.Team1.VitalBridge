@@ -40,6 +40,9 @@ public partial class FileStream
     [InverseProperty("File")]
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();
 
+    [InverseProperty("File")]
+    public virtual ICollection<Organization> Organizations { get; set; } = new List<Organization>();
+
     [InverseProperty("ImageFile")]
     public virtual ICollection<PlateImage> PlateImages { get; set; } = new List<PlateImage>();
 

@@ -66,6 +66,9 @@ public partial class Organization
     [Column("institutionId")]
     public int? InstitutionId { get; set; }
 
+    [Column("fileId")]
+    public int? FileId { get; set; }
+
     [ForeignKey("CityId")]
     [InverseProperty("Organizations")]
     public virtual City City { get; set; }
@@ -73,6 +76,10 @@ public partial class Organization
     [ForeignKey("DistrictId")]
     [InverseProperty("Organizations")]
     public virtual Township District { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("Organizations")]
+    public virtual FileStream File { get; set; }
 
     [ForeignKey("InstitutionId")]
     [InverseProperty("Organizations")]
