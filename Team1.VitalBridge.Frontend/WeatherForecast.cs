@@ -10,4 +10,5 @@ namespace Team1.VitalBridge.Frontend
 
         public string? Summary { get; set; }
     }
-}
+} 
+  
