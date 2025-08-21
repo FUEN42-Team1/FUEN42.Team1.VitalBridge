@@ -118,9 +118,40 @@ namespace Team1.VitalBridge.Frontend.Controllers
             if (!int.TryParse(userIdStr, out var userId))
                 return Unauthorized();
             var data = _context.NotifyUsers.Where(u => u.UserId == userId)
-                .Include(u => u.Notify).Where(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now))
+                .Include(u => u.Notify).ThenInclude(n => n.Categories).Where(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now))
+                .Select(u => new
+                {
+                    u.Notify.Title,
+                    u.Notify.Text,
+                    u.Notify.NotifysUrl,
+                    SendDate = u.Notify.SendDate.ToString("yyyy年MM月dd日 tt hh:mm", new System.Globalization.CultureInfo("zh-TW")),
+                    u.Notify.Categories.Name,
+                    u.IsRead
+                })
                 .ToList();
             return Ok(data);
+        }
+
+        [Authorize]
+        [HttpGet("AllRead")]
+        public async Task<ActionResult<object>> AllRead()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+            var items = _context.NotifyUsers
+            .Where(u => u.UserId == userId && !u.IsRead)
+            .ToList();
+
+            foreach (var item in items)
+            {
+                item.IsRead = true;
+            }
+
+            _context.SaveChanges();
+
+
+            return Ok();
         }
     }
 }

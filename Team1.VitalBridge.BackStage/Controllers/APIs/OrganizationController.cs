@@ -29,7 +29,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         public IActionResult GetOrganization([FromBody] OrganizationRequest request)
         {
             var Organizations = context.Organizations
-                .Where(o => o.Address.Contains(request.City)).Select(o => new OrganizationDTO
+                .Where(o =>o.IsActive==true && o.Address.Contains(request.City)).Select(o => new OrganizationDTO
                 {
                     Name = o.Name,
                     Address = o.Address,
@@ -42,6 +42,17 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
 
             if (Organizations.Count==0) return NotFound(new { message = "查無符合機構" });
             return Ok(Organizations);
+        }
+        [AllowAnonymous]
+        [HttpGet("getOrganizationType")]
+        public IActionResult GetOrganizationType()
+        {
+            var OrganizationTypes = context.OrganizationTypes.Where(o=>o.IsActive==true).Select(o => new
+            {
+                o.Name
+            }).ToList();
+
+            return Ok(OrganizationTypes);
         }
         public class OrganizationDTO
         {
