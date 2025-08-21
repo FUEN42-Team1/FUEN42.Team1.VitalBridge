@@ -81,7 +81,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                         var file = await _context.FileStreams.FirstOrDefaultAsync(f => f.FileName == viewModel.PhotoUrl);
                         fileId = file?.Id;
                     }
-
+                    var imageFileId = _context.FileStreams.FirstOrDefault(f => f.FileName == viewModel.PhotoUrl).Id;
                     // 將 ViewModel 數據映射到 Entity Model
                     var organization = new Organization
                     {
@@ -98,7 +98,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                         IsRecommended = false,
                         IsCertified = false,
                         IsActive = true, // 新增時預設為啟用
-                        IsDeleted = false
+                        IsDeleted = false,
+                        FileId = imageFileId // 使用從 PhotoUrl 獲取的 FileId
                     };
 
                     // 處理多對多關係 (SubsidyInfos)
@@ -479,6 +480,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             {
                 return NotFound();
             }
+            var imageFileId = _context.FileStreams.FirstOrDefault(f => f.FileName == organization.PhotoUrl).Id;
 
             // 將實體模型映射到表單 ViewModel
             var viewModel = new ManagerOrganizationFormViewModel
@@ -494,7 +496,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 AgeLimits = organization.AgeLimits,
                 Description = organization.Description,
                 MapUrl = organization.MapUrl,
-                
+                FileId = imageFileId, // 使用從 PhotoUrl 獲取的 FileId
+
                 // 多對多關係的選中項目
                 SelectedSubsidyInfoIds = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfoId).ToList(),
                 SelectedFeatureServiceIds = organization.OrganizationFeatureServices.Select(ofs => ofs.FeatureServiceId).ToList(),

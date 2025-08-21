@@ -628,6 +628,8 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Organizat__distr__151B244E");
 
+            entity.HasOne(d => d.File).WithMany(p => p.Organizations).HasConstraintName("FK_Organizations_FileStream");
+
             entity.HasOne(d => d.Institution).WithMany(p => p.Organizations).HasConstraintName("FK__Organizat__insti__18EBB532");
 
             entity.HasOne(d => d.Type).WithMany(p => p.Organizations)

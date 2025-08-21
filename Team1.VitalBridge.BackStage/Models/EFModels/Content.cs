@@ -25,7 +25,7 @@ public partial class Content
     [StringLength(50)]
     public string Title { get; set; }
 
-    [Column("coverPic", TypeName = "image")]
+    [Column("coverPic")]
     public byte[] CoverPic { get; set; }
 
     [Required]

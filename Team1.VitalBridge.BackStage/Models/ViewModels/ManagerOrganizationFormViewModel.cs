@@ -97,5 +97,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Display(Name = "所屬機構")]
         public int? InstitutionId { get; set; }
         public string? InstitutionName { get; set; }
+
+        
+        public int? FileId { get; set; } // 用於存儲上傳的檔案ID
     }
 }
