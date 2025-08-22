@@ -62,32 +62,32 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             };
 
 
-            ////建立MemberProfile物件
-            //var MemberProfile = new MemberProfile
-            //{
-            //    User = user,
-            //    CreatedAt = DateTime.UtcNow,
-            //    UpdatedAt = DateTime.UtcNow
-            //};
+            //建立MemberProfile物件
+            var MemberProfile = new MemberProfile
+            {
+                User = user,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
 
 
 
-            ////建立UserRoles物件（假設預設角色為 "Member"）
-            //var userRole = new UserRole
-            //{
-            //    User = user,
-            //    RoleId = roleId,
-            //    CreatedAt = DateTime.UtcNow,
-            //    UpdatedAt = DateTime.UtcNow
+            //建立UserRoles物件（假設預設角色為 "Member"）
+            var userRole = new UserRole
+            {
+                User = user,
+                RoleId = roleId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
 
-            //};
+            };
 
-            //_db.UserRoles.Add(userRole);
+            _db.UserRoles.Add(userRole);
 
 
-            //_db.AddRange(user, MemberProfile, userRole);
-            _db.AddRange(user);
+            _db.AddRange(user, MemberProfile, userRole);
+            //_db.AddRange(user);
             await _db.SaveChangesAsync();
 
 
@@ -95,7 +95,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             // 發送驗證郵件
             string verifyLink = $"https://localhost:7184/VitalBridge/verify.html?email={dto.Email}&token={ConfirmCodeToken}";
             //輸出到debug控制台
-            Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
+            //Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
 
 
             string sql = $@"
@@ -153,7 +153,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
             // 建立驗證連結（請依你的前端路徑調整）
             string verifyLink = $"https://localhost:7184/VitalBridge/verify.html?email={email}&token={confirmCode}";
-            Console.WriteLine($"重新發送驗證郵件到 {email}，連結：{verifyLink}");
+            //Console.WriteLine($"重新發送驗證郵件到 {email}，連結：{verifyLink}");
 
             string sql = $@"
         EXEC msdb.dbo.sp_send_dbmail
