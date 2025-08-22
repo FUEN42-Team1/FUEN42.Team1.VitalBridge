@@ -62,7 +62,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             {
                 // Log the exception
                 return StatusCode(500, new { message = "An error occurred while fetching articles." });
-            }
+            } 
         }
     }
 }
