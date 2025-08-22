@@ -6,7 +6,7 @@ using Team1.VitalBridge.Frontend.Models.EFModels;
 namespace Team1.VitalBridge.Frontend.Controllers.Orgs
 {
     /// <summary>
-    /// 機構查詢API控制器
+    /// 機構相關API控制器
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
@@ -55,7 +55,7 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
                     query = query.Where(o => o.CityId == searchDto.CityId.Value);
                 }
 
-                // 鄉鎮區篩選
+                // 區域篩選
                 if (searchDto.DistrictId.HasValue)
                 {
                     query = query.Where(o => o.DistrictId == searchDto.DistrictId.Value);
@@ -74,7 +74,7 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
                         .Any(ofs => searchDto.FeatureServiceIds.Contains(ofs.FeatureServiceId)));
                 }
 
-                // 價格範圍篩選 (根據房型最低價格)
+                // 價格區間篩選 (根據房型最低價格)
                 if (searchDto.MinPrice.HasValue || searchDto.MaxPrice.HasValue)
                 {
                     query = query.Where(o => o.OrganizationRooms.Any(room => 
@@ -86,7 +86,7 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
                 // 計算總筆數
                 var totalCount = await query.CountAsync();
 
-                // 分頁查詢
+                // 獲取資料
                 var organizations = await query
                     .OrderByDescending(o => o.IsRecommended)
                     .ThenByDescending(o => o.IsCertified)
@@ -135,7 +135,7 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
         }
 
         /// <summary>
-        /// 取得機構詳細資料
+        /// 獲取機構詳細資料
         /// </summary>
         /// <param name="id">機構ID</param>
         /// <returns>機構詳細資料</returns>
@@ -213,13 +213,145 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "取得機構詳細資料時發生錯誤，機構ID: {Id}", id);
+                _logger.LogError(ex, "獲取機構詳細資料時發生錯誤，機構ID: {Id}", id);
                 return StatusCode(500, "伺服器錯誤，請稍後再試");
             }
         }
 
         /// <summary>
-        /// 取得縣市列表
+        /// 獲取指定機構的房型資料 (專為 Visual Studio Code 設計)
+        /// </summary>
+        /// <param name="id">機構ID</param>
+        /// <returns>機構房型資料清單</returns>
+        [HttpGet("{id}/rooms")]
+        public async Task<ActionResult<List<RoomInfoDto>>> GetOrganizationRooms(int id)
+        {
+            try
+            {
+                var organization = await _context.Organizations
+                    .AsNoTracking()
+                    .Where(o => o.Id == id && o.IsActive && !o.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (organization == null)
+                {
+                    return NotFound($"找不到機構 ID: {id}");
+                }
+
+                var rooms = await _context.OrganizationRooms
+                    .AsNoTracking()
+                    .Where(or => or.OrganizationId == id)
+                    .Include(or => or.RoomType)
+                    .OrderBy(or => or.RoomType.Name)
+                    .Select(or => new RoomInfoDto
+                    {
+                        Id = or.Id,
+                        RoomTypeName = or.RoomType.Name,
+                        MonthlyPrice = or.MonthlyPrice,
+                        RoomQuantity = or.RoomQuantity,
+                        HasDeposit = or.HasDeposit,
+                        DepositAmount = or.DepositAmount,
+                        DepositMonths = or.DepositMonths
+                    })
+                    .ToListAsync();
+
+                return Ok(rooms);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "獲取機構房型資料時發生錯誤，機構ID: {Id}", id);
+                return StatusCode(500, "伺服器錯誤，請稍後再試");
+            }
+        }
+
+        /// <summary>
+        /// 獲取所有房型類別清單
+        /// </summary>
+        /// <returns>房型類別清單</returns>
+        [HttpGet("room-types")]
+        public async Task<ActionResult<List<RoomTypeDto>>> GetRoomTypes()
+        {
+            try
+            {
+                var roomTypes = await _context.RoomTypes
+                    .AsNoTracking()
+                    .OrderBy(rt => rt.Name)
+                    .Select(rt => new RoomTypeDto
+                    {
+                        Id = rt.Id,
+                        Name = rt.Name
+                    })
+                    .ToListAsync();
+
+                return Ok(roomTypes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "獲取房型類別清單時發生錯誤");
+                return StatusCode(500, "伺服器錯誤，請稍後再試");
+            }
+        }
+
+        /// <summary>
+        /// 獲取機構的房型摘要資訊 (最低價格和可用房型)
+        /// </summary>
+        /// <param name="id">機構ID</param>
+        /// <returns>房型摘要資訊</returns>
+        [HttpGet("{id}/room-summary")]
+        public async Task<ActionResult<object>> GetOrganizationRoomSummary(int id)
+        {
+            try
+            {
+                var organization = await _context.Organizations
+                    .AsNoTracking()
+                    .Where(o => o.Id == id && o.IsActive && !o.IsDeleted)
+                    .FirstOrDefaultAsync();
+
+                if (organization == null)
+                {
+                    return NotFound($"找不到機構 ID: {id}");
+                }
+
+                var roomSummary = await _context.OrganizationRooms
+                    .AsNoTracking()
+                    .Where(or => or.OrganizationId == id)
+                    .Include(or => or.RoomType)
+                    .GroupBy(or => or.OrganizationId)
+                    .Select(g => new
+                    {
+                        OrganizationId = g.Key,
+                        MinPrice = g.Min(or => or.MonthlyPrice),
+                        MaxPrice = g.Max(or => or.MonthlyPrice),
+                        AvailableRoomTypes = g.Select(or => or.RoomType.Name).Distinct().ToList(),
+                        TotalRooms = g.Sum(or => or.RoomQuantity),
+                        RoomTypeCount = g.Select(or => or.RoomTypeId).Distinct().Count()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (roomSummary == null)
+                {
+                    return Ok(new
+                    {
+                        OrganizationId = id,
+                        MinPrice = (int?)null,
+                        MaxPrice = (int?)null,
+                        AvailableRoomTypes = new List<string>(),
+                        TotalRooms = (int?)null,
+                        RoomTypeCount = 0
+                    });
+                }
+
+                return Ok(roomSummary);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "獲取機構房型摘要時發生錯誤，機構ID: {Id}", id);
+                return StatusCode(500, "伺服器錯誤，請稍後再試");
+            }
+        }
+
+        /// <summary>
+        /// 獲取縣市列表
         /// </summary>
         /// <returns>縣市列表</returns>
         [HttpGet("cities")]
@@ -241,16 +373,16 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "取得縣市列表時發生錯誤");
+                _logger.LogError(ex, "獲取縣市列表時發生錯誤");
                 return StatusCode(500, "伺服器錯誤，請稍後再試");
             }
         }
 
         /// <summary>
-        /// 取得鄉鎮區列表
+        /// 獲取區域列表
         /// </summary>
         /// <param name="cityId">縣市ID</param>
-        /// <returns>鄉鎮區列表</returns>
+        /// <returns>區域列表</returns>
         [HttpGet("cities/{cityId}/districts")]
         public async Task<ActionResult<List<DistrictDto>>> GetDistricts(int cityId)
         {
@@ -272,13 +404,13 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "取得鄉鎮區列表時發生錯誤，縣市ID: {CityId}", cityId);
+                _logger.LogError(ex, "獲取區域列表時發生錯誤，縣市ID: {CityId}", cityId);
                 return StatusCode(500, "伺服器錯誤，請稍後再試");
             }
         }
 
         /// <summary>
-        /// 取得機構類型列表
+        /// 獲取機構類型列表
         /// </summary>
         /// <returns>機構類型列表</returns>
         [HttpGet("organization-types")]
@@ -301,13 +433,13 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "取得機構類型列表時發生錯誤");
+                _logger.LogError(ex, "獲取機構類型列表時發生錯誤");
                 return StatusCode(500, "伺服器錯誤，請稍後再試");
             }
         }
 
         /// <summary>
-        /// 取得特色服務列表
+        /// 獲取特色服務列表
         /// </summary>
         /// <returns>特色服務列表</returns>
         [HttpGet("feature-services")]
@@ -332,7 +464,7 @@ namespace Team1.VitalBridge.Frontend.Controllers.Orgs
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "取得特色服務列表時發生錯誤");
+                _logger.LogError(ex, "獲取特色服務列表時發生錯誤");
                 return StatusCode(500, "伺服器錯誤，請稍後再試");
             }
         }
