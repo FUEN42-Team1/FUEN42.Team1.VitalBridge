@@ -71,7 +71,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         {
             var response = new
             {
-                articles =0,
+                articles =0, 
                 totalCount = 0
             };
             return Ok(response);
