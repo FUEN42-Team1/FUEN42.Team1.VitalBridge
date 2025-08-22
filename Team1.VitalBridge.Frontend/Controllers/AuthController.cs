@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@ using System.Security.Claims; // 加入這行
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.DTOs;
 using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Models.Services;
 
 
 namespace Team1.VitalBridge.Frontend.Controllers
@@ -33,6 +36,26 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok();
         }
 
+        [HttpGet("verify")]
+        public async Task<IActionResult> Verify([FromQuery] string email, [FromQuery] string token)
+        {
+            var result = await _auth.VerifyEmailAsync(email, token);
+            if (!result)
+                return BadRequest("驗證連結無效或已過期");
+
+            return Ok("驗證成功，請登入");
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerification([FromBody] string email)
+        {
+            var result = await _auth.ResendVerificationEmailAsync(email);
+            if (!result)
+                return BadRequest("帳號不存在或已驗證");
+            return Ok("驗證信已重新寄出，請查收信箱");
+        }
+
+
         //[HttpPost("login")]
         //public async Task<ActionResult<TokenRes>> Login(LoginDto dto)
         //    => await _auth.LoginAsync(dto);
@@ -58,6 +81,51 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 return StatusCode(500, new { success = false, message = "伺服器錯誤" });
             }
         }
+
+
+        [HttpGet("google/login")]
+        public IActionResult GoogleLogin(string returnUrl = "/")
+        {
+            var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleCallback", new { returnUrl }) };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("google/callback")]
+        public async Task<IActionResult> GoogleCallback(string returnUrl = "/")
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync();
+            if (!authenticateResult.Succeeded)
+                return Unauthorized();
+
+            var email = authenticateResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = authenticateResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
+            var providerKey = authenticateResult.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Google 唯一識別
+
+            var tokenRes = await _auth.LoginWithGoogleAsync(email, name, providerKey);
+
+            return Ok(tokenRes);
+        }
+
+        [Authorize]
+        [HttpPost("bind-google")]
+        public async Task<IActionResult> BindGoogle([FromBody] BindGoogleDto dto)
+        {
+            // 取得目前登入者的 userId
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+            var result = await _auth.BindGoogleAsync(userId, dto.ProviderKey, dto.Email);
+            if (!result)
+                return BadRequest("此帳號已綁定 Google 或資料有誤");
+
+
+            return Ok("Google 帳號綁定成功");
+        }
+
+
+
+
+
 
 
 
@@ -109,6 +177,12 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 return BadRequest("Token 無效或已過期");
             return Ok();
         }
+
+
+
+
+
+
         [Authorize]
         [HttpGet("getNotify")]
         public async Task<ActionResult<object>> getNotify()
