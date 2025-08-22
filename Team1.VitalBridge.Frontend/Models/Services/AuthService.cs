@@ -304,6 +304,83 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             };
         }
 
+
+        public async Task<TokenRes> LoginWithGoogleAsync(string email, string name, string providerKey)
+        {
+            // 查詢本地 User
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            if (user == null)
+            {
+                // 新使用者，建立 User 與 ExternalLogin
+                user = new User
+                {
+                    UserId = Guid.NewGuid().ToString("N"),
+                    Email = email,
+                    Name = name,
+                    AccountType = "Member",
+                    Status = "verified",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _db.Users.Add(user);
+                await _db.SaveChangesAsync();
+
+                var externalLogin = new ExternalLogin
+                {
+                    UserId = user.Id,
+                    LoginProvider = "google",
+                    ProviderKey = providerKey,
+                    Email = email,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _db.ExternalLogins.Add(externalLogin);
+                await _db.SaveChangesAsync();
+            }
+            else
+            {
+                var extLogin = await _db.ExternalLogins
+                    .FirstOrDefaultAsync(x => x.UserId == user.Id && x.LoginProvider == "google" && x.ProviderKey == providerKey);
+
+                if (extLogin == null)
+                    throw new InvalidOperationException("此 Email 已註冊，請用原本方式登入或至個人設定綁定 Google 帳號");
+            }
+
+            var roles = await GetUserRolesAsync(user.Id);
+            var access = _jwt.CreateAccessToken(user, roles);
+            var refresh = CreateRefreshJwt(user);
+
+            SetRefreshCookie(refresh, DateTime.UtcNow.AddDays(_jwt.RefreshDays));
+            IssueXsrfCookie(_jwt.RefreshDays);
+
+            return new TokenRes(access, _jwt.AccessMinutes * 60);
+        }
+
+        public async Task<bool> BindGoogleAsync(int userId, string providerKey, string email)
+        {
+            var exist = await _db.ExternalLogins
+                .AnyAsync(x => x.UserId == userId && x.LoginProvider == "google");
+            if (exist) return false;
+
+            var externalLogin = new ExternalLogin
+            {
+                UserId = userId,
+                LoginProvider = "google",
+                ProviderKey = providerKey,
+                Email = email,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            _db.ExternalLogins.Add(externalLogin);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+
+
+
+
         public async Task SendPasswordResetEmailAsync(string email)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);

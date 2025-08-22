@@ -13,6 +13,10 @@ namespace Team1.VitalBridge.Frontend.Interfaces
         Task<bool> ResetPasswordAsync(string token, string newPassword);
         Task<bool> VerifyEmailAsync(string email, string token);
         Task<bool> ResendVerificationEmailAsync(string email);
+        Task<TokenRes> LoginWithGoogleAsync(string email, string name, string providerKey);
+        Task<bool> BindGoogleAsync(int userId, string providerKey, string email);
+
+
 
     }
 }
