@@ -121,5 +121,172 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 })
                 .ToListAsync();
         }
+
+        //GET api/ProductsApi/Products
+        /// <summary>
+        /// 取得商品列表，支援分類篩選、關鍵字搜尋和分頁
+        /// </summary>
+        /// <param name="categoryId">分類ID（子分類）</param>
+        /// <param name="searchQuery">搜尋關鍵字</param>
+        /// <param name="page">頁碼（預設1）</param>
+        /// <param name="pageSize">每頁數量（預設12，支援12/24/36/48）</param>
+        /// <returns>商品列表和分頁資訊</returns>
+        /// 
+
+        [HttpGet("Products")]
+        public async Task<IActionResult> GetProducts(
+    [FromQuery] int? categoryId = null,
+    [FromQuery] string searchQuery = null,
+     [FromQuery] string sortBy = "newest",// 新增排序參數
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 12)
+        {
+            try
+            {
+                // === 第一步：參數驗證和預設值設定 ===
+                if (page < 1) page = 1;  // 頁碼不能小於1
+                if (!new[] { 12, 24, 36, 48 }.Contains(pageSize))
+                    pageSize = 12;  // 限制每頁數量只能是這四個值
+
+                // === 第二步：建立基礎查詢 ===
+                // 從所有啟用的商品開始查詢
+                var query = _context.Products
+                    .Where(p => p.IsActive)  // 只取啟用的商品
+                    .AsQueryable();  // 建立可查詢的物件
+
+                // === 第三步：分類篩選 ===
+                if (categoryId.HasValue)
+                {
+                    // 透過 ProductCategories 中介表來篩選特定分類的商品
+                    // Any() 表示「存在任何一個ProductCategory的CategoryId等於指定值」
+                    query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
+                }
+
+                // === 第四步：關鍵字搜尋（AND邏輯） ===
+                if (!string.IsNullOrWhiteSpace(searchQuery))
+                {
+                    // 將搜尋字串分割成多個關鍵字
+                    // 例如："鈣片 維他命" → ["鈣片", "維他命"]
+                    var keywords = searchQuery.Trim()
+                        .Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Where(k => !string.IsNullOrWhiteSpace(k))
+                        .ToList();
+
+                    // 對每個關鍵字使用 AND 邏輯
+                    // 意思是商品必須同時包含所有關鍵字才會被找到
+                    foreach (var keyword in keywords)
+                    {
+                        var normalizedKeyword = keyword.Trim();
+                        query = query.Where(p =>
+                            p.Name.Contains(normalizedKeyword) ||           // 商品名稱包含關鍵字
+                            p.Keypoint.Contains(normalizedKeyword) ||       // 關鍵賣點包含關鍵字
+                            p.ItemNumber.Contains(normalizedKeyword)        // 商品貨號包含關鍵字
+                        );
+                    }
+                }
+                // === 第五步：排序邏輯 ===
+                switch (sortBy?.ToLower())
+                {
+                    case "price_asc":
+                        query = query.OrderBy(p => p.Price);
+                        break;
+                    case "price_desc":
+                        query = query.OrderByDescending(p => p.Price);
+                        break;
+                    case "newest":
+                    default:
+                        query = query.OrderByDescending(p => p.CreateAt);
+                        break;
+                }
+
+                // === 第六步：計算總筆數和分頁資訊 ===
+                var totalItems = await query.CountAsync();  // 符合條件的商品總數
+                var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);  // 總頁數
+
+                // === 第七步：執行分頁查詢並轉換成DTO ===
+                var products = await query
+                    
+                    .Skip((page - 1) * pageSize)         // 跳過前面的資料
+                    .Take(pageSize)                      // 只取這一頁的資料
+                    .Select(p => new ProductListItemDto  // 轉換成DTO格式
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Keypoint = p.Keypoint,
+                        Price = p.Price,
+                        ItemNumber = p.ItemNumber,
+
+                        // 取得商品的第一張圖片檔名
+                        ImageFileName = p.ProductImages
+                            .Where(pi => pi.File != null)      // 只要有檔案的圖片
+                            .OrderBy(pi => pi.SortOrder)       // 按排序順序
+                            .Select(pi => pi.File.FileName)    // 取檔案名稱
+                            .FirstOrDefault() ?? "",           // 如果沒有圖片就回傳空字串
+
+                        // 如果有指定分類，就用指定的；沒有就取商品的第一個分類
+                        CategoryId = categoryId ?? p.ProductCategories
+                            .Select(pc => pc.CategoryId)
+                            .FirstOrDefault(),
+
+                        // 取得分類名稱
+                        CategoryName = categoryId.HasValue
+                            ? p.ProductCategories
+                                .Where(pc => pc.CategoryId == categoryId.Value)
+                                .Select(pc => pc.Category.Name)
+                                .FirstOrDefault() ?? ""
+                            : p.ProductCategories
+                                .Select(pc => pc.Category.Name)
+                                .FirstOrDefault() ?? ""
+                    })
+                    .ToListAsync();  // 執行查詢並轉換成List
+
+                // === 第七步：取得分類名稱（用於回應資訊） ===
+                string categoryName = null;
+                if (categoryId.HasValue)
+                {
+                    categoryName = await _context.Categories
+                        .Where(c => c.Id == categoryId.Value)
+                        .Select(c => c.Name)
+                        .FirstOrDefaultAsync();
+                }
+
+                // === 第八步：建立完整的回應物件 ===
+                var response = new ProductListResponseDto
+                {
+                    Products = products,  // 商品列表
+
+                    // 分頁資訊
+                    Pagination = new PaginationDto
+                    {
+                        CurrentPage = page,
+                        TotalPages = totalPages,
+                        TotalItems = totalItems,
+                        PageSize = pageSize,
+                        HasNextPage = page < totalPages,    // 是否有下一頁
+                        HasPreviousPage = page > 1          // 是否有上一頁
+                    },
+
+                    // 搜尋資訊
+                    SearchInfo = new SearchInfoDto
+                    {
+                        CategoryId = categoryId,
+                        CategoryName = categoryName,
+                        SearchQuery = searchQuery,
+                        TotalFound = totalItems
+                    }
+                };
+
+                return Ok(response);  // 回傳成功結果
+
+            }
+            catch (Exception ex) {
+                // 錯誤處理：回傳500錯誤和錯誤訊息
+                return StatusCode(500, new
+                {
+                    message = "取得商品列表時發生錯誤",
+                    error = ex.Message
+                });
+            }
+        }
     }
 }
