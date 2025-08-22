@@ -81,7 +81,7 @@
     <script>
         $(document).ready(function () {
             $("#routeInput").on('blur', function () {
-                const route = "https://localhost:7184/VitalBridge/"+this.value.trim();
+                const route = "https://localhost:7184"+this.value.trim();
                 const show = $("#Show")[0];
 
                 if (route !== "") {

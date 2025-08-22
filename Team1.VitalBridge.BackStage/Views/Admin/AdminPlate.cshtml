@@ -22,7 +22,7 @@
             <tr>
                 <td>@item.Id</td>
                 <td class="fw-semibold">@item.Name</td>
-                <td class="text-muted"><a href="http://127.0.0.1:5500/@item.Route.TrimStart('/')">@item.Route</a></td>
+                <td class="text-muted"><a href="https://localhost:7184/@item.Route.TrimStart('/')">@item.Route</a></td>
                 <td>
                     <div class="form-check form-switch justify-content-center d-flex">
                         <input type="checkbox"
@@ -122,7 +122,7 @@
                 if (route !== "") {
                   $("#preview-container").show();
 
-                  show.src = "https://localhost:7184/VitalBridge"+route;
+                  show.src = "https://localhost:7184"+route;
 
                           show.onload = function () {
                               const iframeDoc = show.contentDocument || show.contentWindow.document;
@@ -134,14 +134,29 @@
 
 
                               // 建立日期控制區塊
-                              const dateControlDiv = iframeDoc.createElement("div");
-                              dateControlDiv.className = "d-flex justify-content-center align-items-center gap-3 my-4";
-                              dateControlDiv.innerHTML = `
-                                <button id="prevDay" class="btn btn-primary">&larr;</button>
-                                <input type="date" id="publishDate" class="form-control w-auto" />
-                                <button id="nextDay" class="btn btn-primary">&rarr;</button>
-                              `;
-                              iframeBody.insertBefore(dateControlDiv, iframeBody.firstChild);
+                              // const dateControlDiv = iframeDoc.createElement("div");
+                              // dateControlDiv.className = "d-flex justify-content-center align-items-center gap-3 my-4";
+                              // dateControlDiv.innerHTML = `
+                              //   <button id="prevDay" class="btn btn-primary">&larr;</button>
+                              //   <input type="date" id="publishDate" class="form-control w-auto" />
+                              //   <button id="nextDay" class="btn btn-primary">&rarr;</button>
+                              // `;
+                              // iframeBody.insertBefore(dateControlDiv, iframeBody.firstChild);
+
+                            const wrapper = iframeDoc.createElement("section");
+                            wrapper.className = "date-control-wrapper";
+
+                            const dateControlDiv = iframeDoc.createElement("div");
+                            dateControlDiv.className = "d-flex justify-content-center align-items-center gap-3 my-4";
+                            dateControlDiv.innerHTML = `
+                              <button id="prevDay" class="btn btn-primary">&larr;</button>
+                              <input type="date" id="publishDate" class="form-control w-auto" />
+                              <button id="nextDay" class="btn btn-primary">&rarr;</button>
+                            `;
+
+                            wrapper.appendChild(dateControlDiv);
+                            iframeBody.insertBefore(wrapper, iframeBody.firstChild);
+
 
                               // 綁定事件（直接在父層 JS）
                               const dateInput = iframeDoc.querySelector('#publishDate');
