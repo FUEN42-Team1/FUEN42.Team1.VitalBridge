@@ -44,6 +44,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     Id = a.Id,
                     Title = a.Title,
                     CoverPic = a.CoverPic != null ? Convert.ToBase64String(a.CoverPic) : null, // Convert byte array to Base64 string
+                    CategoryId = a.ContentCategory.Id,
                     Category = a.ContentCategory.Name,
                     Author = a.Member.Name,
                     Date = a.CreatedAt
@@ -63,6 +64,17 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 // Log the exception
                 return StatusCode(500, new { message = "An error occurred while fetching articles." });
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<object>> GetArticleById()
+        {
+            var response = new
+            {
+                articles =0,
+                totalCount = 0
+            };
+            return Ok(response);
         }
     }
 }

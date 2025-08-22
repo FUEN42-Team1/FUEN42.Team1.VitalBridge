@@ -14,6 +14,7 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public string CoverPic { get; set; } // Base64 image data
+        public int CategoryId { get; set; }
         public string Category { get; set; }
         public string Excerpt { get; set; }
         public string Author { get; set; }
