@@ -49,7 +49,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         [Required]
         public int ContentCategoryId { get; set; }
 
-        public IFormFile? CoverPic { get; set; } 
+        public IFormFile? CoverPic { get; set; }
+        public string CoverPicFileName { get; set; }
         public string Status { get; set; } // efmodel is int , but view model is string for display purposes
 
     }

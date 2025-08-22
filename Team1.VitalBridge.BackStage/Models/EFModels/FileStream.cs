@@ -28,6 +28,9 @@ public partial class FileStream
     [InverseProperty("File")]
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
 
+    [InverseProperty("CoverPicFile")]
+    public virtual ICollection<Content> Contents { get; set; } = new List<Content>();
+
     [InverseProperty("File")]
     public virtual ICollection<EventImage> EventImages { get; set; } = new List<EventImage>();
 
