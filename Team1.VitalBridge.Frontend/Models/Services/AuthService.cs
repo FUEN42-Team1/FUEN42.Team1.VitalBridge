@@ -6,6 +6,7 @@ using Team1.VitalBridge.BackStage.Models.Utilities;
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {
@@ -45,7 +46,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
 
 
-            //建立user物件
+            ////建立user物件
             var user = new User
             {
                 UserId = Guid.NewGuid().ToString("N"),
@@ -61,64 +62,122 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             };
 
 
-            //建立MemberProfile物件
-            var MemberProfile = new MemberProfile
-            {
-                User = user,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            ////建立MemberProfile物件
+            //var MemberProfile = new MemberProfile
+            //{
+            //    User = user,
+            //    CreatedAt = DateTime.UtcNow,
+            //    UpdatedAt = DateTime.UtcNow
+            //};
 
 
 
 
-            //建立UserRoles物件（假設預設角色為 "Member"）
-            var userRole = new UserRole
-            {
-                User = user,
-                RoleId = roleId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+            ////建立UserRoles物件（假設預設角色為 "Member"）
+            //var userRole = new UserRole
+            //{
+            //    User = user,
+            //    RoleId = roleId,
+            //    CreatedAt = DateTime.UtcNow,
+            //    UpdatedAt = DateTime.UtcNow
 
-            };
+            //};
 
-            _db.UserRoles.Add(userRole);
+            //_db.UserRoles.Add(userRole);
 
 
-            _db.AddRange(user, MemberProfile, userRole);
+            //_db.AddRange(user, MemberProfile, userRole);
+            _db.AddRange(user);
             await _db.SaveChangesAsync();
 
 
 
             // 發送驗證郵件
-            string verifyLink = $"https://localhost:5500/verify?email={dto.Email}&token={ConfirmCodeToken}";
+            string verifyLink = $"https://localhost:7184/VitalBridge/verify.html?email={dto.Email}&token={ConfirmCodeToken}";
             //輸出到debug控制台
             Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
 
 
-            //            string sql = $@"
-            //    EXEC msdb.dbo.sp_send_dbmail
-            //    @profile_name = 'VitalBridge',
-            //    @recipients = '{dto.Email}', 
-            //    @subject = '【VitalBridge】帳號驗證信',
-            //    @body = '
-            //親愛的 {dto.Name} 您好：
+            string sql = $@"
+                EXEC msdb.dbo.sp_send_dbmail
+                @profile_name = 'VitalBridge',
+                @recipients = '{dto.Email}', 
+                @subject = '【VitalBridge】帳號驗證信',
+                @body = '
+            親愛的 {dto.Name} 您好：
 
-            //感謝您註冊 VitalBridge 平台。
-            //請點擊以下連結完成帳號驗證：
+            感謝您註冊 VitalBridge 平台。
+            請點擊以下連結完成帳號驗證：
 
-            //{verifyLink}
+            {verifyLink}
 
-            //如果您沒有註冊過 VitalBridge，請忽略此封信件。
+            如果您沒有註冊過 VitalBridge，請忽略此封信件。
 
-            //-- VitalBridge 系統通知
-            //',
-            //    @body_format = 'TEXT';";
+            -- VitalBridge 系統通知
+            ',
+                @body_format = 'TEXT';";
 
-            //_db.Database.ExecuteSqlRaw(sql);
+            _db.Database.ExecuteSqlRaw(sql);
 
 
         }
+
+
+        public async Task<bool> VerifyEmailAsync(string email, string token)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email && x.ConfirmCode == token);
+
+            if (user == null || user.ConfirmCodeExpiresAt < DateTime.UtcNow)
+                return false;
+
+            user.Status = "verified";
+            user.ConfirmCode = null;
+            user.ConfirmCodeExpiresAt = null;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ResendVerificationEmailAsync(string email)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null || user.Status != "unverified")
+                return false;
+
+            // 產生新驗證碼
+            var confirmCode = Guid.NewGuid().ToString("N");
+            user.ConfirmCode = confirmCode;
+            user.ConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+
+            // 建立驗證連結（請依你的前端路徑調整）
+            string verifyLink = $"https://localhost:7184/VitalBridge/verify.html?email={email}&token={confirmCode}";
+            Console.WriteLine($"重新發送驗證郵件到 {email}，連結：{verifyLink}");
+
+            string sql = $@"
+        EXEC msdb.dbo.sp_send_dbmail
+        @profile_name = 'VitalBridge',
+        @recipients = '{email}', 
+        @subject = '【VitalBridge】帳號驗證信',
+        @body = '
+    親愛的 {user.Name} 您好：
+
+    請點擊以下連結完成帳號驗證：
+
+    {verifyLink}
+
+    如果您沒有註冊過 VitalBridge，請忽略此封信件。
+
+    -- VitalBridge 系統通知
+    ',
+        @body_format = 'TEXT';";
+
+            _db.Database.ExecuteSqlRaw(sql);
+
+            return true;
+        }
+
 
         public async Task<TokenRes> LoginAsync(LoginDto dto)
         {

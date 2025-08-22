@@ -33,6 +33,26 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok();
         }
 
+        [HttpGet("verify")]
+        public async Task<IActionResult> Verify([FromQuery] string email, [FromQuery] string token)
+        {
+            var result = await _auth.VerifyEmailAsync(email, token);
+            if (!result)
+                return BadRequest("驗證連結無效或已過期");
+
+            return Ok("驗證成功，請登入");
+        }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerification([FromBody] string email)
+        {
+            var result = await _auth.ResendVerificationEmailAsync(email);
+            if (!result)
+                return BadRequest("帳號不存在或已驗證");
+            return Ok("驗證信已重新寄出，請查收信箱");
+        }
+
+
         //[HttpPost("login")]
         //public async Task<ActionResult<TokenRes>> Login(LoginDto dto)
         //    => await _auth.LoginAsync(dto);
@@ -109,6 +129,12 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 return BadRequest("Token 無效或已過期");
             return Ok();
         }
+
+
+
+
+
+
         [Authorize]
         [HttpGet("getNotify")]
         public async Task<ActionResult<object>> getNotify()
