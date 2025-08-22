@@ -51,4 +51,7 @@ public partial class FileStream
 
     [InverseProperty("File")]
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+
+    [InverseProperty("File")]
+    public virtual ICollection<ShopHomePageBanner> ShopHomePageBanners { get; set; } = new List<ShopHomePageBanner>();
 }

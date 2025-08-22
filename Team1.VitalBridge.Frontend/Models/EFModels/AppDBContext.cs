@@ -877,6 +877,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreateAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Updated).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.File).WithMany(p => p.ShopHomePageBanners).HasConstraintName("FK_ShopHomePageBanners_FileStream");
         });
 
         modelBuilder.Entity<SubsidyInfo>(entity =>

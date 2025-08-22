@@ -17,10 +17,6 @@ public partial class ShopHomePageBanner
     [Column("position")]
     public int Position { get; set; }
 
-    [Required]
-    [Column("shopBannerUrl")]
-    public string ShopBannerUrl { get; set; }
-
     [Column("landingPageUrl")]
     public string LandingPageUrl { get; set; }
 
@@ -32,4 +28,10 @@ public partial class ShopHomePageBanner
 
     [Column("updated", TypeName = "datetime")]
     public DateTime Updated { get; set; }
+
+    public int? FileId { get; set; }
+
+    [ForeignKey("FileId")]
+    [InverseProperty("ShopHomePageBanners")]
+    public virtual FileStream File { get; set; }
 }
