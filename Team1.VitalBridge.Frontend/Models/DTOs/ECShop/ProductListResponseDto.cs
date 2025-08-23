@@ -1,6 +1,6 @@
 ﻿using Team1.VitalBridge.Frontend.Models.DTOs;
 
-namespace Team1.VitalBridge.Frontend.Models.ECShop
+namespace Team1.VitalBridge.Frontend.Models.DTOs.ECShop
 {
     public class ProductListResponseDto
     {

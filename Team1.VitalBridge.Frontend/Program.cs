@@ -7,6 +7,7 @@ using System.Text;
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
+using Team1.VitalBridge.Frontend.Services;
 
 namespace Team1.VitalBridge.Frontend
 {
@@ -83,6 +84,11 @@ errorNumbersToAdd: null // null 表示使用預設的 SQL Server 錯誤碼
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddHttpContextAccessor();
+            // 註冊自訂服務
+            builder.Services.AddScoped<CategoryService>();
+
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

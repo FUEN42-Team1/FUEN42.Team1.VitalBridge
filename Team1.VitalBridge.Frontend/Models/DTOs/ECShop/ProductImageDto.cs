@@ -1,4 +1,4 @@
-﻿namespace Team1.VitalBridge.Frontend.Models.ECShop
+﻿namespace Team1.VitalBridge.Frontend.Models.DTOs.ECShop
 {
     public class ProductImageDto
     {

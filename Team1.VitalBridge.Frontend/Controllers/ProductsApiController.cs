@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs;
-using Team1.VitalBridge.Frontend.Models.ECShop;
+using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 
 namespace Team1.VitalBridge.Frontend.Controllers

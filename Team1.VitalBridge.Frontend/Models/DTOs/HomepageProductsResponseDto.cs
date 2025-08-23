@@ -1,4 +1,4 @@
-﻿using Team1.VitalBridge.Frontend.Models.ECShop;
+﻿using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 
 namespace Team1.VitalBridge.Frontend.Models.DTOs
 {
