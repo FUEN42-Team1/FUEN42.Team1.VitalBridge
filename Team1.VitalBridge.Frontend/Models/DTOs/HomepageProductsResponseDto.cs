@@ -1,4 +1,6 @@
-﻿namespace Team1.VitalBridge.Frontend.Models.DTOs
+﻿using Team1.VitalBridge.Frontend.Models.ECShop;
+
+namespace Team1.VitalBridge.Frontend.Models.DTOs
 {
     public class HomepageProductsResponseDto
     {

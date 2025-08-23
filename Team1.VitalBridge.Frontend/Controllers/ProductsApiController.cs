@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs;
+using Team1.VitalBridge.Frontend.Models.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 
 namespace Team1.VitalBridge.Frontend.Controllers
@@ -135,11 +136,11 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
         [HttpGet("Products")]
         public async Task<IActionResult> GetProducts(
-    [FromQuery] int? categoryId = null,
-    [FromQuery] string searchQuery = null,
-     [FromQuery] string sortBy = "newest",// 新增排序參數
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 12)
+            [FromQuery] int? categoryId = null,
+            [FromQuery] string searchQuery = null,
+             [FromQuery] string sortBy = "newest",// 新增排序參數
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12)
         {
             try
             {
@@ -287,6 +288,101 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     error = ex.Message
                 });
             }
+        }
+
+
+        //GET api/ProductsApi/Product/5
+        [HttpGet("Product/{id}")]
+        public async Task<ActionResult<ProductDetailResponseDto>> GetProductDetail(int id)
+        {
+            try
+            {
+                // 1. 取得商品基本資料
+            
+                var product = await _context.Products
+                    .Where(p => p.Id == id && p.IsActive)
+                    .Select(p => new
+                    {
+                        p.Id,
+                        p.Name,
+                        p.ItemNumber,
+                        p.Keypoint,
+                        p.ProductDescription,
+                        p.Price,
+                        p.Quantity,
+                        p.CreateAt,
+
+                        // 取得所有商品圖片
+                        Images = p.ProductImages
+                            .Where(pi => pi.File != null)
+                            .OrderBy(pi => pi.SortOrder)
+                            .Select(pi => new
+                            {
+                                pi.Id,
+                                FileName = pi.File.FileName,
+                                pi.SortOrder
+                            }).ToList(),
+
+                        // 取得商品分類
+                        Categories = p.ProductCategories
+                            .Select(pc => new
+                            {
+                                pc.Category.Id,
+                                pc.Category.Name
+                            }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (product == null)
+                    return NotFound(new { message = "商品不存在或已下架" });
+
+                // 2. 取得最新的 ProductNote（送貨付款方式、購物須知）
+                var productNote = await _context.ProductNotes
+                    .OrderByDescending(pn => pn.Id)
+                    .Select(pn => new
+                    {
+                        pn.DeliveryAndPayMethod,
+                        pn.ShoppNote
+                    })
+                    .FirstOrDefaultAsync();
+
+                // 3. 組合回傳資料
+                var response = new ProductDetailResponseDto
+                {
+                    Product = product,
+                    ProductNote = productNote
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "取得商品詳情時發生錯誤",
+                    error = ex.Message
+                });
+            }
+
+
+
+
+
+        }
+
+
+        [HttpGet("Product/{id}")]
+        public async Task<ActionResult<ProductDetailResponseDto>> GetProductDetail(int id)
+        {
+            // ... 查詢邏輯 ...
+
+            var response = new ProductDetailResponseDto
+            {
+                Product = product,  // 已經是 ProductDetailDto
+                ProductNote = productNote  // 已經是 ProductNoteDto
+            };
+
+            return Ok(response);
         }
     }
 }
