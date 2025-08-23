@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // 加入這行
 using Team1.VitalBridge.Frontend.Interfaces;
-using Team1.VitalBridge.Frontend.Models.DTOs;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
+using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
 
 
 namespace Team1.VitalBridge.Frontend.Controllers

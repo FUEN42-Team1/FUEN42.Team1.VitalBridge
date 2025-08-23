@@ -1,4 +1,4 @@
-﻿using Team1.VitalBridge.Frontend.Models.DTOs;
+﻿using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
 
 namespace Team1.VitalBridge.Frontend.Interfaces
 {

@@ -5,9 +5,9 @@ using System.Text;
 using Team1.VitalBridge.BackStage.Models.Utilities;
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
-using Team1.VitalBridge.Frontend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
+using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {

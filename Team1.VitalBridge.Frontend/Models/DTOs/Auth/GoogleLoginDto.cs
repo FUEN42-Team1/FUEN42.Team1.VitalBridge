@@ -1,4 +1,4 @@
-﻿namespace Team1.VitalBridge.Frontend.Models.DTOs
+﻿namespace Team1.VitalBridge.Frontend.Models.DTOs.Auth
 {
     public class GoogleLoginDto
     {

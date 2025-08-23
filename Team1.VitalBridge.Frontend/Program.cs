@@ -68,6 +68,7 @@ namespace Team1.VitalBridge.Frontend
 
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IMemberService, MemberService>();
 
             builder.Services.AddHttpContextAccessor();
             var app = builder.Build();
