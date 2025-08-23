@@ -301,34 +301,34 @@ namespace Team1.VitalBridge.Frontend.Controllers
             
                 var product = await _context.Products
                     .Where(p => p.Id == id && p.IsActive)
-                    .Select(p => new
+                    .Select(p => new ProductDetailDto
                     {
-                        p.Id,
-                        p.Name,
-                        p.ItemNumber,
-                        p.Keypoint,
-                        p.ProductDescription,
-                        p.Price,
-                        p.Quantity,
-                        p.CreateAt,
+                        Id  = p.Id,
+                        Name = p.Name,
+                        ItemNumber = p.ItemNumber,
+                        Keypoint = p.Keypoint,
+                        ProductDescription = p.ProductDescription,
+                        Price = p.Price,
+                        Quantity = p.Quantity,
+                        CreateAt = p.CreateAt,
 
-                        // 取得所有商品圖片
+                        // 取得所有商品圖片，直接轉換成 ProductImageDto
                         Images = p.ProductImages
                             .Where(pi => pi.File != null)
                             .OrderBy(pi => pi.SortOrder)
-                            .Select(pi => new
+                            .Select(pi => new ProductImageDto
                             {
-                                pi.Id,
+                                Id = pi.Id,
                                 FileName = pi.File.FileName,
-                                pi.SortOrder
+                                SortOrder = (int)pi.SortOrder
                             }).ToList(),
 
-                        // 取得商品分類
+                        // 取得商品分類，直接轉換成 CategoryDto
                         Categories = p.ProductCategories
-                            .Select(pc => new
+                            .Select(pc => new CategoryDto
                             {
-                                pc.Category.Id,
-                                pc.Category.Name
+                                Id=pc.Category.Id,
+                                Name =pc.Category.Name // 只取分類名稱
                             }).ToList()
                     })
                     .FirstOrDefaultAsync();
@@ -336,13 +336,13 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 if (product == null)
                     return NotFound(new { message = "商品不存在或已下架" });
 
-                // 2. 取得最新的 ProductNote（送貨付款方式、購物須知）
+                // 2. 取得最新的 ProductNote（送貨付款方式、購物須知），直接轉換成 ProductNoteDto
                 var productNote = await _context.ProductNotes
                     .OrderByDescending(pn => pn.Id)
-                    .Select(pn => new
+                    .Select(pn => new ProductNoteDto
                     {
-                        pn.DeliveryAndPayMethod,
-                        pn.ShoppNote
+                        DeliveryAndPayMethod = pn.DeliveryAndPayMethod,
+                        ShoppNote = pn.ShoppNote
                     })
                     .FirstOrDefaultAsync();
 
@@ -363,26 +363,6 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     error = ex.Message
                 });
             }
-
-
-
-
-
-        }
-
-
-        [HttpGet("Product/{id}")]
-        public async Task<ActionResult<ProductDetailResponseDto>> GetProductDetail(int id)
-        {
-            // ... 查詢邏輯 ...
-
-            var response = new ProductDetailResponseDto
-            {
-                Product = product,  // 已經是 ProductDetailDto
-                ProductNote = productNote  // 已經是 ProductNoteDto
-            };
-
-            return Ok(response);
         }
     }
 }
