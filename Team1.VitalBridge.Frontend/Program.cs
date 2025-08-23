@@ -36,21 +36,6 @@ namespace Team1.VitalBridge.Frontend
                     .AllowCredentials());
             });
 
-            //讀取Google登入設定
-//            var googleConfig = builder.Configuration.GetSection("GoogleLogin");
-
-//            builder.Services.AddAuthentication(options =>
-//            {
-//                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-//                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-//            })
-//.AddCookie()
-//.AddGoogle(options =>
-//{
-//    options.ClientId = googleConfig["ClientId"];
-//    options.ClientSecret = googleConfig["ClientSecret"];
-//    options.CallbackPath = "/api/auth/google/callback";
-//});
 
 
 

@@ -56,9 +56,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         }
 
 
-        //[HttpPost("login")]
-        //public async Task<ActionResult<TokenRes>> Login(LoginDto dto)
-        //    => await _auth.LoginAsync(dto);
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
@@ -83,45 +81,14 @@ namespace Team1.VitalBridge.Frontend.Controllers
         }
 
 
-        //[HttpGet("google/login")]
-        //public IActionResult GoogleLogin(string returnUrl = "/")
-        //{
-        //    var properties = new AuthenticationProperties { RedirectUri = Url.Action("GoogleCallback", new { returnUrl }) };
-        //    return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-        //}
-
-        //[HttpGet("google/callback")]
-        //public async Task<IActionResult> GoogleCallback(string returnUrl = "/")
-        //{
-        //    var authenticateResult = await HttpContext.AuthenticateAsync();
-        //    if (!authenticateResult.Succeeded)
-        //        return Unauthorized();
-
-        //    var email = authenticateResult.Principal.FindFirst(ClaimTypes.Email)?.Value;
-        //    var name = authenticateResult.Principal.FindFirst(ClaimTypes.Name)?.Value;
-        //    var providerKey = authenticateResult.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value; // Google 唯一識別
-
-        //    var tokenRes = await _auth.LoginWithGoogleAsync(email, name, providerKey);
-
-        //    return Ok(tokenRes);
-        //}
-
-        //[Authorize]
-        //[HttpPost("bind-google")]
-        //public async Task<IActionResult> BindGoogle([FromBody] BindGoogleDto dto)
-        //{
-        //    // 取得目前登入者的 userId
-        //    var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        //    if (!int.TryParse(userIdStr, out var userId))
-        //        return Unauthorized();
-        //    var result = await _auth.BindGoogleAsync(userId, dto.ProviderKey, dto.Email);
-        //    if (!result)
-        //        return BadRequest("此帳號已綁定 Google 或資料有誤");
-
-
-        //    return Ok("Google 帳號綁定成功");
-        //}
-
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto dto)
+        {
+            // 驗證 Google Token 並登入/註冊
+            var tokenRes = await _auth.LoginWithGoogleIdTokenAsync(dto.IdToken);
+            if (tokenRes == null) return Unauthorized();
+            return Ok(tokenRes);
+        }
 
 
 

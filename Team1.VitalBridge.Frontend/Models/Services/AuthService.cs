@@ -7,6 +7,7 @@ using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Google.Apis.Auth;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {
@@ -82,8 +83,6 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 UpdatedAt = DateTime.UtcNow
 
             };
-
-            _db.UserRoles.Add(userRole);
 
 
             _db.AddRange(user, MemberProfile, userRole);
@@ -305,10 +304,64 @@ namespace Team1.VitalBridge.Frontend.Models.Services
         }
 
 
+        public async Task<TokenRes?> LoginWithGoogleIdTokenAsync(string idToken)
+        {
+            var clientId = _cfg["GoogleLogin:ClientId"];           // 你的 Web Client ID
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                // 交由 ValidateAsync 做 **audience** 驗證（可放多個）
+                Audience = new[] { clientId },
+                // 可視需要：允許一點時鐘誤差（避免伺服器時間微飄）
+                // Clock = new SystemClock(), // 預設即可
+            };
+
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+            }
+            catch (InvalidJwtException ex)
+            {
+                // 直接結束並提供清楚原因（比回 null 好除錯）
+                throw new UnauthorizedAccessException("INVALID_GOOGLE_TOKEN: " + ex.Message);
+            }
+
+            // **issuer** 保險檢查（通常會是其中之一）
+            if (payload.Issuer != "accounts.google.com" &&
+                payload.Issuer != "https://accounts.google.com")
+            {
+                throw new UnauthorizedAccessException("ISSUER_MISMATCH");
+            }
+
+            // 建議：檢查 email 是否已驗證
+            if (payload.EmailVerified != true)
+            {
+                throw new UnauthorizedAccessException("EMAIL_NOT_VERIFIED");
+            }
+
+
+            // 取得 Google 帳號資訊
+            var email = payload.Email;
+            var name = payload.Name;
+            var providerKey = payload.Subject; // Google 的唯一識別碼
+
+            // 呼叫原本的 Google 登入流程
+            return await LoginWithGoogleAsync(email, name, providerKey);
+        }
+
         public async Task<TokenRes> LoginWithGoogleAsync(string email, string name, string providerKey)
         {
             // 查詢本地 User
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            var roleId = await _db.Roles
+                .Where(r => r.RoleCode == "Member")
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (roleId == 0) // 如果是 int 主鍵
+                throw new InvalidOperationException("系統沒有預設角色 Member，請先建立角色資料");
+
 
             if (user == null)
             {
@@ -319,23 +372,38 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                     Email = email,
                     Name = name,
                     AccountType = "Member",
-                    Status = "verified",
+                    Status = "active",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                _db.Users.Add(user);
-                await _db.SaveChangesAsync();
+
+                var MemberProfile = new MemberProfile
+                {
+                    User = user,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var userRole = new UserRole
+                {
+                    User = user,
+                    RoleId = roleId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
 
                 var externalLogin = new ExternalLogin
                 {
-                    UserId = user.Id,
+                    User = user,
                     LoginProvider = "google",
                     ProviderKey = providerKey,
                     Email = email,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-                _db.ExternalLogins.Add(externalLogin);
+
+                _db.AddRange(user, MemberProfile, userRole, externalLogin);
                 await _db.SaveChangesAsync();
             }
             else
@@ -419,11 +487,37 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
         // ==== Helpers（服務內部） ====
 
+        //private async Task<string[]> GetUserRolesAsync(int userId)
+        //{
+        //    var roles = await _db.UserRoles
+        //        .Where(ur => ur.UserId == userId)
+        //        .Join(_db.Roles,
+        //              ur => ur.RoleId,
+        //              r => r.Id,
+        //              (ur, r) => r.Name)
+        //        .ToArrayAsync();
+
+        //    return roles;
+        //}
+
         private async Task<string[]> GetUserRolesAsync(int userId)
         {
-            // TODO: 依你的資料表實作；暫時給空陣列
-            await Task.CompletedTask;
-            return Array.Empty<string>();
+            var roleCodes = await _db.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.Role.RoleCode)
+                .ToArrayAsync();
+
+            return roleCodes;
+        }
+
+        private async Task<string[]> GetUserRoleNamesAsync(int userId)
+        {
+            var roleNames = await _db.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Select(ur => ur.Role.Name)
+                .ToArrayAsync();
+
+            return roleNames;
         }
 
         // 無表：直接用 JwtService 的 Refresh 簽章（可直接呼叫你已實作的 CreateRefreshJwt/ValidateRefreshJwt）
