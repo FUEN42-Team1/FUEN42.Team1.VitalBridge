@@ -8,7 +8,7 @@
 
         // 新增屬性（用於階層功能）- 使用一致的命名
         public int? FatherId { get; set; }        // 對應 EF Model 的 FatherId
-        public string FatherName { get; set; }    // 對應 EF Model 的 Father.Name
+        public string FatherName { get; set; }    
         public bool IsActive { get; set; } = true; // 對應 EF Model 的 IsActive
         public int Level { get; set; } = 0;        // 階層等級，0 為根類別
 

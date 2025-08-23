@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs;
 using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Services;
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {
@@ -12,20 +13,24 @@ namespace Team1.VitalBridge.Frontend.Controllers
     public class ProductsApiController : ControllerBase
     {
         private readonly AppDbContext _context;
+		private readonly CategoryService _categoryService;
 
-        public ProductsApiController(AppDbContext context)
+		public ProductsApiController(AppDbContext context, CategoryService categoryService)
         {
             this._context=context;
-        }
+			this._categoryService = categoryService; // 注入 CategoryService
+		}
+
+        
 
 
-        //GET api/Products/Homepage
-        /// <summary>
-        /// 取得首頁商品資料，包含四個分類的推薦商品
-        /// </summary>
-        /// <returns>回傳首頁各分類商品清單</returns>
+		//GET api/Products/Homepage
+		/// <summary>
+		/// 取得首頁商品資料，包含四個分類的推薦商品
+		/// </summary>
+		/// <returns>回傳首頁各分類商品清單</returns>
 
-        [HttpGet("Homepage")]
+		[HttpGet("Homepage")]
         public async Task<IActionResult> GetHomepageProducts()
         {
             // 實作邏輯
@@ -300,7 +305,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 // 1. 取得商品基本資料
             
                 var product = await _context.Products
-                    .Where(p => p.Id == id && p.IsActive)
+                    .Where(p => p.Id == id && p.IsActive) 
                     .Select(p => new ProductDetailDto
                     {
                         Id  = p.Id,
@@ -323,31 +328,34 @@ namespace Team1.VitalBridge.Frontend.Controllers
                                 SortOrder = (int)pi.SortOrder
                             }).ToList(),
 
-                        // 取得商品分類，直接轉換成 CategoryDto
-                        Categories = p.ProductCategories
-                            .Select(pc => new CategoryDto
+						// 重點：修正類別資訊查詢
+						Categories = p.ProductCategories
+                            .OrderBy(pc => pc.CategoryId) // 按ID排序，取最小的作為主要類別
+							.Select(pc => new CategoryDto
                             {
                                 Id=pc.Category.Id,
-                                Name =pc.Category.Name // 只取分類名稱
-                            }).ToList()
+                                Name =pc.Category.Name, // 只取分類名稱
+								FatherId = pc.Category.FatherId, // 🔥 加入父類別ID
+								FatherName = pc.Category.Father.Name // 🔥 加入父類別名稱
+							}).ToList()
                     })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(); // 只取一筆
 
-                if (product == null)
+				if (product == null)
                     return NotFound(new { message = "商品不存在或已下架" });
 
                 // 2. 取得最新的 ProductNote（送貨付款方式、購物須知），直接轉換成 ProductNoteDto
                 var productNote = await _context.ProductNotes
-                    .OrderByDescending(pn => pn.Id)
-                    .Select(pn => new ProductNoteDto
+                    .OrderByDescending(pn => pn.Id) // 假設 Id 是自增的，最新的會有最大的 Id
+					.Select(pn => new ProductNoteDto
                     {
                         DeliveryAndPayMethod = pn.DeliveryAndPayMethod,
                         ShoppNote = pn.ShoppNote
                     })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(); // 只取最新的一筆
 
-                // 3. 組合回傳資料
-                var response = new ProductDetailResponseDto
+				// 3. 組合回傳資料
+				var response = new ProductDetailResponseDto
                 {
                     Product = product,
                     ProductNote = productNote
