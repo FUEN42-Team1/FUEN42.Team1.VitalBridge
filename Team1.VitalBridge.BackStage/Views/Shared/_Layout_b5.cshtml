@@ -16,7 +16,7 @@
 
     <!-- App CSS -->
     <link id="theme-style" rel="stylesheet" href="~/portal-theme-bs5/assets/css/portal.css">
-
+    <link rel="stylesheet" href="~/css/chat-float.css" />
     <!-- Johnny Start -->
     <!--ckeditor -->
     <link rel="stylesheet" href="~/ckeditor5/css/style.css">
@@ -33,6 +33,20 @@
 </head>
 
 <body class="app">
+    <div id="chat-float" class="chat-float">
+        <div id="chat-badge" class="chat-badge">💬</div>
+        <div id="chat-window" class="chat-window">
+            <div class="chat-header">
+                <span>客服聊天</span>
+                <button id="chat-close">✖</button>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-text" placeholder="輸入訊息..." />
+                <button id="chat-send">發送</button>
+            </div>
+        </div>
+    </div>
     <header class="app-header fixed-top">
         <div class="app-header-inner">
             <div class="container-fluid py-2">
@@ -609,7 +623,9 @@
             LoadPlateByNow();
         });
     </script> 
-
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat-float.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
     <!-- 這邊在mvc 的layout 要用Render語法 -->
     @RenderSection("Scripts", required: false)
 
