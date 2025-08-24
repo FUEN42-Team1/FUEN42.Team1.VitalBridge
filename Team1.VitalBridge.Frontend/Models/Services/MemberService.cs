@@ -17,95 +17,51 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
         public async Task<MemberProfileDto?> GetProfileAsync(int userId)
         {
-            var user = await _db.Users
-                .Include(u => u.MemberProfile)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
+            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return null;
 
-            string cityName = "";
-            string townshipName = "";
-            string address = user.MemberProfile?.Address ?? "";
+            var profile = await _db.MemberProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId);
 
-            if (user.MemberProfile?.CityId != null)
-            {
-                var city = await _db.Citys
-                    .Where(c => c.Id == user.MemberProfile.CityId.Value)
-                    .Select(c => c.Name)
-                    .FirstOrDefaultAsync();
-                cityName = city ?? "";
-            }
-            if (user.MemberProfile?.TownshipId != null)
-            {
-                var township = await _db.Townships
-                    .Where(t => t.Id == user.MemberProfile.TownshipId.Value)
-                    .Select(t => t.Name)
-                    .FirstOrDefaultAsync();
-                townshipName = township ?? "";
-            }
+            var cityName = profile != null
+                ? (await _db.Citys.FindAsync(profile.CityId))?.Name ?? ""
+                : "";
+
+            var townshipName = profile != null
+                ? (await _db.Townships.FindAsync(profile.TownshipId))?.Name ?? ""
+                : "";
+
+            // 查詢所有角色名稱
+            var roleNames = await _db.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Join(_db.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
+                .ToListAsync();
 
             return new MemberProfileDto
             {
-                UserId = user.UserId,
+                UserId = user.Id.ToString(),
                 Name = user.Name,
                 Phone = user.Phone,
                 Email = user.Email,
+                CityId = profile?.CityId,
                 City = cityName,
+                TownshipId = profile?.TownshipId,
                 Township = townshipName,
-                Address = address,
+                Address = profile?.Address ?? "",
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
+                LastLoginAt = user.LastLoginAt,
+                RoleNames = roleNames
             };
         }
 
 
-        public async Task<bool> UpdateProfileAsync(int userId, UpdateProfileDto dto)
-        {
-            var user = await _db.Users.FindAsync(userId);
-            if (user == null) return false;
-
-            user.Name = dto.Name;
-            user.Phone = dto.Phone;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _db.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> ChangePasswordAsync(int userId, string oldPwd, string newPwd)
-        {
-            var user = await _db.Users.FindAsync(userId);
-            if (user == null) return false;
 
 
-            if (!HashUtility.VerifyPassword(user.Password, oldPwd)) return false;
 
-            user.Password = HashUtility.HashPassword(newPwd);
-            user.UpdatedAt = DateTime.UtcNow;
 
-            await _db.SaveChangesAsync();
-            return true;
-        }
 
-        public async Task<bool> BindGoogleAsync(int userId, string googleToken)
-        {
-            // 這裡應該要驗證 googleToken 並取得 Google 帳號資訊
-            // 省略 Google 驗證細節，僅示範資料儲存
-            var googleLogin = new ExternalLogin
-            {
-                UserId = userId,
-                // Provider, ProviderKey 等欄位請依你的資料表設計補上
-            };
-            _db.ExternalLogins.Add(googleLogin);
-            await _db.SaveChangesAsync();
-            return true;
-        }
 
-        public async Task UnbindGoogleAsync(int userId)
-        {
-            var logins = _db.ExternalLogins.Where(x => x.UserId == userId /* && x.Provider == "Google" */);
-            _db.ExternalLogins.RemoveRange(logins);
-            await _db.SaveChangesAsync();
-        }
+
+
     }
 }

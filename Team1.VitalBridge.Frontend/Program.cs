@@ -54,6 +54,15 @@ namespace Team1.VitalBridge.Frontend
                     };
                 });
 
+
+
+
+
+
+
+
+
+
             //DIª`¤J
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(

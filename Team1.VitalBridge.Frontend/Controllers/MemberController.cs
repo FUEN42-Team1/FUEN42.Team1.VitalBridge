@@ -20,21 +20,22 @@ namespace Team1.VitalBridge.Frontend.Controllers
         }
 
         [HttpGet("profile")]
-        public async Task<ActionResult<User>> GetProfile()
+        public async Task<ActionResult<MemberProfileDto>> GetProfile()
         {
-            var userId = int.Parse(User.FindFirst("sub")!.Value);
-            var user = await _memberService.GetProfileAsync(userId);
-            if (user == null) return NotFound();
-            return Ok(user);
+            // 取得目前登入者的 userId
+            var userIdClaim = User.FindFirst("sub");
+            if (userIdClaim == null) return Unauthorized();
+
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return BadRequest("Invalid user id.");
+
+            var profile = await _memberService.GetProfileAsync(userId);
+            if (profile == null) return NotFound();
+
+            return Ok(profile);
         }
 
-        [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
-        {
-            var userId = int.Parse(User.FindFirst("sub")!.Value);
-            var result = await _memberService.UpdateProfileAsync(userId, dto);
-            if (!result) return BadRequest();
-            return NoContent();
-        }
+
+
     }
 }
