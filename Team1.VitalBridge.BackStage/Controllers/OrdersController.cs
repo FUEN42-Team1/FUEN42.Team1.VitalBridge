@@ -69,12 +69,13 @@ namespace Team1.VitalBridge.BackStage.Controllers
 					CreatedAt = o.CreatedAt,
 					PaymentStatus = o.Payment != null && o.Payment.StatusNavigation != null
 						? o.Payment.StatusNavigation.Name
-						: "未付款",
+						: "待付款",
 					ShippingMethod = o.OrderShipMethod != null && o.OrderShipMethod.Ship != null
 						? o.OrderShipMethod.Ship.ShipMethodName : "未設定",
-					CurrentStatusId = o.OrderStatuses.Any()
-						? o.OrderStatuses.OrderByDescending(os => os.CreatedAt).First().OrderStatusItemId
-						: 1,
+					// 直接從資料庫取得狀態名稱
+					CurrentStatusName = o.OrderStatuses.Any()
+						? o.OrderStatuses.OrderByDescending(os => os.CreatedAt).First().OrderStatusItem.Name
+						: "待付款", // 預設狀態名稱
 
 					TotalAmount = o.TotalAmount // 訂單總金額
 				})
@@ -130,24 +131,28 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			});
 
 
-			// 按照順序：未付款、待出貨、已出貨、已完成、退貨中、已退貨、已取消
-			var statusOrder = new[] { 1, 2, 3, 4, 5, 6, 7 }; // 未付款=1, 待出貨=2, 已出貨=3, 已完成=4, 退貨中=5, 已退貨=6, 已取消=7
+			// 按照順序：待付款、待出貨、已出貨、已完成、退貨中、已退貨、已取消
+			//var statusOrder = new[] { 1, 2, 3, 4, 5, 6, 7 }; // 待付款=1, 待出貨=2, 已出貨=3, 已完成=4, 退貨中=5, 已退貨=6, 已取消=7
 
-			foreach (var targetStatusId in statusOrder) 
+			// 從資料庫取得所有狀態項目
+			var statusItems = await _context.OrderStatusItems
+				.OrderBy(osi => osi.Id)
+				.ToListAsync();
+
+			foreach (var statusItem in statusItems)
 			{
 				var count = await _context.Orders
 					.Where(o => o.OrderStatuses
-					.OrderByDescending(os => os.CreatedAt)
-					.FirstOrDefault().OrderStatusItemId == targetStatusId)
+						.OrderByDescending(os => os.CreatedAt)
+						.FirstOrDefault().OrderStatusItemId == statusItem.Id)
 					.CountAsync();
-				var statusName = GetStatusName(targetStatusId);
 
 				statusOptions.Add(new OrderStatusOptionViewModel
 				{
-					StatusId = targetStatusId,
-					StatusName = statusName,
+					StatusId = statusItem.Id,
+					StatusName = statusItem.Name, // 直接使用資料庫的名稱
 					Count = count,
-					IsActive = currentStatus == targetStatusId
+					IsActive = currentStatus == statusItem.Id
 				});
 			}
 			return statusOptions;
@@ -159,7 +164,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			
 			return statusId switch
 			{
-				1 => "未付款",
+				1 => "待付款",
 				2 => "待出貨",
 				3 => "已出貨",
 				4 => "已完成",
