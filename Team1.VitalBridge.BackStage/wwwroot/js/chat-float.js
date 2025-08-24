@@ -13,7 +13,8 @@
 
     connection.start().then(function () {
         console.log("Hub 連線完成");
-        user = "0";
+        user = "";
+        userName = "";
         connection.invoke("CustomerServiceLogin", user, "123")
             .then(() => console.log("客服登入成功"))
             .catch(err => console.error("客服登入失敗", err));
@@ -22,14 +23,21 @@
     });
     // 接收訊息
     connection.on("UpdContent", function (message) {
-        appendMessage("使用者",message);
+        appendMessage("使用者-" + userName+":",message);
     });
     connection.on("system", function (message) {
         appendMessage(message,"");
     });
     connection.on("user", function (newuser) {
-        console.log(newuser)
         user = newuser;
+    });
+    connection.on("clearUser", function (newuser) {
+        user = "";
+        userName = "";
+    });
+    connection.on("userName", function (newuser) {
+        userName = newuser;
+
     });
 
     // 點擊懸浮球開關聊天窗
@@ -46,8 +54,12 @@
 
     function sendMessage() {
         const msg = chatInput.value.trim();
+        if (!user) {
+            appendMessage("", "尚未連線使用者");
+            return;
+        }
         if (!msg) return;
-        appendMessage("我", msg);
+        appendMessage("我:", msg);
         chatInput.value = "";
 
         // 發送到 Hub
@@ -57,7 +69,7 @@
 
     function appendMessage(sender, msg) {
         const div = document.createElement("div");
-        div.innerHTML = `<b>${sender}:</b> ${msg}`;
+        div.innerHTML = `<b>${sender}</b> ${msg}`;
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }

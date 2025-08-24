@@ -38,12 +38,18 @@ namespace Team1.VitalBridge.Frontend.Hubs
                 customerServiceId.Add(serviceId);
                 UserServiceConnectionMap[user] = serviceId;
                 await Clients.Client(serviceId).SendAsync("user",user);
-                await Clients.Client(serviceId).SendAsync("system", "新客戶已連線");
-                await Clients.Client(serviceId).SendAsync("UpdContent",message);
+                await Clients.Client(serviceId).SendAsync("system", message+"已進入對話");
+                await Clients.Client(serviceId).SendAsync("userName",message);
+                await Clients.Caller.SendAsync("UpdContent", $"**已連線真人客服**");
             }
             else
             {
                 await Clients.Caller.SendAsync("UpdContent", $"當前無空閒客服，請稍後在試。");
+                Thread.Sleep(2000);
+                await Clients.Caller.SendAsync("UpdContent", "**正在轉接智能客服**");
+                Thread.Sleep(3000);
+                await Clients.Caller.SendAsync("openAgent");
+
             }
         }
 
@@ -54,6 +60,15 @@ namespace Team1.VitalBridge.Frontend.Hubs
             // 判斷是否為客服
             if (customerServiceId.Contains(connectionId) || customerServiceIdReady.Contains(connectionId))
             {
+                var serviceUser = UserServiceConnectionMap.FirstOrDefault(x=>x.Value==connectionId).Key;
+                if(UserConnectionMap.TryGetValue(serviceUser,out var userconnectionId))
+                {
+                    await Clients.Client(userconnectionId).SendAsync("UpdContent", "**客服已中斷連線**");
+                    Thread.Sleep(2000);
+                    await Clients.Client(userconnectionId).SendAsync("UpdContent", "**正在轉接智能客服**");
+                    Thread.Sleep(3000);
+                    await Clients.Client(userconnectionId).SendAsync("openAgent");
+                }
                 // 呼叫登出邏輯
                 await CustomerServiceLogout(string.Empty, "連線中斷自動登出");
             }
@@ -65,7 +80,8 @@ namespace Team1.VitalBridge.Frontend.Hubs
                 UserConnectionMap.Remove(user);
                 if (UserServiceConnectionMap.TryGetValue(user, out var serviceId))
                 {
-                    await Clients.Client(serviceId).SendAsync("system", $"使用者 {user} 已離線");
+                    await Clients.Client(serviceId).SendAsync("system", $"使用者已離線");
+                    await Clients.Client(serviceId).SendAsync("clearUser");
                     customerServiceIdReady.Add(serviceId);
                     customerServiceId.Remove(serviceId);
                     UserServiceConnectionMap.Remove(user);
