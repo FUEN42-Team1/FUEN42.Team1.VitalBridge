@@ -299,6 +299,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 user.Id,
                 user.Email,
                 user.Name,
+                user.Phone,
                 user.AccountType,
                 Roles = roles // 回傳角色名稱陣列
             };

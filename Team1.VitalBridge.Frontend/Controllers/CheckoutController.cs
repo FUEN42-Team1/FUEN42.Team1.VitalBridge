@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using static Team1.VitalBridge.Frontend.Models.DTOs.ECShop.CheckoutDtos;
+using Microsoft.Extensions.Options;
+
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {

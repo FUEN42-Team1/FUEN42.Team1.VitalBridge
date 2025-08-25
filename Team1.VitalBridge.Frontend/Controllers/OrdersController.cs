@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Models.Settings;
 using static Team1.VitalBridge.Frontend.Models.DTOs.ECShop.CheckoutDtos;
 
 namespace Team1.VitalBridge.Frontend.Controllers
@@ -16,18 +18,13 @@ namespace Team1.VitalBridge.Frontend.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IOptions<EcpaySettings> _ecpaySettings;
 
-        // 綠界設定，待補
-        private readonly string _merchantId = "3002607";
-        private readonly string _hashKey = "pwFHCqoQZGmho4w6"; // 綠界提供的測試用 HashKey，在檢查碼計算時會用到
-        private readonly string _hashIV = "EkRm7iFT261dpevs";   // 綠界提供的測試用 HashIV，在檢查碼計算時會用到
-        private readonly string _ecpayUrl = "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5";
-
-        public OrdersController(AppDbContext context, IConfiguration configuration)
+       
+        public OrdersController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings)
         {
             this._context=context;
-            this._configuration=configuration;
+            _ecpaySettings = ecpaySettings;
         }
 
         /// <summary>
@@ -44,7 +41,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            //using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
@@ -62,16 +59,18 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 {
                     return BadRequest("缺少必要的訂單資料");
                 }
-
-
+                //var cart = await _context.Carts
+                //    .Include(c => c.CartItems)
+                //    .ThenInclude(ci => ci.Product)
+                //    .FirstOrDefaultAsync(c => c.CustomerId == userId);
                 // 3. 取得購物車資料並檢查庫存
                 var cartItems = await _context.CartItems
                     .Where(ci => ci.Cart.CustomerId == userId)
                     .Include(ci => ci.Product)
                     .Where(ci => ci.Product.IsActive)
                     .ToListAsync();
-                if (!cartItems.Any())
-                    return BadRequest("購物車是空的");
+                //if (!cartItems.Any())
+                //    return BadRequest("購物車是空的");
                 // 檢查庫存
                 foreach (var item in cartItems)
                 {
@@ -187,7 +186,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
                 // 15. 保存所有變更
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                //await transaction.CommitAsync();
 
 
                 // 16.產生綠界付款表單資料
@@ -207,7 +206,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                //await transaction.RollbackAsync();
                 Console.WriteLine($"建立訂單錯誤: {ex.Message}");
                 Console.WriteLine($"堆疊追蹤: {ex.StackTrace}");
                 return StatusCode(500, "建立訂單失敗，請稍後再試");
@@ -221,18 +220,19 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// </summary>
         private EcpayFormDataDto GenerateEcpayFormData(Order order, string customerName, string customerEmail)
         {
+            var ecpaySettings = _ecpaySettings.Value; // 取得設定
             var formData = new Dictionary<string, string>
             {
-                ["MerchantID"] = _merchantId,
+                ["MerchantID"] = ecpaySettings.MerchantId,  // 改用設定
                 ["MerchantTradeNo"] = order.OrderNumber,
                 ["MerchantTradeDate"] = order.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss"),
                 ["PaymentType"] = "aio",
                 ["TotalAmount"] = ((int)order.TotalAmount).ToString(),
                 ["TradeDesc"] = "VitalBridge商城購物",
                 ["ItemName"] = GetOrderItemsDescription(order.Id),
-                ["ReturnURL"] = $"https://localhost:7104/api/ecpay/PaymentCallback",
-                ["ClientBackURL"] = "https://localhost:7184/VitalBridge/ECshop/index.html",
-                ["OrderResultURL"] = "https://localhost:7184/VitalBridge/ECshop/index.html",
+                ["ReturnURL"] = ecpaySettings.NotifyUrl,     // 改用設定
+                ["ClientBackURL"] = ecpaySettings.ReturnUrl, // 改用設定
+                ["OrderResultURL"] = ecpaySettings.ReturnUrl, // 改用設定
                 ["NeedExtraPaidInfo"] = "N",
                 ["ChoosePayment"] = "ALL",
                 ["PlatformID"] = "",
@@ -248,7 +248,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             formData.Add("CheckMacValue", checkMacValue);
             return new EcpayFormDataDto
             {
-                FormAction = _ecpayUrl,
+                FormAction = ecpaySettings.PaymentUrl, // 改用設定
                 FormData = formData
             };
 
@@ -259,6 +259,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// </summary>
         private string GenerateCheckMacValue(Dictionary<string, string> parameters)
         {
+            var ecpaySettings = _ecpaySettings.Value; // 取得設定
             // 1. 排除CheckMacValue參數
             var sortedParams = parameters
                 .Where(p => p.Key != "CheckMacValue")
@@ -266,8 +267,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 .ToList();
             // 2. 組合字串
             var rawString = string.Join("&", sortedParams.Select(p => $"{p.Key}={p.Value}"));
-            // 3. 加入HashKey和HashIV
-            var stringToHash = $"HashKey={_hashKey}&{rawString}&HashIV={_hashIV}";
+            
+            // 3. 加入HashKey和HashIV（改用設定）
+            var stringToHash = $"HashKey={ecpaySettings.HashKey}&{rawString}&HashIV={ecpaySettings.HashIV}";
 
             // 4. URL編碼
             stringToHash = HttpUtility.UrlEncode(stringToHash).ToLower();

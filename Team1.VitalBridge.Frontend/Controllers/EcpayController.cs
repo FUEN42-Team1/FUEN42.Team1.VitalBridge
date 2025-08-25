@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Models.Settings;
+
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {
@@ -13,14 +16,17 @@ namespace Team1.VitalBridge.Frontend.Controllers
     public class EcpayController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IOptions<EcpaySettings> _ecpaySettings;
+
         // 綠界設定（與 OrdersController 相同）
-        private readonly string _merchantId = "3002607";
-        private readonly string _hashKey = "pwFHCqoQZGmho4w6";
-        private readonly string _hashIV = "EkRm7iFT261dpevs";
-        public EcpayController(AppDbContext context)
+        //private readonly string _merchantId = "3002607";
+        //private readonly string _hashKey = "pwFHCqoQZGmho4w6";
+        //private readonly string _hashIV = "EkRm7iFT261dpevs";
+        public EcpayController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings)
         {
             
             this._context=context;
+            this._ecpaySettings=ecpaySettings;
         }
 
         // <summary>
@@ -173,6 +179,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 
         private string GenerateCheckMacValue(Dictionary<string, string> parameters)
         {
+            var ecpaySettings = _ecpaySettings.Value; // 取得設定
             // 1. 排除CheckMacValue參數
             var sortedParams = parameters
                 .Where(p => p.Key != "CheckMacValue")
@@ -182,8 +189,8 @@ namespace Team1.VitalBridge.Frontend.Controllers
             // 2. 組合字串
             var rawString = string.Join("&", sortedParams.Select(p => $"{p.Key}={p.Value}"));
 
-            // 3. 加入HashKey和HashIV
-            var stringToHash = $"HashKey={_hashKey}&{rawString}&HashIV={_hashIV}";
+            // 3. 加入HashKey和HashIV（改用設定）
+            var stringToHash = $"HashKey={ecpaySettings.HashKey}&{rawString}&HashIV={ecpaySettings.HashIV}";
 
             // 4. URL編碼
             stringToHash = HttpUtility.UrlEncode(stringToHash).ToLower();
