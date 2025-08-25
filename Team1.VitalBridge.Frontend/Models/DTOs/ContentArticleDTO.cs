@@ -13,7 +13,8 @@
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public string CoverPic { get; set; } // Base64 image data
+        public string? CoverPic { get; set; } // Base64 image data
+        public string? CoverPicFileName { get; set; }
         public int CategoryId { get; set; }
         public string Category { get; set; }
         public string Excerpt { get; set; }
@@ -21,6 +22,18 @@
         public DateTime Date { get; set; }
     }
 
+    public class ContentArticleContentDisplayDTO
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string? CoverPicFileName { get; set; }
+        public int CategoryId { get; set; }
+        public string Category { get; set; }
+        public string Content { get; set; }
+        public string Author { get; set; }
+        public DateTime Date { get; set; }
+    }
 
-    
+
+
 }

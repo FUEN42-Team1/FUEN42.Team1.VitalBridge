@@ -44,12 +44,19 @@ public partial class Content
     [Column("createdAt", TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
+    [Column("coverPicFileId")]
+    public int? CoverPicFileId { get; set; }
+
     [InverseProperty("ContentNavigation")]
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     [ForeignKey("ContentCategoryId")]
     [InverseProperty("Contents")]
     public virtual ContentCategory ContentCategory { get; set; }
+
+    [ForeignKey("CoverPicFileId")]
+    [InverseProperty("Contents")]
+    public virtual FileStream CoverPicFile { get; set; }
 
     [InverseProperty("Content")]
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();

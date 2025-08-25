@@ -106,11 +106,18 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return NotFound();
             }
 
+            
+            var fileName = dto.CoverPicFileId.HasValue
+                ? _context.FileStreams.FirstOrDefault(f => f.Id == dto.CoverPicFileId.Value)?.FileName
+                : null;
+
             // Map the DTO to the ViewModel
             var vm = new ContentArticleEditViewModel
             {
                 Id = dto.Id,
                 Title = dto.Title,
+                CoverPic = null,
+                CoverPicFileName = fileName,
                 Content = dto.Content,
                 ContentCategoryId = dto.ContentCategoryId,
                 //CoverPic = null, // Handle file upload separately
@@ -129,6 +136,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
 
+            var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == vm.CoverPicFileName).Id;
+
             // Map the ViewModel to the DTO
             var dto = new ContentArticleEditDTO
             {
@@ -136,7 +145,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Title = vm.Title,
                 Content = vm.Content,
                 ContentCategoryId = vm.ContentCategoryId,
-                CoverPic = vm.CoverPic, // Handle file upload separately
+                CoverPic = null, // Handle file upload separately
+                CoverPicFileId = FileId,
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
             };
 
