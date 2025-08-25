@@ -2,173 +2,276 @@
 
 @{
     ViewData["Title"] = "會員清單";
+
+    // 供「身分」篩選下拉用：從模型彙總出不重複的角色顯示名稱
+    var roleOptions = Model
+        .SelectMany(m => m.RoleDisplay ?? Enumerable.Empty<string>())
+        .Select(s => s?.Trim())
+        .Where(s => !string.IsNullOrWhiteSpace(s))
+        .Distinct()
+        .OrderBy(s => s)
+        .ToList();
+}
+
+@section Styles {
+    <!-- DataTables 样式（若你全站已有，這段可保留不衝突） -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+    <style>
+        .td-truncate {
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .text-nowrap {
+            white-space: nowrap !important;
+        }
+
+        .dt-search, .dataTables_filter {
+            display: none;
+        }
+        /* 我們用自己的外部搜尋與篩選 */
+    </style>
 }
 
 <div class="container-fluid px-2">
-    <h2 class="mb-4">會員清單</h2>
+    <h2 class="mb-3">會員清單</h2>
 
-    <form method="get">
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label>狀態</label>
-                <select class="form-select">
+    <!-- 外部篩選區（只驅動 DataTables，不送表單到伺服器） -->
+    <form id="filterForm" class="mb-3">
+        <div class="row g-3">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label">狀態</label>
+                <!-- 與 badge 文字一致，直接用中文值便於比對 -->
+                <select class="form-select" id="statusSelect">
                     <option value="">全部</option>
-                    <option value="active">活躍（正常）</option>
-                    <option value="frozen">凍結（太久沒用）</option>
-                    <option value="unverified">未開通（尚未驗證）</option>
-                    <option value="banned">停權（禁止登入）</option>
+                    <option value="活躍">活躍（正常）</option>
+                    <option value="凍結">凍結（太久沒用）</option>
+                    <option value="未開通">未開通（尚未驗證）</option>
+                    <option value="停權">停權（禁止登入）</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label>縣市</label>
-                <select class="form-select">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label">縣市</label>
+                <select class="form-select" id="citySelect">
                     <option value="">全部</option>
-                    <option value="Taipei">台北市</option>
-                    <option value="Tainan">台南市</option>
+                    <!-- 這裡先放常見範例；若你有完整清單可改為伺服器產出 -->
+                    <option value="台北市">台北市</option>
+                    <option value="新北市">新北市</option>
+                    <option value="台中市">台中市</option>
+                    <option value="台南市">台南市</option>
+                    <option value="高雄市">高雄市</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label>鄉鎮</label>
-                <select class="form-select">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label">鄉鎮</label>
+                <select class="form-select" id="townSelect">
                     <option value="">全部</option>
-                    <option value="Xinyi">信義區</option>
-                    <option value="Anping">安平區</option>
+                    <!-- 可依你 API 動態載入；這裡先給常見範例 -->
+                    <option value="信義區">信義區</option>
+                    <option value="中正區">中正區</option>
+                    <option value="中山區">中山區</option>
+                    <option value="安平區">安平區</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label>搜尋</label>
-                <input type="text" class="form-control" placeholder="請輸入姓名或 Email">
+            <div class="col-sm-6 col-md-3">
+                <label class="form-label">身分</label>
+                <select class="form-select" id="roleSelect">
+                    <option value="">全部</option>
+                    @foreach (var r in roleOptions)
+                    {
+                        <option value="@r">@r</option>
+                    }
+                </select>
             </div>
-        </div>
 
-        <div class="row mb-3 justify-content-between align-items-center">
-            <div class="col-auto">
-                <label class="me-2">每頁顯示筆數：</label>
-                <select class="form-select d-inline-block w-auto">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
+            <div class="col-sm-8 col-md-6">
+                <label class="form-label">關鍵字</label>
+                <input type="text" class="form-control" id="keywordInput" placeholder="姓名 / Email / 電話 / 地址…">
             </div>
-            <div class="col-auto">
-                <button type="submit" class="btn btn-primary">篩選</button>
+            <div class="col-sm-4 col-md-6 d-flex align-items-end justify-content-between">
+                <div>
+                    <label class="me-2">每頁顯示筆數：</label>
+                    <select class="form-select d-inline-block w-auto" id="pageLenSelect">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">套用篩選</button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" id="resetBtn">重置</button>
+                </div>
             </div>
         </div>
     </form>
 
-    <table class="table table-hover table-bordered align-middle">
+    <table id="membersTable" class="table table-hover table-bordered align-middle" style="width:100%">
         <thead class="table-primary text-center">
             <tr>
-                @* <th>會員編號</th> *@
-                <th><a href="#" class="text-decoration-none">姓名 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">Email <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">聯絡電話 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">身分 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">狀態 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">縣市 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">鄉鎮 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">詳細地址 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">註冊時間 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
-                <th><a href="#" class="text-decoration-none">最後登入 <i class="bi bi-caret-up-fill ms-1 text-muted"></i></a></th>
+                <th>姓名</th>
+                <th>Email</th>
+                <th>聯絡電話</th>
+                <th>身分</th>
+                <th>狀態</th>
+                <th>縣市</th>
+                <th>鄉鎮</th>
+                <th>詳細地址</th>
+                <th>註冊時間</th>
+                <th>最後登入</th>
                 <th>操作</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var user in Model)
             {
+                var (badgeCss, statusText) = user.Status switch
+                {
+                    "active" => ("success", "活躍"),
+                    "frozen" => ("secondary", "凍結"),
+                    "unverified" => ("warning text-dark", "未開通"),
+                    "banned" => ("danger", "停權"),
+                    _ => ("secondary", user.Status ?? "—")
+                };
                 <tr>
-                    @* <td>@user.UserId</td> *@
                     <td>@user.Name</td>
                     <td>@user.Email</td>
                     <td>@user.Phone</td>
-                    <td>
-                        @string.Join(", ", user.RoleDisplay)
-                    </td>
-
-                    @{
-                        // 依 status 同時決定 badge 顏色與顯示文字
-                        var (badgeCss, statusText) = user.Status switch
-                        {
-                            "active" => ("success", "活躍"),    // 綠色
-                            "frozen" => ("secondary", "凍結"),    // 灰色
-                            "unverified" => ("warning text-dark", "未開通"), // 黃底黑字
-                            "banned" => ("danger", "停權"),    // 紅色
-                            _ => ("secondary", user.Status) // 其他狀態直接顯示原值
-                        };
-                    }
-                    <td>
-                        <span class="badge bg-@badgeCss">@statusText</span>
-                    </td>
+                    <td>@string.Join(", ", user.RoleDisplay)</td>
+                    <td><span class="badge bg-@badgeCss">@statusText</span></td>
                     <td>@user.CityName</td>
                     <td>@user.TownshipName</td>
-                    <td>@user.Address</td>
-
-
-                    <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
-                    <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
-                    <td class="text-center">
-                        @* <a asp-action="Detail" asp-route-userId="@user.UserId" class="btn btn-sm btn-info me-1">詳細</a> *@
+                    <td class="td-truncate" title="@user.Address">@user.Address</td>
+                    <td data-order="@user.CreatedAt.Ticks">@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    <td data-order="@(user.LastLoginAt?.Ticks ?? 0)">
+                        @(
+                            user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "-"
+                            )
+                    </td>
+                    <td class="text-center text-nowrap">
                         <button class="btn btn-sm btn-info me-1" onclick="showUserDetail('@user.UserId')">詳細</button>
-
-
-                        @* <a asp-action="Edit" asp-route-userId="@user.UserId" class="btn btn-sm btn-warning">編輯</a> *@
                         <button class="btn btn-sm btn-warning" onclick="showEditMember('@user.UserId')">編輯</button>
-
-
                     </td>
                 </tr>
             }
         </tbody>
     </table>
-
-    <nav class="d-flex justify-content-center">
-        <ul class="pagination">
-            <li class="page-item disabled"><a class="page-link" href="#">上一頁</a></li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">下一頁</a></li>
-        </ul>
-    </nav>
 </div>
-
-
 
 @* 詳細資訊(彈窗) *@
 <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                 <h3 class="text-primary">會員詳細資料</h3> 
+                <h3 class="text-primary mb-0">會員詳細資料</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div> 
-
+            </div>
             <div id="userDetailContainer"></div>
-
         </div>
     </div>
 </div>
-
 
 @* 編輯資訊(彈窗) *@
 <div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" >
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 class="text-primary">編輯會員資料</h3>
+                <h3 class="text-primary mb-0">編輯會員資料</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="editMemberContainer"></div>
-            <!-- 內容由 AJAX 載入 -->
         </div>
     </div>
 </div>
 
-
-
 @section Scripts {
+    <!-- 若你的 Layout 已載入 jQuery，這行可拿掉；否則保留 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables Core -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script>
-        // ===== 會員詳細 =====
+        // ===== DataTables 初始化 =====
+        const dt = $('#membersTable').DataTable({
+            ordering: true,
+            searching: true,     // 我們仍開啟，並用 ext.search 加強外部條件
+            pageLength: 10,
+            lengthChange: false, // 用自訂的「每頁筆數」下拉
+            language: { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/zh-HANT.json" },
+            columnDefs: [
+                { targets: -1, orderable: false, className: 'text-center text-nowrap' }
+            ]
+        });
+
+        // ===== 外部篩選控制 =====
+        const $status  = $('#statusSelect');
+        const $city    = $('#citySelect');
+        const $town    = $('#townSelect');
+        const $role    = $('#roleSelect');
+        const $keyword = $('#keywordInput');
+        const $pageLen = $('#pageLenSelect');
+
+        // 客製過濾器：狀態/縣市/鄉鎮/身分 + 關鍵字
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            // 依欄位順序取得資料
+            const name    = data[0] || '';
+            const email   = data[1] || '';
+            const phone   = data[2] || '';
+            const roles   = data[3] || '';
+            const city    = data[5] || '';
+            const town    = data[6] || '';
+            const address = data[7] || '';
+
+            // 狀態用 badge 內容取得，避免受到隱藏標記影響
+            const statusText = $(dt.row(dataIndex).node()).find('td:eq(4) .badge').text().trim();
+
+            const s  = ($status.val()  || '').toLowerCase();
+            const c  = ($city.val()    || '').toLowerCase();
+            const t  = ($town.val()    || '').toLowerCase();
+            const r  = ($role.val()    || '').toLowerCase();
+            const kw = ($keyword.val() || '').toLowerCase();
+
+            if (s && !statusText.toLowerCase().includes(s)) return false;
+            if (c && !city.toLowerCase().includes(c)) return false;
+            if (t && !town.toLowerCase().includes(t)) return false;
+            if (r && !roles.toLowerCase().includes(r)) return false;
+
+            if (kw) {
+                const haystack = (name + ' ' + email + ' ' + phone + ' ' + roles + ' ' + city + ' ' + town + ' ' + address).toLowerCase();
+                if (!haystack.includes(kw)) return false;
+            }
+            return true;
+        });
+
+        // 提交按鈕 → 觸發過濾
+        $('#filterForm').on('submit', function(e){
+            e.preventDefault();
+            dt.draw();
+        });
+
+        // 重置
+        $('#resetBtn').on('click', function(){
+            $status.val('');
+            $city.val('');
+            $town.val('');
+            $role.val('');
+            $keyword.val('');
+            $pageLen.val('10').trigger('change');
+            dt.search(''); // 清掉 DT 內建搜尋字串
+            dt.draw();
+        });
+
+        // 每頁筆數
+        $pageLen.on('change', function () {
+            dt.page.len(parseInt(this.value || '10', 10)).draw();
+        });
+
+        // 即時關鍵字（想改為按下套用才搜尋，註解這行）
+        $keyword.on('input', function(){ dt.draw(); });
+
+        // ===== 你的原本 Modal + AJAX（保持不動） =====
+
+        // 會員詳細
         const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
         function showUserDetail(userId) {
             $('#userDetailContainer').html('載入中...');
@@ -182,20 +285,16 @@
                     console.error(xhr.responseText);
                 });
         }
+        window.showUserDetail = showUserDetail;
 
-        // ===== 編輯會員（載入 Partial 並開啟彈窗） =====
+        // 編輯會員
         const editMemberModal = new bootstrap.Modal(document.getElementById('editMemberModal'));
-
         function showEditMember(userId) {
             $('#editMemberContainer').html('載入中...');
-
             $.get('@Url.Action("Edit", "AdminMember")', { userId })
                 .done(function (html) {
                     $('#editMemberContainer').html(html);
-
-                    // 初始化縣市與鄉鎮（全 AJAX 載入）
                     initEditMemberLocation();
-
                     editMemberModal.show();
                 })
                 .fail(function (xhr) {
@@ -203,31 +302,26 @@
                     console.error(xhr.responseText);
                 });
         }
+        window.showEditMember = showEditMember;
 
-        // 初始化縣市 / 鄉鎮下拉（全 AJAX 載入）
+        // （以下維持你的載入城市/鄉鎮與表單送出程式）
         function initEditMemberLocation() {
             const $wrap = $('#editMemberContainer');
             const $city = $wrap.find('#CityId');
             const $town = $wrap.find('#TownshipId');
 
-            const selectedCityId = $city.data('selected');   // Partial 內 hidden data
-            const selectedTownId = $town.data('selected');   // Partial 內 hidden data
+            const selectedCityId = $city.data('selected');
+            const selectedTownId = $town.data('selected');
 
-            // 先載入城市
             loadCitiesForEdit(selectedCityId, function() {
-                // 如果有已選城市 → 載入對應鄉鎮
-                if (selectedCityId) {
-                    loadTownshipsForEdit(selectedCityId, selectedTownId);
-                }
+                if (selectedCityId) loadTownshipsForEdit(selectedCityId, selectedTownId);
             });
 
-            // 城市變更 → 重新載入鄉鎮
             $city.off('change').on('change', function () {
                 loadTownshipsForEdit($(this).val(), null);
             });
         }
 
-        // 載入城市
         function loadCitiesForEdit(selectedCityId, callback) {
             const $city = $('#editMemberContainer').find('#CityId');
             $city.empty().append('<option value="">請選擇縣市</option>');
@@ -248,7 +342,6 @@
                 });
         }
 
-        // 載入鄉鎮
         function loadTownshipsForEdit(cityId, selectedTownshipId) {
             const $town = $('#editMemberContainer').find('#TownshipId');
             $town.empty().append('<option value="">請選擇鄉鎮</option>');
@@ -270,7 +363,6 @@
                 });
         }
 
-        // ===== 編輯表單送出（AJAX） =====
         $(document).on('submit', '#editMemberForm', function (e) {
             e.preventDefault();
             $.ajax({
@@ -282,7 +374,6 @@
                         bootstrap.Modal.getInstance(document.getElementById('editMemberModal')).hide();
                         location.reload();
                     } else {
-                        // 驗證失敗會回 Partial → 重新初始化城市/鄉鎮
                         $('#editMemberContainer').html(res);
                         initEditMemberLocation();
                     }
@@ -294,4 +385,3 @@
         });
     </script>
 }
-
