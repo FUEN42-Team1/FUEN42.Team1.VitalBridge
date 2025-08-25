@@ -190,7 +190,8 @@
                                 </div><!--//dropdown-menu-->
                             </div><!--//app-utility-item-->
                             <div class="app-utility-item">
-                                <a href="settings.html" title="Settings">
+                                @* <a href="settings.html" title="Settings"> *@
+                                    <a href="#" title="Settings">
                                     <!--//Bootstrap Icons: https://icons.getbootstrap.com/ -->
                                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear icon"
                                          fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -223,9 +224,13 @@
                                 // 取得目前 URL Path
                                 var path = Context.Request.Path.ToString();
                                 // 判斷是否為管理員後台
-                                bool isAdminPortal = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
+                                // bool isAdminPortal = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
                                 // 對應各自的 Auth Controller
-                                var authController = isAdminPortal ? "AdminAuth" : "InstitutionAuth";
+                                // var authController = isAdminPortal ? "AdminAuth" : "InstitutionAuth";
+
+                                // 由於機構端暫時關閉，統一使用 AdminAuth
+                                var authController = "AdminAuth";
+
                                 // 產生登入/登出網址
                                 var loginUrl = Url.Action("Login", authController);
                                 var logoutUrl = Url.Action("Logout", authController);
@@ -315,14 +320,15 @@
                                     @*     <a class="submenu-link" asp-area="" asp-controller="AdminRoles" *@
                                     @*        asp-action="Index">緊急聯絡人清單</a> *@
                                     @* </li> *@
-                                    <li class="submenu-item">
-                                        <a class="submenu-link" asp-area="" asp-controller="AdminInstitutions" asp-action="Index">
-                                        機構法人清單</a>
-                                    </li>
-                                    <li class="submenu-item">
-                                        <a class="submenu-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                        機構帳號清單</a>
-									</li>
+                                    @* 機構做不完先藏起來 *@
+         @*                            <li class="submenu-item"> *@
+         @*                                <a class="submenu-link" asp-area="" asp-controller="AdminInstitutions" asp-action="Index"> *@
+         @*                                機構法人清單</a> *@
+         @*                            </li> *@
+         @*                            <li class="submenu-item"> *@
+         @*                                <a class="submenu-link" asp-area="" asp-controller="Home" asp-action="Index"> *@
+         @*                                機構帳號清單</a> *@
+									@* </li> *@
                                     <li class="submenu-item">
                                         <a class="submenu-link" asp-area="" asp-controller="AdminUsers"
                                            asp-action="Index">管理員清單</a>
