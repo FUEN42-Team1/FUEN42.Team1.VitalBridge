@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs;
 using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
-using Team1.VitalBridge.Frontend.Services;
+using Team1.VitalBridge.Frontend.Models.Services;
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {

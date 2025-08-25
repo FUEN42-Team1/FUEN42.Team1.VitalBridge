@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 
-namespace Team1.VitalBridge.Frontend.Services
+namespace Team1.VitalBridge.Frontend.Models.Services
 {
     public class CategoryService
     {
@@ -11,7 +11,7 @@ namespace Team1.VitalBridge.Frontend.Services
 
         public CategoryService(AppDbContext context)
         {
-            this._context=context;
+            _context=context;
         }
 
         /// <summary>

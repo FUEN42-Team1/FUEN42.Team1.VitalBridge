@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
-using Team1.VitalBridge.Frontend.Services;
+using Team1.VitalBridge.Frontend.Models.Services;
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {
