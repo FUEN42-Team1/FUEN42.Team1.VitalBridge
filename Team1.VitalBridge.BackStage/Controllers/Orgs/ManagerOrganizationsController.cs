@@ -74,14 +74,14 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             {
                 try
                 {
-                    // 處理圖片 - 從 PhotoUrl 獲取 FileId
+                    // 處理圖片 - 從 PhotoUrl 獲取 FileId (安全方式)
                     int? fileId = null;
                     if (!string.IsNullOrEmpty(viewModel.PhotoUrl))
                     {
                         var file = await _context.FileStreams.FirstOrDefaultAsync(f => f.FileName == viewModel.PhotoUrl);
                         fileId = file?.Id;
                     }
-                    var imageFileId = _context.FileStreams.FirstOrDefault(f => f.FileName == viewModel.PhotoUrl).Id;
+
                     // 將 ViewModel 數據映射到 Entity Model
                     var organization = new Organization
                     {
@@ -99,7 +99,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                         IsCertified = false,
                         IsActive = true, // 新增時預設為啟用
                         IsDeleted = false,
-                        FileId = imageFileId // 使用從 PhotoUrl 獲取的 FileId
+                        FileId = fileId // 使用安全獲取的 FileId
                     };
 
                     // 處理多對多關係 (SubsidyInfos)
@@ -480,7 +480,14 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             {
                 return NotFound();
             }
-            var imageFileId = _context.FileStreams.FirstOrDefault(f => f.FileName == organization.PhotoUrl).Id;
+
+            // 安全地獲取 FileId - 檢查 PhotoUrl 是否存在且不為空
+            int? imageFileId = null;
+            if (!string.IsNullOrEmpty(organization.PhotoUrl))
+            {
+                var fileRecord = await _context.FileStreams.FirstOrDefaultAsync(f => f.FileName == organization.PhotoUrl);
+                imageFileId = fileRecord?.Id;
+            }
 
             // 將實體模型映射到表單 ViewModel
             var viewModel = new ManagerOrganizationFormViewModel
@@ -496,7 +503,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 AgeLimits = organization.AgeLimits,
                 Description = organization.Description,
                 MapUrl = organization.MapUrl,
-                FileId = imageFileId, // 使用從 PhotoUrl 獲取的 FileId
+                FileId = imageFileId, // 使用安全獲取的 FileId
 
                 // 多對多關係的選中項目
                 SelectedSubsidyInfoIds = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfoId).ToList(),

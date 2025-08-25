@@ -53,7 +53,7 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string? AgeLimits { get; set; }
 
         [Display(Name = "機構描述")]
-        [StringLength(100, ErrorMessage = "{0} 長度不能超過100字元")]
+        [StringLength(1000, ErrorMessage = "{0} 長度不能超過1000字元")]  // 從 100 改為 1000
         public string? Description { get; set; }
 
         [Display(Name = "地圖網址")]
