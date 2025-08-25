@@ -1,5 +1,7 @@
-﻿using Team1.VitalBridge.BackStage.Models.EFModels;
+﻿using Microsoft.AspNetCore.SignalR;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.Interface;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Team1.VitalBridge.BackStage.Models.Repository
 {
@@ -12,7 +14,7 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             this._context = context;
         }
 
-        public void CreateNotifyUser(int notifyId, int userId)
+        public async void CreateNotifyUser(int notifyId, int userId)
         {
             NotifyUser nu = new NotifyUser
             {
@@ -22,6 +24,12 @@ namespace Team1.VitalBridge.BackStage.Models.Repository
             };
             _context.NotifyUsers.Add(nu);
             _context.SaveChanges();
+            var connection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7104/chathub")
+            .Build();
+
+            await connection.StartAsync();
+            await connection.InvokeAsync("newNotify", userId.ToString(), string.Empty);
         }
 
         public void DeleteNotifyUser(int notifyId, int userId)
