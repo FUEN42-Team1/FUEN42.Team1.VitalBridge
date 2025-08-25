@@ -53,6 +53,12 @@ namespace Team1.VitalBridge.Frontend.Hubs
             }
         }
 
+        public async Task addUser(string user, string message)
+        {
+            var id = Context.ConnectionId;
+            UserConnectionMap[user] = id;
+        }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var connectionId = Context.ConnectionId;
@@ -121,7 +127,14 @@ namespace Team1.VitalBridge.Frontend.Hubs
             await Clients.Caller.SendAsync("UpdContent", "客服已成功登出");
 
         }
+        public async Task newNotify(string user, string message)
+        {
+            if (UserConnectionMap.TryGetValue(user, out var connectionId))
+            {
+                await Clients.Client(connectionId).SendAsync("newNotify", message);
+            }
 
+        }
         public async Task CloseConversation(string user, string message)
         {
             var id = Context.ConnectionId;
