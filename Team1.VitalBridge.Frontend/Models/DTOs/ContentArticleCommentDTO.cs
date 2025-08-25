@@ -2,6 +2,10 @@
 {
     public class ContentArticleCommentDTO
     {
+        public string author { get; set; }
+        public string handle { get; set; }
+        public string time { get; set; }
+        public string text { get; set; }
     }
     public class  ArticleCommentRequestDTO
     {

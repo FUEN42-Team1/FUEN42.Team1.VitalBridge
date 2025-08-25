@@ -26,6 +26,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             try
             {
                 var query = _context.Comments
+                        .Include(c => c.Member)
                         .Where(c => c.ParentCommentId == request.ParentCommentId &&
                         c.ContentId == request.ArticleId &&
                         c.IsEnabled);
@@ -36,7 +37,15 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     .OrderByDescending(c => c.CreatedAt)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
+                    .Select(c => new ContentArticleCommentDTO
+                    {
+                        author = c.Member.Name,
+                        handle = '@' + c.Member.Name + c.MemberId,
+                        time = c.CreatedAt.ToString("yyyy-MM-dd HH:mm"),
+                        text = c.Content
+                    })
                     .ToListAsync();
+               
 
                 return Ok(new
                 {
