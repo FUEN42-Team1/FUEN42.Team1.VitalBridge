@@ -150,6 +150,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 						ProductName = cartItem.Product.Name,
 						UnitPrice = cartItem.Product.Price,
 						Quantity = cartItem.Quantity,
+						ItemNumber = cartItem.Product.ItemNumber, // 商品貨號
 						Subtotal = cartItem.Quantity * cartItem.Product.Price,
 						Stock = cartItem.Product.Quantity, // 目前庫存
 						ImageFileName = cartItem.Product.ProductImages

@@ -6,6 +6,7 @@
 		public int ProductId { get; set; }
 		public string ProductName { get; set; }
 		public decimal UnitPrice { get; set; }
+		public string ItemNumber { get; set; }  // 🔥 新增：商品貨號
 		public int Quantity { get; set; }
 		public decimal Subtotal { get; set; }
 		public string ImageFileName { get; set; }  // 商品圖片
