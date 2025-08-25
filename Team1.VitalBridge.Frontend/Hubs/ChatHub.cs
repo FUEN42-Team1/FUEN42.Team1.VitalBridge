@@ -45,9 +45,9 @@ namespace Team1.VitalBridge.Frontend.Hubs
             else
             {
                 await Clients.Caller.SendAsync("UpdContent", $"當前無空閒客服，請稍後在試。");
-                Thread.Sleep(2000);
+                await Task.Delay(2000);
                 await Clients.Caller.SendAsync("UpdContent", "**正在轉接智能客服**");
-                Thread.Sleep(3000);
+                await Task.Delay(3000);
                 await Clients.Caller.SendAsync("openAgent");
 
             }
@@ -66,17 +66,18 @@ namespace Team1.VitalBridge.Frontend.Hubs
             // 判斷是否為客服
             if (customerServiceId.Contains(connectionId) || customerServiceIdReady.Contains(connectionId))
             {
+                // 呼叫登出邏輯
+                await CustomerServiceLogout(string.Empty, "連線中斷自動登出");
                 var serviceUser = UserServiceConnectionMap.FirstOrDefault(x=>x.Value==connectionId).Key;
                 if(UserConnectionMap.TryGetValue(serviceUser,out var userconnectionId))
                 {
                     await Clients.Client(userconnectionId).SendAsync("UpdContent", "**客服已中斷連線**");
-                    Thread.Sleep(2000);
+                    await Task.Delay(2000);
                     await Clients.Client(userconnectionId).SendAsync("UpdContent", "**正在轉接智能客服**");
-                    Thread.Sleep(3000);
+                    await Task.Delay(3000);
                     await Clients.Client(userconnectionId).SendAsync("openAgent");
                 }
-                // 呼叫登出邏輯
-                await CustomerServiceLogout(string.Empty, "連線中斷自動登出");
+                
             }
 
             // 處理使用者斷線
