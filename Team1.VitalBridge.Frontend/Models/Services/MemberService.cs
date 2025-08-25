@@ -38,7 +38,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
             return new MemberProfileDto
             {
-                UserId = user.Id.ToString(),
+                UserId = user.UserId.ToString(),
                 Name = user.Name,
                 Phone = user.Phone,
                 Email = user.Email,

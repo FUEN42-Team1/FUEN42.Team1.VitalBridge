@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Team1.VitalBridge.Frontend.Interfaces;
@@ -10,6 +12,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MemberController : ControllerBase
     {
         private readonly IMemberService _memberService;
@@ -23,8 +26,11 @@ namespace Team1.VitalBridge.Frontend.Controllers
         public async Task<ActionResult<MemberProfileDto>> GetProfile()
         {
             // 取得目前登入者的 userId
-            var userIdClaim = User.FindFirst("sub");
+            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null) return Unauthorized();
+
+            //var userIdClaim = User.FindFirst("sub");
+            //if (userIdClaim == null) return Unauthorized();
 
             if (!int.TryParse(userIdClaim.Value, out var userId))
                 return BadRequest("Invalid user id.");
@@ -33,6 +39,18 @@ namespace Team1.VitalBridge.Frontend.Controllers
             if (profile == null) return NotFound();
 
             return Ok(profile);
+        }
+
+        [HttpGet("diag-auth")]
+        [Authorize]   // 保持和 profile 一樣
+        public ActionResult<object> DiagAuth()
+        {
+            return Ok(new
+            {
+                Authenticated = User.Identity?.IsAuthenticated,
+                Name = User.Identity?.Name,
+                Claims = User.Claims.Select(c => new { c.Type, c.Value })
+            });
         }
 
 
