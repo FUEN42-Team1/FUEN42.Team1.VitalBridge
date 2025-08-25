@@ -33,7 +33,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim("accountType", user.AccountType ?? "Member"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // 新增這行
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
                 new Claim("typ", "at") // 明確標記 access token
             };
@@ -67,6 +67,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             var claims = new List<Claim>
     {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // 新增這行
         new Claim("typ", "rt"),
         new Claim("sst", BuildSecurityStamp(user)), // << 用 HashUtility 產出安全戳
         new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)

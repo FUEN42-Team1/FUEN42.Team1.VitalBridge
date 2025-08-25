@@ -11,8 +11,8 @@ namespace Team1.VitalBridge.Frontend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MemberController : ControllerBase
     {
         private readonly IMemberService _memberService;
@@ -26,7 +26,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         public async Task<ActionResult<MemberProfileDto>> GetProfile()
         {
             // 取得目前登入者的 userId
-            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
             if (userIdClaim == null) return Unauthorized();
 
             //var userIdClaim = User.FindFirst("sub");
@@ -51,6 +51,18 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 Name = User.Identity?.Name,
                 Claims = User.Claims.Select(c => new { c.Type, c.Value })
             });
+        }
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+            if (userIdClaim == null) return Unauthorized("Missing user id claim.");
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return BadRequest("Invalid user id.");
+
+            var result = await _memberService.UpdateProfileAsync(userId, dto);
+            if (!result) return BadRequest();
+            return NoContent();
         }
 
 

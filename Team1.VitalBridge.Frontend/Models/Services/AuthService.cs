@@ -212,8 +212,9 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             if (user.Status == "frozen")
                 throw new UnauthorizedAccessException("帳號已凍結，請聯繫管理員");
 
-
-
+            //最後登入時間
+            user.LastLoginAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
 
             // TODO: 你的角色取得邏輯
             var roles = await GetUserRolesAsync(user.Id);
@@ -298,7 +299,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 user.Id,
                 user.Email,
                 user.Name,
-                user.AccountType,
+                user.Phone,
                 Roles = roles // 回傳角色名稱陣列
             };
         }
@@ -418,6 +419,9 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             var roles = await GetUserRolesAsync(user.Id);
             var access = _jwt.CreateAccessToken(user, roles);
             var refresh = CreateRefreshJwt(user);
+
+            user.LastLoginAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
 
             SetRefreshCookie(refresh, DateTime.UtcNow.AddDays(_jwt.RefreshDays));
             IssueXsrfCookie(_jwt.RefreshDays);

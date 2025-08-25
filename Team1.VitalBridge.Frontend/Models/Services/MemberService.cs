@@ -53,6 +53,42 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 RoleNames = roleNames
             };
         }
+        public async Task<bool> UpdateProfileAsync(int userId, UpdateProfileDto dto)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return false;
+
+            // 更新 User 基本資料
+            user.Name = dto.Name;
+            user.Phone = dto.Phone;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            // 更新 MemberProfile
+            var profile = await _db.MemberProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (profile == null)
+            {
+                // 若沒有 profile，則新增
+                profile = new MemberProfile
+                {
+                    UserId = userId,
+                    CityId = dto.CityId,
+                    TownshipId = dto.TownshipId,
+                    Address = dto.Address
+                };
+                _db.MemberProfiles.Add(profile);
+            }
+            else
+            {
+                profile.CityId = dto.CityId;
+                profile.TownshipId = dto.TownshipId;
+                profile.Address = dto.Address;
+            }
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+
 
 
 
