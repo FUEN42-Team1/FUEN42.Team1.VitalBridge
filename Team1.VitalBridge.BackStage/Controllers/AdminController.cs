@@ -5,9 +5,12 @@ using Team1.VitalBridge.BackStage.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Team1.VitalBridge.BackStage.Controllers
 {
+    [Authorize(AuthenticationSchemes = "AdminJwtScheme")]
+    [Route("[controller]/[action]")]
     public class AdminController : Controller
     {
         private readonly PlateService _service;

@@ -274,8 +274,12 @@
                 <a href="#" id="sidepanel-close" class="sidepanel-close d-xl-none">&times;</a>
                 <div class="app-branding">
                     <!-- 左上icon導向 -->
-                    <a class="app-logo" href="/">
-                        <img class="logo-icon me-2" src="~/portal-theme-bs5/assets/images/app-logo.svg" alt="logo"><span class="logo-text">樂齡橋 後台管理系統</span>
+                    @* <a class="app-logo" href="/"> *@
+                    @*     <img class="logo-icon me-2" src="~/portal-theme-bs5/assets/images/app-logo.svg" alt="logo"><span class="logo-text">樂齡橋 後台管理系統</span> *@
+                    @* </a> *@
+                    <a class="app-logo" asp-area="" asp-controller="Admin" asp-action="Index">
+                        <img class="logo-icon me-2" src="~/portal-theme-bs5/assets/images/app-logo.svg" alt="logo">
+                        <span class="logo-text">樂齡橋 後台管理系統</span>
                     </a>
 
                   

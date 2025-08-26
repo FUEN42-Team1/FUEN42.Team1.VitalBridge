@@ -1,10 +1,13 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Team1.VitalBridge.BackStage.Models;
 
 namespace Team1.VitalBridge.BackStage.Controllers
 {
+    [Authorize(AuthenticationSchemes = "AdminJwtScheme")]
+    //[Route("Admin/[controller]/[action]")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
