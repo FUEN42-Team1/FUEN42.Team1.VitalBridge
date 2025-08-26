@@ -4,6 +4,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Team1.VitalBridge.Frontend.Models.EFModels;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 
 namespace Team1.VitalBridge.Frontend.Hubs
@@ -14,6 +17,13 @@ namespace Team1.VitalBridge.Frontend.Hubs
         public static List<string> customerServiceId = new List<string>(); //服務中客服
         public static Dictionary<string, string> UserServiceConnectionMap = new();
         public static List<string> customerServiceIdReady = new List<string>(); //空閒客服
+        private readonly AppDbContext _context;
+
+        public ChatHub(AppDbContext context)
+        {
+            this._context = context;
+        }
+
         /// <summary>
         /// 傳遞訊息
         /// </summary>
@@ -57,6 +67,11 @@ namespace Team1.VitalBridge.Frontend.Hubs
         {
             var id = Context.ConnectionId;
             UserConnectionMap[user] = id;
+            var haveNotReadNotify = _context.NotifyUsers.Where(u => u.UserId.ToString() == user && u.IsRead == false)
+                .Include(u => u.Notify)
+                .Any(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now));
+            if (haveNotReadNotify) await Clients.Client(id).SendAsync("newNotify", message);
+
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
