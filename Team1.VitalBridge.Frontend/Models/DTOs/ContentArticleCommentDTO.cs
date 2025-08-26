@@ -2,11 +2,14 @@
 {
     public class ContentArticleCommentDTO
     {
+        public int id { get; set; }
         public string author { get; set; }
         public string handle { get; set; }
         public string time { get; set; }
         public string text { get; set; }
+        public int repliesCount { get; set; } // Number of replies to the comment
     }
+
     public class  ArticleCommentRequestDTO
     {
         public int ArticleId { get; set; }
@@ -15,5 +18,18 @@
 
         public int? ParentCommentId { get; set; } // Parent Comment ID to filter comments
 
+    }
+
+    public class  ArticleCommentReplyDTO
+    {
+        public int CommentId { get; set; }
+    }
+
+    public class ArticleCommentCreateDTO
+    {
+        public int articleId { get; set; }
+        public int userId { get; set; }
+        public int? parentCommentId { get; set; }
+        public string text { get; set; }
     }
 }

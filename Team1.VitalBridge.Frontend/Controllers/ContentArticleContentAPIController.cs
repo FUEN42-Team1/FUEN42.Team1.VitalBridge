@@ -33,6 +33,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
                 // Then get the paginated articles
                 var articles = await _context.Contents
+                    .OrderByDescending(a => a.CreatedAt)
                     .Include(a => a.ContentCategory) // Eagerly load the category
                     .Include(a => a.Member)         // Eagerly load the member
                     .Include(a => a.CoverPicFile) // Eagerly load the cover picture file
