@@ -43,7 +43,7 @@ public partial class Organization
     public int TypeId { get; set; }
 
     [Column("description")]
-    [StringLength(100)]
+    [StringLength(1000)]
     public string Description { get; set; }
 
     [Column("isCertified")]
