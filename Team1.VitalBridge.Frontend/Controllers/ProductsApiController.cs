@@ -145,7 +145,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
             [FromQuery] string searchQuery = null,
              [FromQuery] string sortBy = "newest",// 新增排序參數
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 12)
+            [FromQuery] int pageSize = 12,
+            [FromQuery] bool includeSubCategories = true)
+
         {
             try
             {
@@ -160,16 +162,30 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     .Where(p => p.IsActive)  // 只取啟用的商品
                     .AsQueryable();  // 建立可查詢的物件
 
-                // === 第三步：分類篩選 ===
-                if (categoryId.HasValue)
-                {
-                    // 透過 ProductCategories 中介表來篩選特定分類的商品
-                    // Any() 表示「存在任何一個ProductCategory的CategoryId等於指定值」
-                    query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
-                }
+				// === 第三步：分類篩選 ===
+				if (categoryId.HasValue)
+				{
+					if (includeSubCategories)
+					{
+						// 查詢該分類及其所有子分類的商品
+						var categoryIds = await GetCategoryAndSubCategoryIds(categoryId.Value);
+						query = query.Where(p => p.ProductCategories.Any(pc => categoryIds.Contains(pc.CategoryId)));
+					}
+					else
+					{
+						// 只查詢指定分類的商品
+						query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
+					}
+				}
+				//if (categoryId.HasValue)
+				//{
+				//    // 透過 ProductCategories 中介表來篩選特定分類的商品
+				//    // Any() 表示「存在任何一個ProductCategory的CategoryId等於指定值」
+				//    query = query.Where(p => p.ProductCategories.Any(pc => pc.CategoryId == categoryId.Value));
+				//}
 
-                // === 第四步：關鍵字搜尋（AND邏輯） ===
-                if (!string.IsNullOrWhiteSpace(searchQuery))
+				// === 第四步：關鍵字搜尋（AND邏輯） ===
+				if (!string.IsNullOrWhiteSpace(searchQuery))
                 {
                     // 將搜尋字串分割成多個關鍵字
                     // 例如："鈣片 維他命" → ["鈣片", "維他命"]
@@ -372,5 +388,21 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 });
             }
         }
-    }
+
+		// 🔥 新增：取得分類及其子分類ID的輔助方法
+		private async Task<List<int>> GetCategoryAndSubCategoryIds(int categoryId)
+		{
+			var categoryIds = new List<int> { categoryId };
+
+			// 查詢子分類
+			var childCategoryIds = await _context.Categories
+				.Where(c => c.FatherId == categoryId && c.IsActive)
+				.Select(c => c.Id)
+				.ToListAsync();
+
+			categoryIds.AddRange(childCategoryIds);
+
+			return categoryIds;
+		}
+	}
 }
