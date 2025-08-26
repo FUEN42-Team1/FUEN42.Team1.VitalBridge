@@ -274,4 +274,34 @@ class MyUploadAdapter {
     abort() {
         // You can implement cancel upload if needed
     }
+
+    /**
+     * Resize image using canvas if larger than maxWidth
+     */
+    //_resizeImage(file, maxWidth) {
+    //    return new Promise(resolve => {
+    //        const img = new Image();
+    //        img.onload = () => {
+    //            if (img.width <= maxWidth) {
+    //                // No resize needed
+    //                resolve(file);
+    //                return;
+    //            }
+
+    //            const scale = maxWidth / img.width;
+    //            const canvas = document.createElement('canvas');
+    //            canvas.width = img.width * scale;
+    //            canvas.height = img.height * scale;
+
+    //            const ctx = canvas.getContext('2d');
+    //            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    //            canvas.toBlob(blob => {
+    //                resolve(new File([blob], file.name, { type: file.type }));
+    //            }, file.type, 0.9); // last param is quality (for JPEG/WebP)
+    //        };
+    //        img.src = URL.createObjectURL(file);
+    //    });
+    //}
 }
+
