@@ -71,8 +71,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
 
-
-            var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == vm.CoverPicFileName).Id;
+            int? FileId = null;
+            if(vm.CoverPicFileName!=null)
+                FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == vm.CoverPicFileName).Id;
 
             // todo coverpic 還沒存到filetable
             var dto = new ContentArticleCreateDTO

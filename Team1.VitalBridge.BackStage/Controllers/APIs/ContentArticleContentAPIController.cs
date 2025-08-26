@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.DTOs;
@@ -20,7 +21,11 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         [HttpGet]
         public async Task<IEnumerable<ContentArticleContentDisplayDTO?>> Get([FromQuery] ContentArticleContentCriteriaDTO criteria)
         {
-            var query = _context.Contents.Include(n => n.CoverPicFile).AsQueryable().Select(n=>new Content
+            var query = _context.Contents
+                .Include(n => n.CoverPicFile)
+                .OrderByDescending(c => c.CreatedAt)
+                .AsQueryable()
+                .Select(n=>new Content
             {
                 Id=n.Id,
                 MemberId = n.MemberId,
