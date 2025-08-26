@@ -84,17 +84,26 @@ namespace Team1.VitalBridge.BackStage.Controllers
             return RedirectToAction("Index");
         }
 
-        //編輯身分
-        public IActionResult Edit(string roleCode) {
-
+        // 編輯身分 GET
+        public IActionResult Edit(string roleCode)
+        {
             var role = _context.Roles.FirstOrDefault(r => r.RoleCode == roleCode);
             if (role == null)
                 return NotFound();
 
-            if (role.IsSystemDefault) {
-                
+            if (role.IsSystemDefault)
                 return RedirectToAction("Index");
-            }
+
+            var roleId = role.Id;
+
+            // 取得所有權限
+            var allPermissions = _context.Permissions.ToList();
+
+            // 取得此身分已選的權限
+            var selectedIds = _context.RolePermissions
+                .Where(rp => rp.RoleId == roleId)
+                .Select(rp => rp.PermissionId)
+                .ToList();
 
             var vm = new RoleViewModel
             {
@@ -104,37 +113,57 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 IsActive = role.IsActive,
                 RoleType = Enum.TryParse<RoleTypeItem>(role.RoleType, out var type)
                             ? type
-                            : RoleTypeItem.Member // 預設 fallback
+                            : RoleTypeItem.Member,
+                //AllPermissions = allPermissions,
+                //SelectedPermissionIds = selectedIds
             };
 
             return View(vm);
         }
 
+        // 編輯身分 POST
         [HttpPost]
-        public IActionResult Edit(RoleViewModel vm) {
-
-            if (!ModelState.IsValid)
-            {
-                return View(vm);
-            }
-
-
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(RoleViewModel vm)
+        {
+            //if (!ModelState.IsValid)
+            //{
+            //    // 重新載入權限資料，避免回傳 View 時權限清單為空
+            //    vm.AllPermissions = _context.Permissions.ToList();
+            //    return View(vm);
+            //}
 
             var role = _context.Roles.FirstOrDefault(r => r.RoleCode == vm.RoleCode);
             if (role == null)
                 return NotFound();
 
             if (role.IsSystemDefault)
-            {
-
                 return RedirectToAction("Index");
-            }
 
+            var roleId = role.Id;
+
+            // 更新身分基本資料
             role.Name = vm.Name;
             role.Info = vm.Info;
             role.IsActive = vm.IsActive;
-            role.RoleType = vm.RoleType.ToString(); // ← 儲存為文字
+            role.RoleType = vm.RoleType.ToString();
             role.UpdatedAt = DateTime.Now;
+
+            // 更新權限設定
+            //var oldPermissions = _context.RolePermissions.Where(rp => rp.RoleId == roleId);
+            //_context.RolePermissions.RemoveRange(oldPermissions);
+
+            //if (vm.SelectedPermissionIds != null)
+            //{
+            //    foreach (var pid in vm.SelectedPermissionIds)
+            //    {
+            //        _context.RolePermissions.Add(new RolePermission
+            //        {
+            //            RoleId = roleId,
+            //            PermissionId = pid
+            //        });
+            //    }
+            //}
 
             _context.SaveChanges();
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Team1.VitalBridge.BackStage.Models.EFModels;
 
 namespace Team1.VitalBridge.BackStage.Models.ViewModels
 {
@@ -44,5 +45,8 @@ namespace Team1.VitalBridge.BackStage.Models.ViewModels
         public string RoleTypeName => RoleType.ToString();
 
         public string RoleTypeShowName { get; set; }
+
+        //public List<int> SelectedPermissionIds { get; set; } = new();
+        //public List<Permission> AllPermissions { get; set; } = new();
     }
 }

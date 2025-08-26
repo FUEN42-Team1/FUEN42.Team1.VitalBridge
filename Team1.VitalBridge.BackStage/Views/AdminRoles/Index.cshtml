@@ -1,144 +1,159 @@
 ﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
 @model IEnumerable<RoleViewModel>
 @{
-    ViewData["Title"] = "身分清單";
+	ViewData["Title"] = "身分清單";
 }
 
 <h2 class="mb-4">身分清單</h2>
 
 <div class="mb-3 d-flex justify-content-between">
-    <div>
-        共 @Model.Count() 筆身分資料
-    </div>
-    <div>
-        <a asp-action="Create" class="btn btn-primary">➕ 新增身分</a>
-    </div>
+	<div>
+		共 @Model.Count() 筆身分資料
+	</div>
+	<div>
+		<a asp-action="Create" class="btn btn-primary">➕ 新增身分</a>
+	</div>
 </div>
 
 <table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>身分代碼</th>
-            <th>身分名稱</th>
-            <th>類別</th>
-            <th>說明</th>
-            <th>啟用</th>
-            <th>建立時間</th>
-            <th>更新時間</th>
-            <th class="text-center" style="width: 150px;">操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.Any())
-        {
-            <tr>
-                <td colspan="7" class="text-center text-muted">尚無資料</td>
-            </tr>
-        }
-        else
-        {
-            foreach (var role in Model)
-            {
-                <tr>
-                    <td>@role.RoleCode</td>
-                    <td>@role.Name</td>
-                    <td>@role.RoleTypeShowName</td>
-                    <td>@role.Info</td>
-                    <td>
-                        @if (role.IsActive)
-                        {
-                            <span id="status-@role.RoleCode" class="badge bg-success">啟用</span>
-                        }
-                        else
-                        {
-                            <span id="status-@role.RoleCode" class="badge bg-secondary">停用</span>
-                        }
-                    </td>
-                    <td>@role.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@role.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td class="text-center">
-                        <a asp-action="Edit"
-                           asp-route-roleCode="@role.RoleCode"
-                           class="btn btn-sm btn-warning me-1 edit-btn"
-                           data-default="@role.IsSystemDefault.ToString().ToLower()">
-                            編輯
-                        </a>
+	<thead class="table-light">
+		<tr>
+			<th>身分代碼</th>
+			<th>身分名稱</th>
+			<th>類別</th>
+			<th>說明</th>
+			<th>啟用</th>
+			<th>建立時間</th>
+			<th>更新時間</th>
+			<th class="text-center" style="width: 150px;">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (!Model.Any())
+		{
+			<tr>
+				<td colspan="7" class="text-center text-muted">尚無資料</td>
+			</tr>
+		}
+		else
+		{
+			foreach (var role in Model)
+			{
+				<tr>
+					<td>@role.RoleCode</td>
+					<td>@role.Name</td>
+					<td>@role.RoleTypeShowName</td>
+					<td>@role.Info</td>
+					<td>
+						@if (role.IsActive)
+						{
+							<span id="status-@role.RoleCode" class="badge bg-success">啟用</span>
+						}
+						else
+						{
+							<span id="status-@role.RoleCode" class="badge bg-secondary">停用</span>
+						}
+					</td>
+					<td>@role.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+					<td>@role.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+					<td class="text-center">
+						<a asp-action="Edit"
+						   asp-route-roleCode="@role.RoleCode"
+						   class="btn btn-sm btn-warning me-1 edit-btn"
+						   data-default="@role.IsSystemDefault.ToString().ToLower()">
+							編輯
+						</a>
 
 
-                        <button class="btn btn-sm toggle-status-btn @(role.IsActive ? "btn-outline-danger" : "btn-outline-success")"
-                                data-role-code="@role.RoleCode">
-                            @(role.IsActive ? "停用" : "啟用")
-                        </button>
+						<button class="btn btn-sm toggle-status-btn @(role.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+								data-role-code="@role.RoleCode"
+								data-default="@role.IsSystemDefault.ToString().ToLower()">
+							@(role.IsActive ? "停用" : "啟用")
+						</button>
 
 
-                        @*
+						@*
                         <form asp-action="Delete" asp-route-roleCode="@role.RoleCode" method="post" class="d-inline"
                               onsubmit="return confirm('確定要停用這個身分嗎？');">
                             <button type="submit" class="btn btn-sm btn-danger">停用</button>
                         </form>
                         *@
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
 </table>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.edit-btn').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                const isDefault = this.dataset.default === "true";
-                if (isDefault) {
-                    e.preventDefault();
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.edit-btn').forEach(function (btn) {
+			btn.addEventListener('click', function (e) {
+				const isDefault = this.dataset.default === "true";
+				if (isDefault) {
+					e.preventDefault();
 
-                    // 呼叫 SweetAlert2 彈窗
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '禁止操作',
-                        text: '此為系統預設身分，無法編輯！',
-                        confirmButtonText: '了解'
-                    });
-                }
-            });
-        });
-    });
+					// 呼叫 SweetAlert2 彈窗
+					Swal.fire({
+						icon: 'warning',
+						title: '禁止操作',
+						text: '此為系統預設身分，無法編輯！',
+						confirmButtonText: '了解'
+					});
+				}
+			});
+		});
+	});
 </script>
 
 
 
 <script>
-    $(document).on('click', '.toggle-status-btn', function () {
-        const btn = $(this);
-        const roleCode = btn.data('role-code');
+	$(document).on('click', '.toggle-status-btn', function () {
+		const btn = $(this);
+		const roleCode = btn.data('role-code');
+			const isDefault = btn.data('default') === true || btn.data('default') === "true";
+	if (isDefault) {
+		// 彈窗警告
+		Swal.fire({
+			icon: 'warning',
+			title: '禁止操作',
+			text: '此為系統預設身分，無法停用！',
+			confirmButtonText: '了解'
+		});
+		e.preventDefault();
+		return;
+	}
 
-        $.post('/Admin/AdminRoles/ToggleStatus', { roleCode: roleCode }, function (res) {
-            if (res.success) {
-                // 更新按鈕文字（顯示下一步操作）
-                const nextAction = res.isActive ? '停用' : '啟用';
-                btn.text(nextAction);
-                    if (res.isActive) {
-      btn.removeClass('btn-outline-success').addClass('btn-outline-danger');
-    } else {
-      btn.removeClass('btn-outline-danger').addClass('btn-outline-success');
-    }
 
-                // 更新狀態徽章
-                const badge = $('#status-' + roleCode);
-                if (res.isActive) {
-                    badge.text('啟用').removeClass('bg-secondary').addClass('bg-success');
-                } else {
-                    badge.text('停用').removeClass('bg-success').addClass('bg-secondary');
-                }
-            } else {
-                alert("操作失敗");
-            }
-        }).fail(function () {
-            alert("伺服器錯誤");
-        });
-    });
+
+		$.post('/Admin/AdminRoles/ToggleStatus', { roleCode: roleCode }, function (res) {
+			if (res.success) {
+				// 更新按鈕文字（顯示下一步操作）
+				const nextAction = res.isActive ? '停用' : '啟用';
+				btn.text(nextAction);
+					if (res.isActive) {
+	  btn.removeClass('btn-outline-success').addClass('btn-outline-danger');
+	} else {
+	  btn.removeClass('btn-outline-danger').addClass('btn-outline-success');
+	}
+
+				// 更新狀態徽章
+				const badge = $('#status-' + roleCode);
+				if (res.isActive) {
+					badge.text('啟用').removeClass('bg-secondary').addClass('bg-success');
+				} else {
+					badge.text('停用').removeClass('bg-success').addClass('bg-secondary');
+				}
+			} else {
+				alert("操作失敗");
+			}
+		}).fail(function () {
+			alert("伺服器錯誤");
+		});
+	});
 
 </script>
