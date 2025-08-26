@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.Frontend.Models.DTOs;
+using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
+using Team1.VitalBridge.Frontend.Models.Services;
 
 namespace Team1.VitalBridge.Frontend.Controllers
 {
@@ -11,20 +13,24 @@ namespace Team1.VitalBridge.Frontend.Controllers
     public class ProductsApiController : ControllerBase
     {
         private readonly AppDbContext _context;
+		private readonly CategoryService _categoryService;
 
-        public ProductsApiController(AppDbContext context)
+		public ProductsApiController(AppDbContext context, CategoryService categoryService)
         {
             this._context=context;
-        }
+			this._categoryService = categoryService; // 注入 CategoryService
+		}
+
+        
 
 
-        //GET api/Products/Homepage
-        /// <summary>
-        /// 取得首頁商品資料，包含四個分類的推薦商品
-        /// </summary>
-        /// <returns>回傳首頁各分類商品清單</returns>
+		//GET api/Products/Homepage
+		/// <summary>
+		/// 取得首頁商品資料，包含四個分類的推薦商品
+		/// </summary>
+		/// <returns>回傳首頁各分類商品清單</returns>
 
-        [HttpGet("Homepage")]
+		[HttpGet("Homepage")]
         public async Task<IActionResult> GetHomepageProducts()
         {
             // 實作邏輯
@@ -135,11 +141,11 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
         [HttpGet("Products")]
         public async Task<IActionResult> GetProducts(
-    [FromQuery] int? categoryId = null,
-    [FromQuery] string searchQuery = null,
-     [FromQuery] string sortBy = "newest",// 新增排序參數
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 12)
+            [FromQuery] int? categoryId = null,
+            [FromQuery] string searchQuery = null,
+             [FromQuery] string sortBy = "newest",// 新增排序參數
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12)
         {
             try
             {
@@ -284,6 +290,84 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 return StatusCode(500, new
                 {
                     message = "取得商品列表時發生錯誤",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+        //GET api/ProductsApi/Product/5
+        [HttpGet("Product/{id}")]
+        public async Task<ActionResult<ProductDetailResponseDto>> GetProductDetail(int id)
+        {
+            try
+            {
+                // 1. 取得商品基本資料
+            
+                var product = await _context.Products
+                    .Where(p => p.Id == id && p.IsActive) 
+                    .Select(p => new ProductDetailDto
+                    {
+                        Id  = p.Id,
+                        Name = p.Name,
+                        ItemNumber = p.ItemNumber,
+                        Keypoint = p.Keypoint,
+                        ProductDescription = p.ProductDescription,
+                        Price = p.Price,
+                        Quantity = p.Quantity,
+                        CreateAt = p.CreateAt,
+
+                        // 取得所有商品圖片，直接轉換成 ProductImageDto
+                        Images = p.ProductImages
+                            .Where(pi => pi.File != null)
+                            .OrderBy(pi => pi.SortOrder)
+                            .Select(pi => new ProductImageDto
+                            {
+                                Id = pi.Id,
+                                FileName = pi.File.FileName,
+                                SortOrder = (int)pi.SortOrder
+                            }).ToList(),
+
+						// 重點：修正類別資訊查詢
+						Categories = p.ProductCategories
+                            .OrderBy(pc => pc.CategoryId) // 按ID排序，取最小的作為主要類別
+							.Select(pc => new CategoryDto
+                            {
+                                Id=pc.Category.Id,
+                                Name =pc.Category.Name, // 只取分類名稱
+								FatherId = pc.Category.FatherId, // 🔥 加入父類別ID
+								FatherName = pc.Category.Father.Name // 🔥 加入父類別名稱
+							}).ToList()
+                    })
+                    .FirstOrDefaultAsync(); // 只取一筆
+
+				if (product == null)
+                    return NotFound(new { message = "商品不存在或已下架" });
+
+                // 2. 取得最新的 ProductNote（送貨付款方式、購物須知），直接轉換成 ProductNoteDto
+                var productNote = await _context.ProductNotes
+                    .OrderByDescending(pn => pn.Id) // 假設 Id 是自增的，最新的會有最大的 Id
+					.Select(pn => new ProductNoteDto
+                    {
+                        DeliveryAndPayMethod = pn.DeliveryAndPayMethod,
+                        ShoppNote = pn.ShoppNote
+                    })
+                    .FirstOrDefaultAsync(); // 只取最新的一筆
+
+				// 3. 組合回傳資料
+				var response = new ProductDetailResponseDto
+                {
+                    Product = product,
+                    ProductNote = productNote
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "取得商品詳情時發生錯誤",
                     error = ex.Message
                 });
             }

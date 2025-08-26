@@ -170,33 +170,22 @@
                                                 }
                                             </td>
                                             <td class="text-center">@order.ShippingMethod</td>
+                                            
                                             <td class="text-center">
                                                 @{
-                                                    var statusBadgeClass = order.CurrentStatusId switch
+                                                    var statusBadgeClass = order.CurrentStatusName switch
                                                     {
-                                                        1 => "bg-warning text-dark", // 未付款
-                                                        2 => "bg-info", // 待出貨
-                                                        3 => "bg-primary", // 已出貨
-                                                        4 => "bg-success", // 已完成
-                                                        5 => "bg-warning", // 退貨中
-                                                        6 => "bg-secondary", // 已退貨
-                                                        7 => "bg-danger", // 已取消
+                                                        "待付款" => "bg-warning text-dark",
+                                                        "待出貨" => "bg-info",
+                                                        "已出貨" => "bg-primary",
+                                                        "已完成" => "bg-success",
+                                                        "退貨中" => "bg-warning",
+                                                        "已退貨" => "bg-secondary",
+                                                        "已取消" => "bg-danger",
                                                         _ => "bg-secondary"
                                                     };
-                                                    
-                                                    var statusName = order.CurrentStatusId switch
-                                                    {
-                                                        1 => "未付款",
-                                                        2 => "待出貨",
-                                                        3 => "已出貨",
-                                                        4 => "已完成",
-                                                        5 => "退貨中",
-                                                        6 => "已退貨",
-                                                        7 => "已取消",
-                                                        _ => "未知狀態"
-                                                    };
                                                 }
-                                                <span class="badge @statusBadgeClass">@statusName</span>
+                                                <span class="badge @statusBadgeClass">@order.CurrentStatusName</span>
                                             </td>
                                             <td class="text-center fw-bold text-success">
                                                 NT$ @order.TotalAmount.ToString("N0")

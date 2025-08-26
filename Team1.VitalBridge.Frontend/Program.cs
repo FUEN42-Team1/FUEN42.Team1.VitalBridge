@@ -10,6 +10,7 @@ using Team1.VitalBridge.Frontend.Hubs;
 using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
+using Team1.VitalBridge.Frontend.Models.Settings;
 
 namespace Team1.VitalBridge.Frontend
 {
@@ -134,6 +135,12 @@ namespace Team1.VitalBridge.Frontend
 
 
             builder.Services.AddHttpContextAccessor();
+            // 註冊自訂服務
+            builder.Services.AddScoped<CategoryService>();
+
+            // 在 DI 容器註冊綠界設定
+            builder.Services.Configure<EcpaySettings>(cfg.GetSection("Ecpay"));
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
