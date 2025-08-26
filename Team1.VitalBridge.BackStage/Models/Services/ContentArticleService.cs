@@ -32,6 +32,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                 Content1 = article.Content,
                 ContentCategoryId = article.ContentCategoryId,
                 CoverPic = article.CoverPic, 
+                CoverPicFileId = article.CoverPicFileId,
                 Status = article.Status,
                 ViewCount = 0, // Initial view count
                 CreatedAt = DateTime.UtcNow,
@@ -97,6 +98,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                     Content = c.Content1, // Assuming Content1 is the content field
                     ContentCategoryId = c.ContentCategoryId,
                     //CoverPic = null, // Assuming CoverPic is not needed for edit
+                    CoverPicFileId = c.CoverPicFileId,
                     Status = c.Status
                 }).FirstOrDefaultAsync();
             if (dto == null)
@@ -193,6 +195,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             entity.Title = article.Title;
             entity.Content1 = article.Content;
             entity.ContentCategoryId = article.ContentCategoryId;
+            entity.CoverPicFileId = article.CoverPicFileId;
             entity.Content1 = article.Content;
             entity.Status = article.Status;
 

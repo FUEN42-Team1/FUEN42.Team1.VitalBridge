@@ -26,29 +26,29 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
         // GET: ContentArticles/Search
-        public async Task<IActionResult> SearchOld([FromQuery] ContentArticleListCritriaDTO? criteria)
-        {
-            if (criteria == null)
-            {
-                criteria = new ContentArticleListCritriaDTO();
-            }
-            var results = await _service.SearchArticlesAsync(criteria);
+        //public async Task<IActionResult> SearchOld([FromQuery] ContentArticleListCritriaDTO? criteria)
+        //{
+        //    if (criteria == null)
+        //    {
+        //        criteria = new ContentArticleListCritriaDTO();
+        //    }
+        //    var results = await _service.SearchArticlesAsync(criteria);
 
-            var vm = results.Select(r => new ContentArticleListViewModel
-            {
-                Id = r.Id,
-                Title = r.Title,
-                CoverPic = r.CoverPic,
-                CategoryName = r.CategoryName,
-                MemberName = r.MemberName,
-                Status = r.Status.ToString(), // Convert int to string for display
-                ViewCount = r.ViewCount,
-                CreatedAt = r.CreatedAt,
-                UpdatedAt = r.UpdatedAt
-            }).ToList();
+        //    var vm = results.Select(r => new ContentArticleListViewModel
+        //    {
+        //        Id = r.Id,
+        //        Title = r.Title,
+        //        CoverPic = r.CoverPic,
+        //        CategoryName = r.CategoryName,
+        //        MemberName = r.MemberName,
+        //        Status = r.Status.ToString(), // Convert int to string for display
+        //        ViewCount = r.ViewCount,
+        //        CreatedAt = r.CreatedAt,
+        //        UpdatedAt = r.UpdatedAt
+        //    }).ToList();
 
-            return View(vm);
-        }
+        //    return View(vm);
+        //}
 
         public async Task<IActionResult> Search()
         {
@@ -71,18 +71,17 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
 
-            using var ms = new MemoryStream();
-            if (vm.CoverPic != null && vm.CoverPic.Length > 0)
-                await vm.CoverPic.CopyToAsync(ms);
 
-                
+            var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == vm.CoverPicFileName).Id;
 
+            // todo coverpic 還沒存到filetable
             var dto = new ContentArticleCreateDTO
             {
                 Title = vm.Title,
                 Content = vm.Content,
                 ContentCategoryId = vm.ContentCategoryId,
-                CoverPic = ms.ToArray(),
+                CoverPic = null,
+                CoverPicFileId = FileId,
                 MemberId = 1, // Assuming a default member ID for now, replace with actual logic
                 // 修正：將 ContentArticleStatus 轉型為 int
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
@@ -106,11 +105,19 @@ namespace Team1.VitalBridge.BackStage.Controllers
             {
                 return NotFound();
             }
+
+            
+            var fileName = dto.CoverPicFileId.HasValue
+                ? _context.FileStreams.FirstOrDefault(f => f.Id == dto.CoverPicFileId.Value)?.FileName
+                : null;
+
             // Map the DTO to the ViewModel
             var vm = new ContentArticleEditViewModel
             {
                 Id = dto.Id,
                 Title = dto.Title,
+                CoverPic = null,
+                CoverPicFileName = fileName,
                 Content = dto.Content,
                 ContentCategoryId = dto.ContentCategoryId,
                 //CoverPic = null, // Handle file upload separately
@@ -129,6 +136,10 @@ namespace Team1.VitalBridge.BackStage.Controllers
         {
             if (!ModelState.IsValid) return View(vm);
 
+            int? FileId = null;
+            if(vm.CoverPicFileName!= null)
+                FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == vm.CoverPicFileName).Id;
+
             // Map the ViewModel to the DTO
             var dto = new ContentArticleEditDTO
             {
@@ -136,7 +147,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Title = vm.Title,
                 Content = vm.Content,
                 ContentCategoryId = vm.ContentCategoryId,
-                CoverPic = vm.CoverPic, // Handle file upload separately
+                CoverPic = null, // Handle file upload separately
+                CoverPicFileId = FileId,
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
             };
 
@@ -166,10 +178,8 @@ namespace Team1.VitalBridge.BackStage.Controllers
         public async Task<IActionResult> GetCoverPic(int id)
         {
             var content = await _context.Contents.FindAsync(id);
-            if (content?.CoverPic != null)
-            {
-                return File(content.CoverPic, "image/jpeg"); // or detect type dynamically
-            }
+            
+
             return File("~/images/no-image.png", "image/png"); // fallback if no pic
         }
     }

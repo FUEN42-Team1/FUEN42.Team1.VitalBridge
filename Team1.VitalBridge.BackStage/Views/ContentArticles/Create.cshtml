@@ -26,12 +26,25 @@
         </div>
     </div>
 
-     <div class="form-group row">
-        <label for="CoverPic" class="col-sm-2 col-form-label">Cover Picture</label>
+    <div class="form-group row">
+        <label for="" class="col-sm-2 col-form-label">CoverPicture</label>
         <div class="col-sm-10">
-            <input type="file" id="CoverPic" name="CoverPic" class="form-control-file">
+            <div class="input-group mb-3">
+                <input type="file" class="form-control" id="fileInput">
+                <button id="upload" type="button" class="btn btn-outline-primary">上傳圖片</button>
+            </div>
+            <div>
+                <img src="" alt="" id="showimage" class="img-fluid rounded shadow-sm" />
+            </div>
+            <div id="result"></div>
+            <div class="form-group mb-3">
+                <input type="text" class="form-control" id="CoverPicFileName" name="CoverPicFileName" readonly hidden>
+            </div>
         </div>
+
     </div>
+
+
 
     <div class="form-group row">
         <label for="Status" class="col-sm-2 col-form-label">Status</label>
@@ -53,14 +66,27 @@
 
     <div class="form-group row">
         <div class="col-sm-10 offset-sm-2">
-            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="submit" class="btn btn-primary" id="upload">Create</button>
         </div>
     </div>
 </form>
 
 @section Scripts {
+    <script src="~/js/UploadImage.js"></script>
+    <script>
+        $(document).ready(function () {
+            var fileInput = $("#fileInput");
+            var showImage = $("#showimage");
+            var resultDiv = $("#result");
+            var image = $("#CoverPicFileName");
+            ready(fileInput,showImage);
+            $("#upload").on('click',function(){
+                uploadFile(fileInput,resultDiv,image,showimage);
+            });
+        });
+    </script>
     <script src="~/ckeditor5/js/main.js"></script>
-    
+
     <script>
         $(document).ready(function () {
             // Function to load categories via AJAX

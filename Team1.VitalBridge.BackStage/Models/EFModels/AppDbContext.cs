@@ -278,6 +278,8 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Contents__conten__73BA3083");
 
+            entity.HasOne(d => d.CoverPicFile).WithMany(p => p.Contents).HasConstraintName("FK_Contents_FileStream");
+
             entity.HasOne(d => d.Member).WithMany(p => p.Contents)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Contents_Users");

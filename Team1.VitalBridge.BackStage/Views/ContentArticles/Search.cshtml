@@ -263,10 +263,10 @@
                 const row = `
                     <tr>
                         <td>${article.title}</td>
-                        <td><img src="https://localhost:7184/ContentArticles/GetCoverPic/${article.id}" width="100px" /></td>
+                        <td><img src="/api/UploadFile/GetFile?fileName=${article.coverPicFileName}" width="100px" /></td>
                         <td>${article.category}</td>
                         <td>${article.memberName}</td>
-                        <td>${article.status}</td>
+                        <td>${article.status == 0 ? "Draft" : article.status == 1 ? "Published" : "Archived"}</td>
                         <td>${article.views}</td>
                         <td>${article.createdAt}</td>
                         <td>${article.updatedAt}</td>
