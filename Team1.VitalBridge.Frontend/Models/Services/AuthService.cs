@@ -57,7 +57,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 AccountType = "Member",
                 Status = "unverified",
                 ConfirmCode = ConfirmCodeToken, // 產生確認碼
-                ConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1), // 確認碼有效期為1小時
+                ConfirmCodeExpiresAt = DateTime.UtcNow.AddMinutes(30), // 確認碼有效期為30分鐘
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -455,7 +455,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
         public async Task SendPasswordResetEmailAsync(string email)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == email.Trim().ToLower());
             if (user == null) return; // 不洩漏帳號存在與否
 
             // 產生 token
@@ -466,10 +466,34 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             await _db.SaveChangesAsync();
 
             // 建立重設密碼連結
-            var resetLink = $"https://localhost:5500/reset-password?email={email}&token={token}";
+            var resetLink = $"https://localhost:7184/VitalBridge/reset-password.html?email={email}&token={token}";
             Console.WriteLine($"發送重設密碼郵件到 {email}，連結：{resetLink}");
 
-            // TODO: 實際寄信
+            string sql = $@"
+                EXEC msdb.dbo.sp_send_dbmail
+                    @profile_name = 'VitalBridge',
+                    @recipients = '{user.Email}', 
+                    @subject = '【VitalBridge】重設您的密碼',
+                    @body = '
+                親愛的 {user.Name} 您好：
+
+                您剛剛提出了重設密碼的請求。  
+                請點擊以下連結來設定新的登入密碼：
+
+                {resetLink}
+
+                此連結將於 30 分鐘後失效，請及早完成設定。  
+                如果您並未提出重設密碼的申請，請忽略此封信件，您的帳號資訊不會受到影響。
+
+                祝您使用愉快！
+
+                -- VitalBridge 系統通知
+                ',
+                    @body_format = 'TEXT';";
+
+            _db.Database.ExecuteSqlRaw(sql);
+
+
         }
 
         public async Task<bool> ResetPasswordAsync(string token, string newPassword)

@@ -126,6 +126,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok(userInfo);
         }
 
+        //忘記密碼
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
         {
@@ -133,6 +134,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok();
         }
 
+        //重設密碼
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
         {
@@ -144,6 +146,10 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 return BadRequest("Token 無效或已過期");
             return Ok();
         }
+
+
+
+
 
 
 
