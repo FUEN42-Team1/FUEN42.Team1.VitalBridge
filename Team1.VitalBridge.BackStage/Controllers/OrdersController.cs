@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using Team1.VitalBridge.BackStage.Models.ViewModels;
+using static Team1.VitalBridge.BackStage.Models.ViewModels.OrderDetailsViewModel;
 
 namespace Team1.VitalBridge.BackStage.Controllers
 {
@@ -158,21 +159,182 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			return statusOptions;
 		}
 
-		// 輔助方法：取得狀態名稱
-		private string GetStatusName(int statusId)
+		public async Task<IActionResult> Deatails(int id) 
 		{
-			
-			return statusId switch
+			var order = await _context.Orders
+				.Include(o=>o.Customer)
+				.Include(o=>o.OrderRecipent)
+				.Include(o => o.Payment)
+					.ThenInclude(p=>p.PayMethod)
+				.Include(o=>o.Payment)
+					.ThenInclude(ss=>ss.StatusNavigation) // StatusNavigation 這是付款狀態(確認是 已付款、付款失敗)，PaymentStatus
+                .Include(o=>o.OrderShipMethod)
+					.ThenInclude(osm => osm.Ship)
+                .Include(o => o.OrderShipMethod)
+					.ThenInclude(osm => osm.City)
+				.Include(o => o.OrderShipMethod)
+					.ThenInclude(osm => osm.Township)
+                 .Include(o => o.OrderItems)
+					.ThenInclude(oi => oi.Product)
+				.Include(o => o.OrderStatuses)
+					.ThenInclude(os => os.OrderStatusItem)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = MapToViewModel(order);
+            return View(viewModel);
+
+
+
+
+
+
+
+        }
+
+        // 輔助方法：將 Order 映射到 OrderDetailsViewModel
+        private OrderDetailsViewModel MapToViewModel(Order order)
+        {
+            var latestOrderStatus = order.OrderStatuses
+				 .OrderByDescending(os => os.CreatedAt)
+				 .FirstOrDefault();
+            var shippingStatus = GetShippingStatus(order.OrderShipMethod, order.OrderStatuses);
+            
+			// 判斷是否為宅配
+			var isHomeDelivery = order.OrderShipMethod?.Ship?.ShipMethodName == "宅配";
+
+            // 三元運算子取得對應的追蹤碼
+            var trackingCode = isHomeDelivery
+				? order.OrderShipMethod?.HomeTrackingCode
+				: order.OrderShipMethod?.StoreTrackingCode;
+
+            // 組合地址
+            var shippingAddress = "";
+			if (isHomeDelivery)
 			{
-				1 => "待付款",
-				2 => "待出貨",
-				3 => "已出貨",
-				4 => "已完成",
-				5 => "退貨中",
-				6 => "已退貨",
-				7 => "已取消",
-				_ => "未知狀態"
-			};
-		}
-	}
+				shippingAddress = $"{order.OrderShipMethod?.City?.Name ?? ""}" +
+						 $"{order.OrderShipMethod?.Township?.Name ?? ""}" +
+						 $"{order.OrderShipMethod?.DetailAddress ?? ""}";
+			}
+			else 
+			{
+                shippingAddress = $"{order.OrderShipMethod?.StoreCode ?? ""} - " +
+                         $"{order.OrderShipMethod?.StoreAddress ?? ""}";
+            }
+
+			var viewModel = new OrderDetailsViewModel
+			{
+				// 訂單基本資訊
+				OrderId = order.Id,
+                OrderNumber= order.OrderNumber,
+                CreatedAt= order.CreatedAt,
+                Note= order.Note,
+                TotalAmount= order.TotalAmount,
+
+                // 會員資訊
+                CustomerName = order.Customer?.Name,
+				CustomerEmail= order.Customer?.Email,
+				CustomerPhone= order.Customer?.Phone,
+
+                // 收件人資訊
+                RecipientName = order.OrderRecipent?.RecipentName??"",
+				RecipientPhone = order.OrderRecipent?.RecipentPhone??"",
+
+
+                // 付款資訊
+                PaymentMethodName = order.Payment?.PayMethod?.Name ?? "",
+                PaymentStatusName = order.Payment?.StatusNavigation?.Name ?? "待付款",
+                PaymentAmount = order.Payment?.Amount ?? order.TotalAmount,
+                PaymentStatusId = order.Payment?.Status ?? 1,
+
+
+                // 物流資訊
+                ShipId = order.OrderShipMethod?.ShipId ?? 0,
+                ShippingMethodName = order.OrderShipMethod?.Ship?.ShipMethodName ?? "",
+                ShippingAddress = shippingAddress,
+                TrackingCode = trackingCode ?? "",
+                ShippingStatus = shippingStatus,
+                IsHomeDelivery = isHomeDelivery,
+
+
+                // 商品明細
+                OrderItems = order.OrderItems.Select(oi => new OrderItemViewModel
+                {
+                    ProductName = oi.ProductName,
+                    UnitPrice = oi.UnitPrice,
+                    Quantity = oi.Quantity,
+                    Subtotal = oi.Subtotal
+                }).ToList(),
+
+
+                // 價格明細
+                SubtotalAmount = order.SubtotalAmount,
+                ShippingFee = order.ShippingFee,
+                CouponDiscount = order.CouponDiscount,
+
+
+                // 狀態資訊
+                CurrentOrderStatus = latestOrderStatus?.OrderStatusItem?.Name ?? "待付款",
+                CurrentOrderStatusId = latestOrderStatus?.OrderStatusItemId ?? 1
+
+            };
+            // 設定編輯權限
+            SetEditPermissions(viewModel);
+            return viewModel;
+        }
+
+        private string GetShippingStatus(OrderShipMethod shipMethod, ICollection<OrderStatus> orderStatuses)
+        {
+            // 物流狀態判斷和權限設定方法
+
+			var latestStatus = orderStatuses
+				.OrderByDescending(x=>x.CreatedAt)
+				.FirstOrDefault();
+
+            if (latestStatus?.OrderStatusItem.Name == "退貨中" || latestStatus?.OrderStatusItem.Name == "已退貨")
+                return "退貨中";
+
+			if(shipMethod?.Ship?.ShipMethodName == "宅配")
+				return string.IsNullOrEmpty(shipMethod.HomeTrackingCode) ? "未配送" : "已配送";
+            else
+                return string.IsNullOrEmpty(shipMethod?.StoreTrackingCode) ? "未配送" : "已配送";
+        }
+
+		private void SetEditPermissions(OrderDetailsViewModel viewModel)
+		{
+            // 只有未配送且已付款才能編輯物流
+			viewModel.CanEditShipping = viewModel.ShippingStatus == "未配送" &&
+										viewModel.PaymentStatusId == 2; // 已付款=2
+
+            // 只有已配送且已出貨狀態才能申請退貨
+            viewModel.CanApplyReturn = viewModel.ShippingStatus == "已配送" &&
+									viewModel.CurrentOrderStatusId == 3; // 已出貨
+        }
+
+
+        // 輔助方法：取得狀態名稱
+        //private string GetStatusName(int statusId)
+        //{
+
+        //	return statusId switch
+        //	{
+        //		1 => "待付款",
+        //		2 => "待出貨",
+        //		3 => "已出貨",
+        //		4 => "已完成",
+        //		5 => "退貨中",
+        //		6 => "已退貨",
+        //		7 => "已取消",
+        //		_ => "未知狀態"
+        //	};
+        //}
+
+
+
+
+    }
 }
