@@ -106,5 +106,55 @@ namespace Team1.VitalBridge.Frontend.Controllers
             }
             
         }
+
+        [HttpPost("ViewPlusOne")]
+        public async Task<ActionResult<object>> GetArticleViewPlusOne([FromBody] ContentArticleViewPlusOneDTO request)
+        {
+            try
+            {
+
+                // Then get the paginated articles
+                var article = await _context.Contents
+                    .FirstOrDefaultAsync(a => a.Id == request.articleId);
+
+                article.ViewCount += 1;
+                await _context.SaveChangesAsync();
+                
+                return Ok(article);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, new { message = "An error occurred while making articles ViewCount plus one." });
+            }
+        }
+
+        [HttpGet("Trending")]
+        public async Task<ActionResult<object>> GetArticleTrending()
+        {
+            try
+            {
+                // Then get the paginated articles
+                var articles = await _context.Contents
+                    .Where(a=>a.Status==1)
+                    .OrderByDescending(a => a.ViewCount)
+                    .Take(4)
+                    .Select(a => new
+                    {
+                        Id = a.Id,
+                        Title = a.Title,
+                        Url = "ArticleContent.html?id="+ a.Id
+                    })
+                    .ToListAsync();
+
+
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, new { message = "An error occurred while fetching trending articles." });
+            }
+        }
     }
 }

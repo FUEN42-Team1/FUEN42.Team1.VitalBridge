@@ -3,6 +3,10 @@
     public class ContentArticleDTO
     {
     }
+    public class ContentArticleViewPlusOneDTO
+    {
+        public int articleId { get; set; }
+    }
     public class ArticleRequestDTO
     {
         public int Page { get; set; } // Page number for pagination 
