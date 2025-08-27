@@ -214,10 +214,8 @@ EXEC msdb.dbo.sp_send_dbmail
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
             if (user == null) throw new UnauthorizedAccessException("帳號或密碼錯誤");
-            if (!HashUtility.VerifyPassword(dto.Password, user.Password))
-                throw new UnauthorizedAccessException("帳號或密碼錯誤");
-            if (user.Status == "banned")
-                throw new UnauthorizedAccessException("帳號已停權");
+
+
             if (DateTime.UtcNow < user.LockedUntil)
             {
                 var remaining = user.LockedUntil - DateTime.UtcNow;
@@ -239,18 +237,48 @@ EXEC msdb.dbo.sp_send_dbmail
 
                 throw new UnauthorizedAccessException(msg);
             }
+
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                // 此帳號為 Google 註冊，無密碼
+                throw new UnauthorizedAccessException("此帳號為第三方註冊，請用第三方登入");
+            }
+
+            // 密碼錯誤處理
+            if (!HashUtility.VerifyPassword(dto.Password, user.Password))
+            {
+                user.FailedLoginCount = (user.FailedLoginCount ?? 0) + 1;
+                if (user.FailedLoginCount >= 3)
+                {
+                    user.LockedUntil = DateTime.UtcNow.AddMinutes(15);
+                    user.FailedLoginCount = 0; // 鎖定後歸零
+                    throw new UnauthorizedAccessException("帳號已鎖定，請 15 分鐘後再試");
+                }
+                else
+                {
+                    await _db.SaveChangesAsync();
+                    throw new UnauthorizedAccessException("帳號或密碼錯誤");
+                }
+            }
+
+
+            if (user.Status == "banned")
+                throw new UnauthorizedAccessException("帳號已停權");
             if (user.Status == "unverified")
                 throw new UnauthorizedAccessException("帳號尚未驗證，請先驗證後再登入");
             if (user.Status == "frozen")
                 throw new UnauthorizedAccessException("帳號已凍結，請聯繫管理員");
 
-            //最後登入時間
+
+
+            //最後登入時間、重置失敗次數與鎖定
+            user.FailedLoginCount = 0;
+            user.LockedUntil = null;
             user.LastLoginAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
 
             // TODO: 你的角色取得邏輯
             var roles = await GetUserRolesAsync(user.Id);
-
             var access = _jwt.CreateAccessToken(user, roles);
             var refresh = CreateRefreshJwt(user); // 無表：簽一顆 Refresh-JWT
 
