@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Settings;
 using static Team1.VitalBridge.Frontend.Models.DTOs.ECShop.CheckoutDtos;
@@ -19,12 +20,13 @@ namespace Team1.VitalBridge.Frontend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IOptions<EcpaySettings> _ecpaySettings;
+        private readonly IPaymentMethodMappingService _paymentMappingService;
 
-       
-        public OrdersController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings)
+        public OrdersController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings, IPaymentMethodMappingService paymentMappingService)
         {
             this._context=context;
             _ecpaySettings = ecpaySettings;
+            this._paymentMappingService=paymentMappingService;
         }
 
         /// <summary>
@@ -190,7 +192,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
                 // 16.產生綠界付款表單資料
-                var ecpayFormData = await GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail);
+                var ecpayFormData = await GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail, request.PaymentMethodId);
                 var response = new CreateOrderResponseDto
                 {
                     Success = true,
@@ -218,18 +220,14 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 產生綠界付款表單資料
         /// 這邊就會用到綠界設定的資料
         /// </summary>
-        private async Task<EcpayFormDataDto> GenerateEcpayFormData(Order order, string customerName, string customerEmail)
+        private async Task<EcpayFormDataDto> GenerateEcpayFormData(Order order, string customerName, string customerEmail, int paymentMethodId)
         {
             var ecpaySettings = _ecpaySettings.Value; // 取得設定
 
-            // 1. 查詢訂單的付款方式來決定綠界的 ChoosePayment 參數
-            var payment = await _context.Payments
-                .Include(p => p.PayMethod)
-                .FirstOrDefaultAsync(p => p.OrderId == order.Id);
+            // 使用服務來取得對應的綠界付款方式參數
+            string choosePayment = _paymentMappingService.GetEcpayChoosePaymentById(paymentMethodId, _context);
 
-            // 2. 根據付款方式名稱對應到綠界的 ChoosePayment 參數
-            string choosePayment = GetEcpayChoosePayment(payment?.PayMethod?.Name);
-
+           
             var formData = new Dictionary<string, string>
             {
                 ["MerchantID"] = ecpaySettings.MerchantId,  // 改用設定
@@ -252,6 +250,10 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["CustomField4"] = "",
                 ["EncryptType"] = "1"
             };
+
+            // 記錄 log 供除錯
+            Console.WriteLine($"訂單 {order.OrderNumber} 使用付款方式: PaymentMethodId={paymentMethodId}, ChoosePayment={choosePayment}");
+
             // 產生檢查碼
             var checkMacValue = GenerateCheckMacValue(formData);
             formData.Add("CheckMacValue", checkMacValue);
