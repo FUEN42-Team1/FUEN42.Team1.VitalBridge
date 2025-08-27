@@ -190,7 +190,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
                 // 16.產生綠界付款表單資料
-                var ecpayFormData = GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail);
+                var ecpayFormData = await GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail);
                 var response = new CreateOrderResponseDto
                 {
                     Success = true,
@@ -218,9 +218,18 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 產生綠界付款表單資料
         /// 這邊就會用到綠界設定的資料
         /// </summary>
-        private EcpayFormDataDto GenerateEcpayFormData(Order order, string customerName, string customerEmail)
+        private async Task<EcpayFormDataDto> GenerateEcpayFormData(Order order, string customerName, string customerEmail)
         {
             var ecpaySettings = _ecpaySettings.Value; // 取得設定
+
+            // 1. 查詢訂單的付款方式來決定綠界的 ChoosePayment 參數
+            var payment = await _context.Payments
+                .Include(p => p.PayMethod)
+                .FirstOrDefaultAsync(p => p.OrderId == order.Id);
+
+            // 2. 根據付款方式名稱對應到綠界的 ChoosePayment 參數
+            string choosePayment = GetEcpayChoosePayment(payment?.PayMethod?.Name);
+
             var formData = new Dictionary<string, string>
             {
                 ["MerchantID"] = ecpaySettings.MerchantId,  // 改用設定
@@ -234,7 +243,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["ClientBackURL"] = ecpaySettings.ReturnUrl, // 改用設定
                 ["OrderResultURL"] = ecpaySettings.ReturnUrl, // 改用設定
                 ["NeedExtraPaidInfo"] = "N",
-                ["ChoosePayment"] = "ALL",
+                ["ChoosePayment"] = choosePayment, //動態設定付款方式
                 ["PlatformID"] = "",
                 ["InvoiceMark"] = "N",
                 ["CustomField1"] = order.Id.ToString(),
@@ -252,6 +261,26 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 FormData = formData
             };
 
+        }
+
+        /// <summary>
+        /// 將資料庫的付款方式名稱對應到綠界的 ChoosePayment 參數
+        /// </summary>
+        private string GetEcpayChoosePayment(string paymentMethodName)
+        {
+            // 根據您資料庫中的付款方式名稱來對應綠界的參數
+            return paymentMethodName?.ToLower() switch
+            {
+                "信用卡付款" => "Credit",           // 只顯示信用卡
+                "信用卡" => "Credit",              // 只顯示信用卡
+                "atm轉帳" => "ATM",               // 只顯示 ATM
+                "atm付款" => "ATM",               // 只顯示 ATM  
+                "網路atm" => "ATM",               // 只顯示 ATM
+                "超商代碼繳費" => "CVS",            // 只顯示超商代碼
+                "超商條碼繳費" => "BARCODE",        // 只顯示超商條碼
+                "行動支付" => "AndroidPay",        // 行動支付相關
+                _ => "ALL"                        // 預設顯示所有付款方式
+            };
         }
 
         /// <summary>

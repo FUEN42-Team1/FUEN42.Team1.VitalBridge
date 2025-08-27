@@ -211,7 +211,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 			{
 				// 使用交易確保資料一致性
 				// 注意這一行有可能因此報錯
-				using var transaction = await _context.Database.BeginTransactionAsync();
+				//using var transaction = await _context.Database.BeginTransactionAsync();
 
 				// 取得訂單資訊
 				var order = await _context.Orders
@@ -259,7 +259,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 					_context.OrderStatuses.Add(newOrderStatus);
 				}
 				await _context.SaveChangesAsync();
-				await transaction.CommitAsync();
+				//await transaction.CommitAsync();
 
 				TempData["Success"] = "物流狀態更新成功";
 
@@ -512,12 +512,13 @@ namespace Team1.VitalBridge.BackStage.Controllers
 		private void SetEditPermissions(OrderDetailsViewModel viewModel)
 		{
             // 只有未配送且已付款才能編輯物流
-			viewModel.CanEditShipping = viewModel.ShippingStatus == "未配送" &&
-										viewModel.PaymentStatusId == 2; // 已付款=2
+			viewModel.CanEditShipping = viewModel.CurrentOrderStatusId == 2 &&
+
+                                        viewModel.PaymentStatusId == 2; // 已付款=2
 
             // 只有已配送且已出貨狀態才能申請退貨
-            viewModel.CanApplyReturn = viewModel.ShippingStatus == "已配送" &&
-									viewModel.CurrentOrderStatusId == 3; // 已出貨
+            viewModel.CanApplyReturn =viewModel.CurrentOrderStatusId == 3; // 已出貨
+
         }
 
 
