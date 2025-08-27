@@ -570,6 +570,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                     organization.AgeLimits = viewModel.AgeLimits;
                     organization.Description = viewModel.Description;
                     organization.MapUrl = viewModel.MapUrl;
+                    organization.FileId = viewModel.FileId;
 
                     // 更新多對多關係 - 補助資訊
                     _context.OrganizationSubsidyInfos.RemoveRange(organization.OrganizationSubsidyInfos);
