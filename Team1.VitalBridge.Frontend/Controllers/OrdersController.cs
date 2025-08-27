@@ -237,9 +237,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["TotalAmount"] = ((int)order.TotalAmount).ToString(),
                 ["TradeDesc"] = "VitalBridge商城購物",
                 ["ItemName"] = GetOrderItemsDescription(order.Id),
-                ["ReturnURL"] = ecpaySettings.NotifyUrl,     // 改用設定
-                ["ClientBackURL"] = ecpaySettings.ReturnUrl, // 改用設定
-                ["OrderResultURL"] = ecpaySettings.ReturnUrl, // 改用設定
+                ["ReturnURL"] = ecpaySettings.ReturnUrl,     // 改用設定
+                ["ClientBackURL"] = ecpaySettings.ClientBackUrl, // 改用設定
+                ["OrderResultURL"] = ecpaySettings.OrderResultUrl, // 改用設定
                 ["NeedExtraPaidInfo"] = "N",
                 ["ChoosePayment"] = choosePayment, //動態設定付款方式
                 ["PlatformID"] = "",
@@ -251,11 +251,14 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["EncryptType"] = "1"
             };
 
-            // 記錄 log 供除錯
-            Console.WriteLine($"訂單 {order.OrderNumber} 使用付款方式: PaymentMethodId={paymentMethodId}, ChoosePayment={choosePayment}");
+			// 記錄 log 供除錯
+			Console.WriteLine($"訂單 {order.OrderNumber} 綠界 URL 設定:");
+			Console.WriteLine($"  ReturnURL (後端): {ecpaySettings.ReturnUrl}");
+			Console.WriteLine($"  ClientBackURL (前端): {ecpaySettings.ClientBackUrl}");
+			Console.WriteLine($"  OrderResultURL (前端): {ecpaySettings.OrderResultUrl}");
 
-            // 產生檢查碼
-            var checkMacValue = GenerateCheckMacValue(formData);
+			// 產生檢查碼
+			var checkMacValue = GenerateCheckMacValue(formData);
             formData.Add("CheckMacValue", checkMacValue);
             return new EcpayFormDataDto
             {
