@@ -8,6 +8,7 @@ using Team1.VitalBridge.Frontend.Models.EFModels;
 using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
 using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
+using Microsoft.Data.SqlClient;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {
@@ -97,26 +98,57 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             //Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
 
 
-            string sql = $@"
-                EXEC msdb.dbo.sp_send_dbmail
-                @profile_name = 'VitalBridge',
-                @recipients = '{dto.Email}', 
-                @subject = '【VitalBridge】帳號驗證信',
-                @body = '
-            親愛的 {dto.Name} 您好：
+            //string sql = $@"
+            //    EXEC msdb.dbo.sp_send_dbmail
+            //    @profile_name = 'VitalBridge',
+            //    @recipients = '{dto.Email}', 
+            //    @subject = '【VitalBridge】帳號驗證信',
+            //    @body = '
+            //親愛的 {dto.Name} 您好：
 
-            感謝您註冊 VitalBridge 平台。
-            請點擊以下連結完成帳號驗證：
+            //感謝您註冊 VitalBridge 平台。
+            //請點擊以下連結完成帳號驗證：
 
-            {verifyLink}
+            //{verifyLink}
 
-            如果您沒有註冊過 VitalBridge，請忽略此封信件。
+            //如果您沒有註冊過 VitalBridge，請忽略此封信件。
 
-            -- VitalBridge 系統通知
-            ',
-                @body_format = 'TEXT';";
+            //-- VitalBridge 系統通知
+            //',
+            //    @body_format = 'TEXT';";
 
-            _db.Database.ExecuteSqlRaw(sql);
+            //_db.Database.ExecuteSqlRaw(sql);
+
+            string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】帳號驗證信',
+    @body = @Body,
+    @body_format = 'HTML';";
+
+            string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {dto.Name} 您好：</p>
+    <p>感謝您註冊 VitalBridge 平台。<br/>
+       請點擊以下按鈕完成帳號驗證：</p>
+    <p>
+      <a href=""{verifyLink}""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        完成驗證
+      </a>
+    </p>
+    <p>如果您沒有註冊過 VitalBridge，請忽略此封信件。</p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
+
+            _db.Database.ExecuteSqlRaw(sql,
+                new SqlParameter("@Email", dto.Email),
+                new SqlParameter("@Body", body));
 
 
         }
@@ -406,6 +438,45 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
                 _db.AddRange(user, MemberProfile, userRole, externalLogin);
                 await _db.SaveChangesAsync();
+
+                string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】歡迎加入',
+    @body = @Body,
+    @body_format = 'HTML';";
+
+                string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {name} 您好：</p>
+    <p>感謝您透過 <strong>Google 帳號</strong> 註冊 VitalBridge 平台！🎉</p>
+    <p>
+      從現在起，您可以直接使用 Google 登入，無需額外驗證。<br/>
+      為了幫助您更快上手，我們建議您：
+    </p>
+    <ul>
+      <li>補充會員資料，讓服務更貼近需求</li>
+      <li>探索我們的功能與資源</li>
+      <li>訂閱最新公告，掌握最新資訊</li>
+    </ul>
+    <p>
+      <a href=""https://localhost:7184/VitalBridge/member/memberCenter.html""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        前往會員中心
+      </a>
+    </p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
+
+                _db.Database.ExecuteSqlRaw(sql,
+                    new SqlParameter("@Email", email),
+                    new SqlParameter("@Body", body));
+
             }
             else
             {

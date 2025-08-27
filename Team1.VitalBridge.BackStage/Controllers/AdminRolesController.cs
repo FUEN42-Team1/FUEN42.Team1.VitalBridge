@@ -30,19 +30,20 @@ namespace Team1.VitalBridge.BackStage.Controllers
         public IActionResult Index()
         {
             var roles = _context.Roles
-        .OrderBy(r => r.CreatedAt)
-        .Select(r => new RoleViewModel
-        {
-            RoleCode = r.RoleCode,
-            Name = r.Name,
-            RoleTypeShowName = r.RoleType,
-            Info = r.Info,
-            IsActive = r.IsActive,
-            IsSystemDefault = r.IsSystemDefault,
-            CreatedAt = r.CreatedAt,
-            UpdatedAt = r.UpdatedAt
-        })
-        .ToList();
+                .Where(r => r.RoleType == "Admin" || r.RoleType == "Member")
+                .OrderBy(r => r.CreatedAt)
+                .Select(r => new RoleViewModel
+                {
+                    RoleCode = r.RoleCode,
+                    Name = r.Name,
+                    RoleTypeShowName = r.RoleType,
+                    Info = r.Info,
+                    IsActive = r.IsActive,
+                    IsSystemDefault = r.IsSystemDefault,
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt
+                }
+            ).ToList();
 
             return View(roles);
         }
