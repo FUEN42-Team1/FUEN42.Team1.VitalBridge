@@ -55,7 +55,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(RoleViewModel vm)
+        public IActionResult Create(RoleCreateViewModel vm)
         {
             // 在這裡處理新增身分的邏輯
             // 例如，將 roleName 儲存到資料庫中

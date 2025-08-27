@@ -360,6 +360,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return RedirectToAction("Details", new { AdminUserId = userId });
             }
 
+            if (user.Status == "frozen") { 
+                user.Status = "active";
+            }
             user.FailedLoginCount = 0;
             user.LockedUntil = null;
             user.UpdatedAt = DateTime.UtcNow;

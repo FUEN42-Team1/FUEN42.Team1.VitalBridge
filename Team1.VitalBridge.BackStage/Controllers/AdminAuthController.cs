@@ -43,6 +43,13 @@ namespace Team1.VitalBridge.BackStage.Controllers
         public async Task<IActionResult> Login(AdminLoginViewModel vm)
         {
 
+            //TODO
+            //1.若上鎖凍結禁止登入
+            //2.只有管理員能登入
+            //3.被Ban會說已停權
+
+
+
             if (!ModelState.IsValid)
             {
                 return View(vm);
@@ -54,7 +61,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                    .ThenInclude(aur => aur.Role) // 從 AdminUsersRoles 進入，載入實際的 AdminRole
                        .ThenInclude(ar => ar.RolePermissions) // 從 AdminRole 進入，載入 AdminRolePermissions 集合 (假設有此中間表)
                            .ThenInclude(arp => arp.Permission) // 從 AdminRolePermissions 進入，載入實際的 AdminPermission
-               .SingleOrDefaultAsync(au => au.Email == vm.Email);
+               .SingleOrDefaultAsync(au => au.Email == vm.Email && au.AccountType == "Admin");
 
 
             // 驗證使用者是否存在
@@ -73,6 +80,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 if (adminUser.FailedLoginCount >= 3)
                 {
                     adminUser.LockedUntil = DateTime.MaxValue; // 永久鎖定
+                    adminUser.Status = "frozen";//改為凍結
                     ModelState.AddModelError("", $"您的帳號已被鎖定，鎖定至 {adminUser.LockedUntil:yyyy-MM-dd HH:mm:ss}");
                 }
                 else
@@ -83,6 +91,35 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 await _context.SaveChangesAsync();
                 return View(vm);
             }
+
+            //檢查帳號狀態
+            //若是凍結或停權則無法登入
+            if (adminUser.Status == "banned")
+            {
+                ModelState.AddModelError("", "您的帳號已被停用，請聯絡管理員。");
+                return View(vm);
+            }
+            if (adminUser.Status == "frozen") {
+                //檢查鎖定時間
+                if (adminUser.LockedUntil.HasValue && adminUser.LockedUntil.Value > DateTime.UtcNow)
+                {
+                    ModelState.AddModelError("", $"您的帳號已被凍結，鎖定至 {adminUser.LockedUntil:yyyy-MM-dd HH:mm:ss}，請聯絡管理員。");
+                    return View(vm);
+                }
+                else
+                {
+                    //若鎖定時間已過 解凍帳號
+                    adminUser.Status = "active";
+                    adminUser.LockedUntil = null;
+                    adminUser.FailedLoginCount = 0; // 清除失敗次數
+                    _context.Users.Update(adminUser);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+
+
+
 
 
             // 檢查是否已驗證開通
