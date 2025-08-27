@@ -83,7 +83,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 ContentCategoryId = vm.ContentCategoryId,
                 CoverPic = null,
                 CoverPicFileId = FileId,
-                MemberId = 1, // Assuming a default member ID for now, replace with actual logic
+                MemberId = 1, //vm.MemberId,  Assuming a default member ID for now, replace with actual logic
                 // 修正：將 ContentArticleStatus 轉型為 int
                 Status = (int)Enum.Parse(typeof(ContentArticleStatus), vm.Status)
             };
@@ -120,6 +120,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 CoverPic = null,
                 CoverPicFileName = fileName,
                 Content = dto.Content,
+                MemberId=dto.MemberId,
                 ContentCategoryId = dto.ContentCategoryId,
                 //CoverPic = null, // Handle file upload separately
                 Status = ((ContentArticleStatus)dto.Status).ToString() // Convert int to string for display
@@ -147,6 +148,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 Id = vm.Id,
                 Title = vm.Title,
                 Content = vm.Content,
+                MemberId = 1,
                 ContentCategoryId = vm.ContentCategoryId,
                 CoverPic = null, // Handle file upload separately
                 CoverPicFileId = FileId,

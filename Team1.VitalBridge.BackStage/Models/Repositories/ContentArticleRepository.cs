@@ -56,7 +56,7 @@ namespace Team1.VitalBridge.BackStage.Models.Repositories
             return _context.Contents
                 .Include(c => c.ContentCategory)
                 .Include(c => c.Comments)
-                //.Include(c => c.Member) // Assuming Member is a navigation property in Content
+                .Include(c => c.Member) // Assuming Member is a navigation property in Content
                 .AsNoTracking();
         }
 

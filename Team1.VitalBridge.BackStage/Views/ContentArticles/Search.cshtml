@@ -34,26 +34,26 @@
 
         <!-- Search and Filter Area -->
         <div class="search-filter-area">
-            <h2>Manage Article Contents</h2>
+            <h2>管理文章</h2>
             <form action="#" method="get">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="Keyword">Keyword</label>
-                        <input type="text" id="Keyword" name="Keyword" placeholder="Search title, member, category">
+                        <label for="Keyword">搜尋</label>
+                        <input type="text" id="Keyword" name="Keyword" placeholder="搜尋標題、會員、類別">
                     </div>
 
                     <div class="form-group">
-                        <label for="Status">Status</label>
+                        <label for="Status">狀態</label>
                         <select id="Status" name="Status">
                             <option value="">-- All --</option>
-                            <option value="0">Draft</option>
-                            <option value="1">Published</option>
-                            <option value="2">Archived</option>
+                            <option value="0">草稿</option>
+                            <option value="1">已發表</option>
+                            <option value="2">已歸檔</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>View Count Range</label>
+                        <label>觀看次數段落</label>
                         <div class="date-inputs">
                             <input type="number" id="MinViewCount" name="MinViewCount" placeholder="Min">
                             <input type="number" id="MaxViewCount" name="MaxViewCount" placeholder="Max">
@@ -61,7 +61,7 @@
                     </div>
 
                     <div class="form-group date-range">
-                        <label>Created At Range</label>
+                        <label>新增時段</label>
                         <div class="date-inputs">
                             <input type="date" id="CreatedAtStart" name="CreatedAtStart">
                             <input type="date" id="CreatedAtEnd" name="CreatedAtEnd">
@@ -69,23 +69,23 @@
                     </div>
 
                     <div class="form-group date-range">
-                        <label>Updated At Range</label>
+                        <label>更新時段</label>
                         <div class="date-inputs">
                             <input type="date" id="UpdatedAtStart" name="UpdatedAtStart">
                             <input type="date" id="UpdatedAtEnd" name="UpdatedAtEnd">
                         </div>
                     </div>
                 </div>
-                <button class="action-button">Filter</button>
+                <button class="action-button">篩選</button>
             </form>
         </div>
 
         <!-- Create New Article Button -->
-        <a class="btn btn-primary" asp-action="Create">Create New Article</a>
+        <a class="btn btn-primary" asp-action="Create">新增文章</a>
 
         <!-- Rows Per Page Selector -->
         <div class="rows-per-page-area">
-            <label for="rowsPerPage">Rows Per Page:</label>
+            <label for="rowsPerPage">每頁幾筆資料:</label>
             <select id="rowsPerPage">
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -100,83 +100,31 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Title</th>
-                        <th>Cover</th>
-                        <th>Category</th>
-                        <th>Member</th>
-                        <th>Status</th>
-                        <th>Views</th>
-                        <th>Created</th>
-                        <th>Updated</th>
-                        <th>Actions</th>
+                        <th>標題</th>
+                        <th>封面</th>
+                        <th>類別</th>
+                        <th>成員</th>
+                        <th>狀態</th>
+                        <th>觀看次數</th>
+                        <th>創作時間</th>
+                        <th>更新時間</th>
+                        <th>行動</th>
                     </tr>
                 </thead>
                 <tbody id="articlesTableBody">
                     <!-- Data will be populated here by JavaScript, right now it is just samples -->
                     <!-- Sample Data Rows -->
                     <tr>
-                        <td>The Rise of Green Technology</td>
-                        <td><img src="https://placehold.co/80x50/34D399/FFFFFF?text=Tech" alt="Cover" class="table-cover-img"></td>
-                        <td>Technology</td>
-                        <td>Jane Doe</td>
-                        <td>Published</td>
-                        <td>1250</td>
-                        <td>2023-09-15</td>
-                        <td>2023-09-20</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
                         <td>
-                            <a class="edit-button" href="#">Edit</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Exploring Deep Sea Creatures</td>
-                        <td><img src="https://placehold.co/80x50/60A5FA/FFFFFF?text=Ocean" alt="Cover" class="table-cover-img"></td>
-                        <td>Science</td>
-                        <td>John Smith</td>
-                        <td>Draft</td>
-                        <td>80</td>
-                        <td>2024-01-10</td>
-                        <td>2024-01-10</td>
-                        <td>
-                            <a class="edit-button" href="#">Edit</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Benefits of Mindfulness Meditation</td>
-                        <td><img src="https://placehold.co/80x50/C084FC/FFFFFF?text=Mind" alt="Cover" class="table-cover-img"></td>
-                        <td>Health</td>
-                        <td>Emily White</td>
-                        <td>Archived</td>
-                        <td>450</td>
-                        <td>2023-11-01</td>
-                        <td>2023-11-05</td>
-                        <td>
-                            <a class="edit-button" href="#">Edit</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>A Guide to Urban Gardening</td>
-                        <td><img src="https://placehold.co/80x50/F87171/FFFFFF?text=Garden" alt="Cover" class="table-cover-img"></td>
-                        <td>Lifestyle</td>
-                        <td>Michael Green</td>
-                        <td>Published</td>
-                        <td>980</td>
-                        <td>2024-03-20</td>
-                        <td>2024-03-22</td>
-                        <td>
-                            <a class="edit-button" href="#">Edit</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>History of the Olympic Games</td>
-                        <td><img src="https://placehold.co/80x50/22D3EE/FFFFFF?text=Sport" alt="Cover" class="table-cover-img"></td>
-                        <td>Sports</td>
-                        <td>Sarah Brown</td>
-                        <td>Published</td>
-                        <td>2100</td>
-                        <td>2023-07-01</td>
-                        <td>2023-07-01</td>
-                        <td>
-                            <a class="edit-button" href="#">Edit</a>
+                            Loading...
                         </td>
                     </tr>
                     <!-- More sample data can be added here -->
@@ -188,10 +136,10 @@
         <div class="pagination-controls">
             <div class="pagination-info">No data (Static)</div>
             <div class="pagination-buttons">
-                <button id="firstPageBtn">First</button>
-                <button id="prevPageBtn">Previous</button>
-                <button id="nextPageBtn">Next</button>
-                <button id="lastPageBtn">Last</button>
+                <button id="firstPageBtn">第一頁</button>
+                <button id="prevPageBtn">上頁</button>
+                <button id="nextPageBtn">下頁</button>
+                <button id="lastPageBtn">最後一頁</button>
             </div>
         </div>
 
@@ -266,12 +214,12 @@
                         <td><img src="/api/UploadFile/GetFile?fileName=${article.coverPicFileName}" width="100px" /></td>
                         <td>${article.category}</td>
                         <td>${article.memberName}</td>
-                        <td>${article.status == 0 ? "Draft" : article.status == 1 ? "Published" : "Archived"}</td>
+                        <td>${article.status == 0 ? "草稿" : article.status == 1 ? "已發表" : "已歸檔"}</td>
                         <td>${article.views}</td>
                         <td>${article.createdAt}</td>
                         <td>${article.updatedAt}</td>
                         <td>
-                            <a class="edit-button" href="/ContentArticles/Edit/${article.id}">Edit</a>
+                            <a class="edit-button" href="/ContentArticles/Edit/${article.id}">編輯</a>
                         </td>
                     </tr>
                 `;

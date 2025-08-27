@@ -99,6 +99,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
                     ContentCategoryId = c.ContentCategoryId,
                     //CoverPic = null, // Assuming CoverPic is not needed for edit
                     CoverPicFileId = c.CoverPicFileId,
+                    MemberId = c.MemberId,
                     Status = c.Status
                 }).FirstOrDefaultAsync();
             if (dto == null)
@@ -194,6 +195,7 @@ namespace Team1.VitalBridge.BackStage.Models.Services
             }
             entity.Title = article.Title;
             entity.Content1 = article.Content;
+            entity.MemberId = article.MemberId;
             entity.ContentCategoryId = article.ContentCategoryId;
             entity.CoverPicFileId = article.CoverPicFileId;
             entity.Content1 = article.Content;

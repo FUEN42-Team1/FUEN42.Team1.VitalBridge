@@ -73,9 +73,7 @@
 	</style>
 }
 
-<h1>Index</h1>
-
-<h2>Category Management</h2>
+<h1>類別管理</h1>
 <div id="category-tree">
 	@* Initial rendering of top-level categories *@
 	@if (Model != null && Model.Any())
@@ -88,13 +86,13 @@
 					<i class="category-toggle-sign fa-solid fa-solid fa-chevron-right me-2"></i>
 					<span class="category-name">@category.Name</span>
 					<span class="category-actions">
-						<a href="@Url.Action("Edit", "ContentCategories", new { id = category.Id })">Edit</a>
+						<a href="@Url.Action("Edit", "ContentCategories", new { id = category.Id })">編輯</a>
 					</span>
 				</li>
 				<li class="subcategories-placeholder" id="subcategories-@category.Id" style="display:none;"></li>
 			}
 			<li class="create-link-item">
-				<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+				<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">新增類別</a>
 			</li>
 		</ul>
 	}
@@ -102,7 +100,7 @@
 	{
 		<p>No categories found.</p>
 		<li class="create-link-item">
-			<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">Create New Category</a>
+			<a href="@Url.Action("Create", "ContentCategories", new { parentId = "" })">新增類別</a>
 		</li>
 	}
 </div>
@@ -149,18 +147,18 @@
 												<i class="category-toggle-sign fa-solid fa-solid fa-chevron-right me-2"></i>
 												<span class="category-name ">${subcategory.name}</span>
 												<span class="category-actions">
-													<a href="@Url.Action("Edit", "ContentCategories")?id=${subcategory.id}">Edit</a>
+													<a href="@Url.Action("Edit", "ContentCategories")?id=${subcategory.id}">編輯</a>
 												</span>
 											</li>
 											<li class="subcategories-placeholder" id="subcategories-${subcategory.id}" style="display:none;"></li>
 										`;
 									});
 								} else {
-									html += '<li>no subcategories found</li>';
+									html += '<li>無子類別</li>';
 								}
 								// Add the 'Create' link for this level
 								html += `<li class="create-link-item">
-									<a href="@Url.Action("Create", "ContentCategories")?parentId=${categoryId}">Create Subcategory</a>
+									<a href="@Url.Action("Create", "ContentCategories")?parentId=${categoryId}">新增子類別</a>
 								</li>`;
 								html += `</ul>`;
 								subcategoriesContainer.append(html);

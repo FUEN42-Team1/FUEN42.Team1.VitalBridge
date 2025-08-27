@@ -3,7 +3,7 @@
     ViewData["Title"] = "Edit Article";
 }
 
-<h2>Edit Article</h2>
+<h2>編輯文章</h2>
 <hr />
 
 <form id="editArticleForm" method="post" enctype="multipart/form-data" asp-controller="ContentArticles" asp-action="Edit">
@@ -11,14 +11,14 @@
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group row">
-        <label for="Title" class="col-sm-2 col-form-label">Title</label>
+        <label for="Title" class="col-sm-2 col-form-label">標題</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" required>
         </div>
     </div>
 
     <div class="form-group row">
-        <label for="ContentCategoryId" class="col-sm-2 col-form-label">Category</label>
+        <label for="ContentCategoryId" class="col-sm-2 col-form-label">類別</label>
         <div class="col-sm-10">
             <select id="ContentCategoryId" name="ContentCategoryId" class="form-control" required>
                 <option value="">-- Select a Category --</option>
@@ -26,11 +26,18 @@
             </select>
         </div>
     </div>
-
+    @* <div class="form-group row">
+        <label for="MemberId" class="col-sm-2 col-form-label">會員</label>
+        <div class="col-sm-10">
+            <select id="MemberId" name="MemberId" class="form-control" required>
+                <option value="">-- Select a Member --</option>
+            </select>
+        </div>
+    </div> *@
 
     <!-- Cover Picture -->
     <div class="form-group row">
-        <label for="" class="col-sm-2 col-form-label">CoverPicture</label>
+        <label for="" class="col-sm-2 col-form-label">封面圖</label>
         <div class="col-sm-10">
             <div class="input-group mb-3">
                 <input type="file" class="form-control" id="fileInput">
@@ -47,20 +54,21 @@
 
     </div>
 
+    
 
     <div class="form-group row">
-        <label for="Status" class="col-sm-2 col-form-label">Status</label>
+        <label for="Status" class="col-sm-2 col-form-label">狀態</label>
         <div class="col-sm-10">
             <select id="Status" name="Status" class="form-control" required>
-                <option value="Drafted">Drafted</option>
-                <option value="Published">Published</option>
-                <option value="Archived">Archived</option>
+                <option value="Drafted">草稿</option>
+                <option value="Published">已發表</option>
+                <option value="Archived">已歸檔</option>
             </select>
         </div>
     </div>
 
     <div class="form-group row mb-2">
-        <label for="Content" class="col-sm-2 col-form-label">Content</label>
+        <label for="Content" class="col-sm-2 col-form-label">內容</label>
         <div class="col-sm-10">
             <textarea id="ContentEditor" name="Content" class="form-control" rows="10">@Html.Raw(Model.Content)</textarea>
         </div>
@@ -68,7 +76,7 @@
 
     <div class="form-group row">
         <div class="col-sm-10 offset-sm-2">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="submit" class="btn btn-primary">儲存編輯</button>
         </div>
     </div>
 </form>
@@ -105,7 +113,7 @@
                     success: function (data) {
                         var select = $('#ContentCategoryId');
                         select.empty();
-                        select.append('<option value="">-- Select a Category --</option>');
+                        select.append('<option value="">-- 選擇類別 --</option>');
                         $.each(data, function (index, category) {
                             // Pre-select the category if it matches the model's category ID
                             var selected = (category.id == selectedCategoryId) ? 'selected' : '';

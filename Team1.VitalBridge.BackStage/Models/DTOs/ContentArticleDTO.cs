@@ -106,6 +106,7 @@
         public string Title { get; set; }
         public string Content { get; set; }
         public int ContentCategoryId { get; set; }
+        public int MemberId { get; set; }
         public IFormFile? CoverPic { get; set; } // Base64 encoded image
         public int? CoverPicFileId { get; set; } //file id for reference
         public int Status { get; set; } // efmodel is int , but view model is string for display purposes

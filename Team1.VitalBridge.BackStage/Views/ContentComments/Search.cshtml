@@ -12,37 +12,37 @@
 
         <!-- Search and Filter Area -->
         <div class="search-filter-area">
-            <h2>Manage Article Comments</h2>
+            <h2>管理文章留言</h2>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="articleTitleSearch">Search by Article Title</label>
-                    <input type="text" id="articleTitleSearch" placeholder="Enter article title">
+                    <label for="articleTitleSearch">文章標題搜尋</label>
+                    <input type="text" id="articleTitleSearch" placeholder="搜尋文章標題">
                 </div>
                 <div class="form-group">
-                    <label for="memberNameSearch">Search by Member Name</label>
-                    <input type="text" id="memberNameSearch" placeholder="Enter member name">
+                    <label for="memberNameSearch">成員名稱搜尋</label>
+                    <input type="text" id="memberNameSearch" placeholder="搜尋會員姓名">
                 </div>
                 <div class="form-group">
-                    <label for="commentContentSearch">Search by Content</label>
-                    <input type="text" id="commentContentSearch" placeholder="Enter comment content">
+                    <label for="commentContentSearch">留言內容搜尋</label>
+                    <input type="text" id="commentContentSearch" placeholder="搜尋留言內容">
                 </div>
                 <div class="form-group">
-                    <label for="commentStatusFilter">Status</label>
+                    <label for="commentStatusFilter">狀態</label>
                     <select id="commentStatusFilter">
                         <option value="all">All</option>
-                        <option value="enabled">Enabled</option>
-                        <option value="disabled">Disabled</option>
+                        <option value="enabled">啟用</option>
+                        <option value="disabled">禁用</option>
                     </select>
                 </div>
             </div>
             <button class="action-button">
-                Apply Filters
+                篩選
             </button>
         </div>
 
         <!-- Rows Per Page Selector -->
         <div class="rows-per-page-area">
-            <label for="rowsPerPage">Rows Per Page:</label>
+            <label for="rowsPerPage">每頁幾筆資料:</label>
             <select id="rowsPerPage">
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -57,59 +57,23 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Article Title</th>
-                        <th>Member Name</th>
-                        <th>Comment Content</th>
-                        <th>Created At</th>
-                        <th>Enabled Status</th>
+                        <th>文章標題</th>
+                        <th>成員名稱</th>
+                        <th>留言內容</th>
+                        <th>創作時間</th>
+                        <th>狀態</th>
                     </tr>
                 </thead>
                 <tbody id="commentsTableBody">
                     <!-- Data will be populated here by JavaScript, right now it is just samples -->
                     <!-- Sample Data Rows -->
                     <tr>
-                        <td>The Future of AI</td>
-                        <td>Alice Johnson</td>
-                        <td>"Fascinating article! I wonder how AI will impact daily life in the next decade."</td>
-                        <td>2023-10-26 10:30 AM</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
                         <td>
-                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Understanding Quantum Physics</td>
-                        <td>Bob Williams</td>
-                        <td>"This was a bit complex for me, but the illustrations helped clarify some concepts."</td>
-                        <td>2023-10-25 03:15 PM</td>
-                        <td>
-                            <input type="checkbox" aria-label="Toggle comment enabled status">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Healthy Eating Habits</td>
-                        <td>Carol Davis</td>
-                        <td>"Great tips! I've started incorporating more fresh vegetables into my diet."</td>
-                        <td>2023-10-24 09:00 AM</td>
-                        <td>
-                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>The History of the Roman Empire</td>
-                        <td>David Lee</td>
-                        <td>"An insightful read, especially the part about the fall of the Western Empire."</td>
-                        <td>2023-10-23 01:45 PM</td>
-                        <td>
-                            <input type="checkbox" checked aria-label="Toggle comment enabled status">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Beginner's Guide to Coding</td>
-                        <td>Eve Brown</td>
-                        <td>"Very helpful for someone just starting out! Clear and concise explanations."</td>
-                        <td>2023-10-22 11:20 AM</td>
-                        <td>
-                            <input type="checkbox" aria-label="Toggle comment enabled status">
+                            Loading...
                         </td>
                     </tr>
                     <!-- More sample data can be added here -->
@@ -121,10 +85,10 @@
         <div class="pagination-controls">
             <div class="pagination-info">Page 1 of 10 (Static)</div>
             <div class="pagination-buttons">
-                <button id="firstPageBtn">First</button>
-                <button id="prevPageBtn">Previous</button>
-                <button id="nextPageBtn">Next</button>
-                <button id="lastPageBtn">Last</button>
+                <button id="firstPageBtn">第一頁</button>
+                <button id="prevPageBtn">上頁</button>
+                <button id="nextPageBtn">下頁</button>
+                <button id="lastPageBtn">最後一頁</button>
             </div>
         </div>
 
