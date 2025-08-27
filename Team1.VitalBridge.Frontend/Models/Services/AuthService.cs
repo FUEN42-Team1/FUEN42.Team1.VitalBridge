@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
 using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
 using Microsoft.Data.SqlClient;
+using Team1.VitalBridge.Frontend.Interfaces.Security;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {
@@ -19,10 +20,11 @@ namespace Team1.VitalBridge.Frontend.Models.Services
         private readonly IJwtService _jwt;
         private readonly IConfiguration _cfg;
         private readonly IHttpContextAccessor _http;
+        private readonly IRecaptchaVerifier _recaptcha;
 
-        public AuthService(AppDbContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http)
+        public AuthService(AppDbContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http, IRecaptchaVerifier recaptcha)
         {
-            _db = db; _jwt = jwt; _cfg = cfg; _http = http;
+            _db = db; _jwt = jwt; _cfg = cfg; _http = http; _recaptcha = recaptcha;
         }
 
         // ==== Public APIs ====
@@ -96,28 +98,6 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             string verifyLink = $"https://localhost:7184/VitalBridge/verify.html?email={dto.Email}&token={ConfirmCodeToken}";
             //輸出到debug控制台
             //Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
-
-
-            //string sql = $@"
-            //    EXEC msdb.dbo.sp_send_dbmail
-            //    @profile_name = 'VitalBridge',
-            //    @recipients = '{dto.Email}', 
-            //    @subject = '【VitalBridge】帳號驗證信',
-            //    @body = '
-            //親愛的 {dto.Name} 您好：
-
-            //感謝您註冊 VitalBridge 平台。
-            //請點擊以下連結完成帳號驗證：
-
-            //{verifyLink}
-
-            //如果您沒有註冊過 VitalBridge，請忽略此封信件。
-
-            //-- VitalBridge 系統通知
-            //',
-            //    @body_format = 'TEXT';";
-
-            //_db.Database.ExecuteSqlRaw(sql);
 
             string sql = @"
 EXEC msdb.dbo.sp_send_dbmail
@@ -209,7 +189,9 @@ EXEC msdb.dbo.sp_send_dbmail
             return true;
         }
 
-
+        private const int CAPTCHA_AFTER_FAILS = 2;        // 已錯兩次→本次要驗
+        private const int LOCK_AFTER_FAILS = 3;        // 你原本的鎖定門檻
+        private static readonly TimeSpan LOCK_DURATION = TimeSpan.FromMinutes(15);
         public async Task<TokenRes> LoginAsync(LoginDto dto)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
@@ -220,42 +202,45 @@ EXEC msdb.dbo.sp_send_dbmail
             {
                 var remaining = user.LockedUntil - DateTime.UtcNow;
 
-                string msg;
-                if (remaining.Value.TotalMinutes < 60)
-                {
-                    // 只顯示分鐘
-                    var minutes = (int)Math.Ceiling(remaining.Value.TotalMinutes);
-                    msg = $"帳號已鎖定，請 {minutes} 分鐘後再試";
-                }
-                else
-                {
-                    // 顯示 小時 + 分鐘
-                    int hours = (int)remaining.Value.TotalHours;
-                    int minutes = remaining.Value.Minutes;
-                    msg = $"帳號已鎖定，請 {hours} 小時 {minutes} 分鐘後再試";
-                }
-
+                string msg = remaining!.Value.TotalMinutes < 60
+                    ? $"帳號已鎖定，請 {(int)Math.Ceiling(remaining.Value.TotalMinutes)} 分鐘後再試"
+                    : $"帳號已鎖定，請 {(int)remaining.Value.TotalHours} 小時 {remaining.Value.Minutes} 分鐘後再試";
                 throw new UnauthorizedAccessException(msg);
             }
 
             if (string.IsNullOrEmpty(user.Password))
-            {
-                // 此帳號為 Google 註冊，無密碼
                 throw new UnauthorizedAccessException("此帳號為第三方註冊，請用第三方登入");
+
+
+            // === Step-Up：兩次錯誤後，本次（第3次）先做人機驗證 ===
+            var fails = user.FailedLoginCount ?? 0;           // 以前的錯誤次數
+            var needCaptcha = fails >= CAPTCHA_AFTER_FAILS;   // 已錯2次→需要
+
+            if (needCaptcha)
+            {
+                if (string.IsNullOrWhiteSpace(dto.RecaptchaToken))
+                    throw new UnauthorizedAccessException("需要人機驗證");
+
+                var captchaOk = await _recaptcha.VerifyAsync(dto.RecaptchaToken /*, HttpContext IP 若需要 */);
+                if (!captchaOk)
+                    throw new UnauthorizedAccessException("人機驗證未通過，請重試");
             }
+            // === Step-Up 到此 ===
 
             // 密碼錯誤處理
             if (!HashUtility.VerifyPassword(dto.Password, user.Password))
             {
-                user.FailedLoginCount = (user.FailedLoginCount ?? 0) + 1;
-                if (user.FailedLoginCount >= 3)
+                fails++;
+                if (fails >= LOCK_AFTER_FAILS)
                 {
-                    user.LockedUntil = DateTime.UtcNow.AddMinutes(15);
+                    user.LockedUntil = DateTime.UtcNow.Add(LOCK_DURATION);
                     user.FailedLoginCount = 0; // 鎖定後歸零
-                    throw new UnauthorizedAccessException("帳號已鎖定，請 15 分鐘後再試");
+                    await _db.SaveChangesAsync();
+                    throw new UnauthorizedAccessException($"帳號已鎖定，請 {(int)LOCK_DURATION.TotalMinutes} 分鐘後再試");
                 }
                 else
                 {
+                    user.FailedLoginCount = fails;
                     await _db.SaveChangesAsync();
                     throw new UnauthorizedAccessException("帳號或密碼錯誤");
                 }
@@ -281,7 +266,6 @@ EXEC msdb.dbo.sp_send_dbmail
             var roles = await GetUserRolesAsync(user.Id);
             var access = _jwt.CreateAccessToken(user, roles);
             var refresh = CreateRefreshJwt(user); // 無表：簽一顆 Refresh-JWT
-
             SetRefreshCookie(refresh, DateTime.UtcNow.AddDays(_jwt.RefreshDays));
             IssueXsrfCookie(_jwt.RefreshDays);
 
