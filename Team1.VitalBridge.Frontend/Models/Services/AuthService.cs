@@ -541,10 +541,20 @@ EXEC msdb.dbo.sp_send_dbmail
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == email.Trim().ToLower());
             if (user == null) return; // 不洩漏帳號存在與否
 
+            // 防止短時間重複寄送（假設有 LastPasswordResetEmailSentAt 欄位）
+            var now = DateTime.UtcNow;
+            var minInterval = TimeSpan.FromMinutes(5);
+            if (user.LastPasswordResetEmailAt != null && now - user.LastPasswordResetEmailAt < minInterval)
+            {
+                // 可選：丟出例外或直接 return
+                throw new InvalidOperationException("請勿頻繁申請重設密碼，請稍後再試。");
+            }
+
             // 產生 token
             var token = Guid.NewGuid().ToString("N");
             user.ResetPasswordConfirmCode = token;
             user.ResetPasswordConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1);
+            user.LastPasswordResetEmailAt = now; // 更新寄送時間
 
             await _db.SaveChangesAsync();
 
@@ -552,29 +562,37 @@ EXEC msdb.dbo.sp_send_dbmail
             var resetLink = $"https://localhost:7184/VitalBridge/reset-password.html?email={email}&token={token}";
             Console.WriteLine($"發送重設密碼郵件到 {email}，連結：{resetLink}");
 
-            string sql = $@"
-                EXEC msdb.dbo.sp_send_dbmail
-                    @profile_name = 'VitalBridge',
-                    @recipients = '{user.Email}', 
-                    @subject = '【VitalBridge】重設您的密碼',
-                    @body = '
-                親愛的 {user.Name} 您好：
+            string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {user.Name} 您好：</p>
+    <p>您剛剛提出了重設密碼的請求。<br/>
+       請點擊以下按鈕來設定新的登入密碼：</p>
+    <p>
+      <a href=""{resetLink}""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        前往重設密碼頁面
+      </a>
+    </p>
+    <p>此連結將於 1 小時後失效，請及早完成設定。<br/>
+       如果您並未提出重設密碼的申請，請忽略此封信件，您的帳號資訊不會受到影響。</p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
 
-                您剛剛提出了重設密碼的請求。  
-                請點擊以下連結來設定新的登入密碼：
+            string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】重設您的密碼',
+    @body = @Body,
+    @body_format = 'HTML';";
 
-                {resetLink}
-
-                此連結將於 30 分鐘後失效，請及早完成設定。  
-                如果您並未提出重設密碼的申請，請忽略此封信件，您的帳號資訊不會受到影響。
-
-                祝您使用愉快！
-
-                -- VitalBridge 系統通知
-                ',
-                    @body_format = 'TEXT';";
-
-            _db.Database.ExecuteSqlRaw(sql);
+            _db.Database.ExecuteSqlRaw(sql,
+                new SqlParameter("@Email", user.Email),
+                new SqlParameter("@Body", body));
 
 
         }
@@ -590,6 +608,7 @@ EXEC msdb.dbo.sp_send_dbmail
             user.Password = HashUtility.HashPassword(newPassword);
             user.ResetPasswordConfirmCode = null;
             user.ResetPasswordConfirmCodeExpiresAt = null;
+            user.LastPasswordResetEmailAt = null;
             user.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();

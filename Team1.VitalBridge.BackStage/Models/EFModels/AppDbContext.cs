@@ -508,9 +508,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.Township).WithMany(p => p.MemberProfiles).HasConstraintName("FK__MemberPro__towns__73501C2F");
 
-            entity.HasOne(d => d.User).WithOne(p => p.MemberProfile)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__MemberPro__userI__7167D3BD");
+            entity.HasOne(d => d.User).WithOne(p => p.MemberProfile).HasConstraintName("FK__MemberPro__userI__7167D3BD");
         });
 
         modelBuilder.Entity<Notify>(entity =>
