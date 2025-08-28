@@ -511,5 +511,86 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
         }
+
+
+        /// <summary>
+        /// 取得訂單詳細資訊
+        /// </summary>
+        [HttpGet("{orderId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetOrderDetails(int orderId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .Where(o => o.Id == orderId && o.CustomerId == userId)
+                .Include(o => o.OrderItems)
+                .Include(o => o.OrderRecipent)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.Ship)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.City)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.Township)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.PayMethod)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.StatusNavigation)
+                .Include(o => o.OrderStatuses)
+                    .ThenInclude(os => os.OrderStatusItem)
+                .Select(o => new
+                {
+                    // 基本資訊
+                    o.Id,
+                    o.OrderNumber,
+                    o.TotalAmount,
+                    o.SubtotalAmount,
+                    o.ShippingFee,
+                    o.CouponDiscount,
+                    o.CreatedAt,
+                    o.Note,
+
+                    // 收件人資訊
+                    RecipientName = o.OrderRecipent.RecipentName,
+                    RecipientPhone = o.OrderRecipent.RecipentPhone,
+
+                    // 配送資訊
+                    ShippingMethod = o.OrderShipMethod.Ship.ShipMethodName,
+                    ShippingAddress = $"{o.OrderShipMethod.City.Name}{o.OrderShipMethod.Township.Name}{o.OrderShipMethod.DetailAddress}",
+                    TrackingCode = o.OrderShipMethod.HomeTrackingCode ?? o.OrderShipMethod.StoreTrackingCode,
+
+                    // 付款資訊
+                    PaymentMethod = o.Payment.PayMethod.Name,
+                    PaymentStatus = o.Payment.StatusNavigation.Name,
+                    PaymentStatusId = o.Payment.Status,
+
+                    // 目前訂單狀態
+                    CurrentStatus = o.OrderStatuses
+                        .OrderByDescending(os => os.CreatedAt)
+                        .First().OrderStatusItem.Name,
+                    CurrentStatusId = o.OrderStatuses
+                        .OrderByDescending(os => os.CreatedAt)
+                        .First().OrderStatusItemId,
+
+                    // 商品明細
+                    OrderItems = o.OrderItems.Select(oi => new
+                    {
+                        oi.ProductId,
+                        oi.ProductName,
+                        oi.UnitPrice,
+                        oi.Quantity,
+                        oi.Subtotal
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                return NotFound(new { success = false, message = "訂單不存在" });
+
+            return Ok(new { success = true, data = order });
+        }
+
     }
 }
