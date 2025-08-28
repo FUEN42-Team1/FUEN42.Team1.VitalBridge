@@ -22,6 +22,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         {
             var categories = await _context.ContentCategories
                                    .Where(c => c.ParentCategoryId == id)
+                                   .OrderBy(c => c.DisplayOrder)
                                    .ToListAsync();
 
             if (!categories.Any())
@@ -45,6 +46,25 @@ namespace Team1.VitalBridge.Frontend.Controllers
             }
 
             return categoryDtos; // Returns a 200 OK with the list of categories.
+        }
+
+        [HttpGet("popular/{categoryid?}")]
+        public async Task<ActionResult<IEnumerable<ContentCategoryDTO>>> GetPopularCategories(int? categoryid)
+        {
+            var categories = await _context.ContentCategories
+               .Where(c => c.ParentCategoryId == categoryid)
+               .OrderByDescending(c => _context.Contents.Count(content => content.ContentCategoryId == c.Id))
+               .Take(3)
+               .Select(c => new 
+               {
+                   Id = c.Id,
+                   Name = c.Name,
+                   NumberOfArticles = _context.Contents.Count(content => content.ContentCategoryId == c.Id)
+               })
+               .ToListAsync();
+
+            return Ok(categories);
+
         }
     }
 }
