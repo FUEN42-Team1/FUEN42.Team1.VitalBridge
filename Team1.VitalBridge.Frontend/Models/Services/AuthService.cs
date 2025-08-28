@@ -246,7 +246,7 @@ EXEC msdb.dbo.sp_send_dbmail
                 }
             }
 
-
+            
             if (user.Status == "banned")
                 throw new UnauthorizedAccessException("帳號已停權");
             if (user.Status == "unverified")
