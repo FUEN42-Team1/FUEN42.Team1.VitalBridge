@@ -615,6 +615,31 @@ EXEC msdb.dbo.sp_send_dbmail
             return true;
         }
 
+        public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            // 驗證舊密碼
+            if (!HashUtility.VerifyPassword(oldPassword, user.Password))
+                throw new InvalidOperationException("舊密碼錯誤");
+
+            // 可加：新密碼格式檢查
+            // if (!IsValidPassword(newPassword)) throw new InvalidOperationException("新密碼格式不符");
+
+            user.Password = HashUtility.HashPassword(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+
+
+
+
+
+
+
         // ==== Helpers（服務內部） ====
 
         //private async Task<string[]> GetUserRolesAsync(int userId)

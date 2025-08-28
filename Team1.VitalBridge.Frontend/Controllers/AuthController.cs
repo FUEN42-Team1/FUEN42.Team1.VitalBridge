@@ -147,10 +147,29 @@ namespace Team1.VitalBridge.Frontend.Controllers
             return Ok();
         }
 
+        //修改密碼
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (dto.NewPassword != dto.ConfirmPassword)
+                return BadRequest("新密碼與確認密碼不一致");
 
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
 
-
-
+            try
+            {
+                var result = await _auth.ChangePasswordAsync(userId, dto.OldPassword, dto.NewPassword);
+                if (!result) return BadRequest("密碼修改失敗");
+                return Ok("密碼已成功修改");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
 
