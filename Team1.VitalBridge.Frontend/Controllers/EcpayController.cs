@@ -107,7 +107,8 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     // 更新 Payment 記錄
                     if (order.Payment != null)
                     {
-                        if (returnCode == "1") // 付款成功
+						// 根據綠界文件https://developers.ecpay.com.tw/?p=2878#elementor-toc__heading-anchor-2，RtnCode=1代表 付款成功。因為在前面有宣告var returnCode = formData["RtnCode"]; 所以returnCode 就是RtnCode
+						if (returnCode == "1") // 付款成功
                         {
                             order.Payment.Status = 2; // 已付款
                             order.Payment.PaidAt = DateTime.Now;

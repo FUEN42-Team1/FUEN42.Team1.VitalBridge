@@ -39,6 +39,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 5. 產生綠界付款表單
         /// </summary>
         /// 
+     
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)
@@ -267,11 +268,75 @@ namespace Team1.VitalBridge.Frontend.Controllers
             };
 
         }
+		/// <summary>
+		/// 查詢訂單付款狀態 - 供前端付款結果頁面使用
+		/// </summary>
 
-        /// <summary>
-        /// 將資料庫的付款方式名稱對應到綠界的 ChoosePayment 參數
-        /// </summary>
-        private string GetEcpayChoosePayment(string paymentMethodName)
+		[Authorize] // 需要登入
+		[HttpGet("payment-status/{orderNumber}")]
+        public async Task<IActionResult> GetOrderPaymentStatus(string orderNumber)
+        {
+			// 取得當前使用者 ID
+			var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			if (!int.TryParse(userIdStr, out var userId))
+				return Unauthorized("請重新登入");
+
+			try
+            {
+				var order = await _context.Orders
+                    .Where(o => o.OrderNumber == orderNumber && o.CustomerId == userId) // 確保當前訂單屬於當前使用者
+					.Select(o => new {
+						o.OrderNumber,
+						o.TotalAmount,
+						o.CreatedAt,
+						// 付款資訊
+						PaymentStatusId = o.Payment != null ?   o.Payment.Status : (int?)null,
+						PaymentStatusName = o.Payment != null
+			                ? o.Payment.StatusNavigation.Name
+			                : "尚未建立付款記錄",
+						TransactionId = o.Payment != null ? o.Payment.TransactionId : null,
+						PaidAt = o.Payment != null ? o.Payment.PaidAt : null,
+
+						// 訂單狀態
+						OrderStatusName = o.OrderStatuses
+					        .OrderByDescending(os => os.CreatedAt)
+					        .Select(os => os.OrderStatusItem.Name)
+					        .FirstOrDefault() ?? "處理中"
+					})
+			        .FirstOrDefaultAsync();
+
+				if (order == null)
+					return NotFound(new { success = false, message = "訂單不存在" });
+				// 回傳簡化的訂單狀態資訊
+				var result = new
+                {
+
+					success = true,
+					orderNumber = order.OrderNumber,
+					totalAmount = order.TotalAmount,
+					paymentStatus = order.PaymentStatusName,
+					paymentStatusId = order.PaymentStatusId,
+					transactionId = order.TransactionId,
+					paidAt = order.PaidAt,
+					orderStatus = order.OrderStatusName,
+					createdAt = order.CreatedAt,
+					isPaid = order.PaymentStatusId == 2
+					// 2 = 已付款 (是資料庫的paymentStatus 裡面定義的id 2 代表 已付款)
+				}; 
+                return Ok(result);
+			}
+            catch (Exception ex) 
+            {
+				Console.WriteLine($"查詢訂單付款狀態錯誤: {ex.Message}");
+				return StatusCode(500, new { success = false, message = "查詢失敗，請稍後再試" });
+			}
+        
+        }
+
+		/// <summary>
+		/// 將資料庫的付款方式名稱對應到綠界的 ChoosePayment 參數
+		/// </summary>
+		private string GetEcpayChoosePayment(string paymentMethodName)
         {
             // 根據您資料庫中的付款方式名稱來對應綠界的參數
             return paymentMethodName?.ToLower() switch
@@ -311,7 +376,8 @@ namespace Team1.VitalBridge.Frontend.Controllers
             // 5. SHA256加密
             using (var sha256 = SHA256.Create())
             {
-                var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(stringToHash));
+				// 這是綠界檢查碼資料https://developers.ecpay.com.tw/?p=2902
+				var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(stringToHash));
                 return BitConverter.ToString(hash).Replace("-", "").ToUpper();
             }
         }
