@@ -101,13 +101,14 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 }
 
                 // 5. 更新付款狀態
-                using var transaction = await _context.Database.BeginTransactionAsync();
+                //using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
                     // 更新 Payment 記錄
                     if (order.Payment != null)
                     {
-                        if (returnCode == "1") // 付款成功
+						// 根據綠界文件https://developers.ecpay.com.tw/?p=2878#elementor-toc__heading-anchor-2，RtnCode=1代表 付款成功。因為在前面有宣告var returnCode = formData["RtnCode"]; 所以returnCode 就是RtnCode
+						if (returnCode == "1") // 付款成功
                         {
                             order.Payment.Status = 2; // 已付款
                             order.Payment.PaidAt = DateTime.Now;
@@ -148,7 +149,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
                         }
                     }
                     await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                    //await transaction.CommitAsync();
 
                     Console.WriteLine($"訂單 {orderNumber} 付款狀態更新完成，結果: {(returnCode == "1" ? "成功" : "失敗")}");
 
@@ -157,7 +158,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    //await transaction.RollbackAsync();
                     Console.WriteLine($"更新訂單狀態錯誤: {ex.Message}");
                     return StatusCode(500, "更新訂單狀態失敗");
                 }

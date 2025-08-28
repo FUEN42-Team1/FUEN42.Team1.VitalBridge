@@ -7,6 +7,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using Team1.VitalBridge.Frontend.Interfaces;
+using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Settings;
 using static Team1.VitalBridge.Frontend.Models.DTOs.ECShop.CheckoutDtos;
@@ -19,12 +21,13 @@ namespace Team1.VitalBridge.Frontend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IOptions<EcpaySettings> _ecpaySettings;
+        private readonly IPaymentMethodMappingService _paymentMappingService;
 
-       
-        public OrdersController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings)
+        public OrdersController(AppDbContext context, IOptions<EcpaySettings> ecpaySettings, IPaymentMethodMappingService paymentMappingService)
         {
             this._context=context;
             _ecpaySettings = ecpaySettings;
+            this._paymentMappingService=paymentMappingService;
         }
 
         /// <summary>
@@ -37,6 +40,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 5. 產生綠界付款表單
         /// </summary>
         /// 
+     
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequestDto request)
@@ -190,7 +194,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
                 // 16.產生綠界付款表單資料
-                var ecpayFormData = GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail);
+                var ecpayFormData = await GenerateEcpayFormData(order, request.CustomerName, request.CustomerEmail, request.PaymentMethodId);
                 var response = new CreateOrderResponseDto
                 {
                     Success = true,
@@ -218,9 +222,14 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// 產生綠界付款表單資料
         /// 這邊就會用到綠界設定的資料
         /// </summary>
-        private EcpayFormDataDto GenerateEcpayFormData(Order order, string customerName, string customerEmail)
+        private async Task<EcpayFormDataDto> GenerateEcpayFormData(Order order, string customerName, string customerEmail, int paymentMethodId)
         {
             var ecpaySettings = _ecpaySettings.Value; // 取得設定
+
+            // 使用服務來取得對應的綠界付款方式參數
+            string choosePayment = _paymentMappingService.GetEcpayChoosePaymentById(paymentMethodId, _context);
+
+           
             var formData = new Dictionary<string, string>
             {
                 ["MerchantID"] = ecpaySettings.MerchantId,  // 改用設定
@@ -230,11 +239,11 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["TotalAmount"] = ((int)order.TotalAmount).ToString(),
                 ["TradeDesc"] = "VitalBridge商城購物",
                 ["ItemName"] = GetOrderItemsDescription(order.Id),
-                ["ReturnURL"] = ecpaySettings.NotifyUrl,     // 改用設定
-                ["ClientBackURL"] = ecpaySettings.ReturnUrl, // 改用設定
-                ["OrderResultURL"] = ecpaySettings.ReturnUrl, // 改用設定
+                ["ReturnURL"] = ecpaySettings.ReturnUrl,     // 改用設定
+                ["ClientBackURL"] = ecpaySettings.ClientBackUrl, // 改用設定
+                ["OrderResultURL"] = ecpaySettings.OrderResultUrl, // 改用設定
                 ["NeedExtraPaidInfo"] = "N",
-                ["ChoosePayment"] = "ALL",
+                ["ChoosePayment"] = choosePayment, //動態設定付款方式
                 ["PlatformID"] = "",
                 ["InvoiceMark"] = "N",
                 ["CustomField1"] = order.Id.ToString(),
@@ -243,8 +252,15 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 ["CustomField4"] = "",
                 ["EncryptType"] = "1"
             };
-            // 產生檢查碼
-            var checkMacValue = GenerateCheckMacValue(formData);
+
+			// 記錄 log 供除錯
+			Console.WriteLine($"訂單 {order.OrderNumber} 綠界 URL 設定:");
+			Console.WriteLine($"  ReturnURL (後端): {ecpaySettings.ReturnUrl}");
+			Console.WriteLine($"  ClientBackURL (前端): {ecpaySettings.ClientBackUrl}");
+			Console.WriteLine($"  OrderResultURL (前端): {ecpaySettings.OrderResultUrl}");
+
+			// 產生檢查碼
+			var checkMacValue = GenerateCheckMacValue(formData);
             formData.Add("CheckMacValue", checkMacValue);
             return new EcpayFormDataDto
             {
@@ -252,6 +268,123 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 FormData = formData
             };
 
+        }
+		[HttpPost("ecpay-order-result")]
+		[AllowAnonymous] // 允許綠界訪問
+		public async Task<IActionResult> EcpayOrderResult([FromForm] EcpayReturnDto returnData)
+		{
+			try
+			{
+				// 接收綠界的 OrderResultURL POST 回傳
+				var orderNumber = returnData.MerchantTradeNo;
+				var rtnCode = returnData.RtnCode;
+
+				// 不需要更新資料庫（ReturnURL 已經處理了）
+				// 只負責重導向到前端頁面
+
+				if (rtnCode == "1")
+				{
+					// 成功：重導向到付款成功頁面，並帶上訂單編號
+					return Redirect($"https://localhost:7184/VitalBridge/ECshop/payment-success.html?orderNumber={orderNumber}");
+				}
+				else
+				{
+					// 失敗：重導向到付款失敗頁面
+					return Redirect($"/ECshop/payment-failed.html?error={returnData.RtnMsg}");
+				}
+			}
+			catch (Exception ex)
+			{
+				return Redirect("/ECshop/payment-failed.html?error=系統錯誤");
+			}
+		}
+
+
+
+		/// <summary>
+		/// 查詢訂單付款狀態 - 供前端付款結果頁面使用
+		/// </summary>
+		/// 
+
+		[Authorize] // 需要登入
+		[HttpGet("payment-status/{orderNumber}")]
+        public async Task<IActionResult> GetOrderPaymentStatus(string orderNumber)
+        {
+			// 取得當前使用者 ID
+			var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			if (!int.TryParse(userIdStr, out var userId))
+				return Unauthorized("請重新登入");
+
+			try
+            {
+				var order = await _context.Orders
+                    .Where(o => o.OrderNumber == orderNumber && o.CustomerId == userId) // 確保當前訂單屬於當前使用者
+					.Select(o => new {
+						o.OrderNumber,
+						o.TotalAmount,
+						o.CreatedAt,
+						// 付款資訊
+						PaymentStatusId = o.Payment != null ?   o.Payment.Status : (int?)null,
+						PaymentStatusName = o.Payment != null
+			                ? o.Payment.StatusNavigation.Name
+			                : "尚未建立付款記錄",
+						TransactionId = o.Payment != null ? o.Payment.TransactionId : null,
+						PaidAt = o.Payment != null ? o.Payment.PaidAt : null,
+
+						// 訂單狀態
+						OrderStatusName = o.OrderStatuses
+					        .OrderByDescending(os => os.CreatedAt)
+					        .Select(os => os.OrderStatusItem.Name)
+					        .FirstOrDefault() ?? "處理中"
+					})
+			        .FirstOrDefaultAsync();
+
+				if (order == null)
+					return NotFound(new { success = false, message = "訂單不存在" });
+				// 回傳簡化的訂單狀態資訊
+				var result = new
+                {
+
+					success = true,
+					orderNumber = order.OrderNumber,
+					totalAmount = order.TotalAmount,
+					paymentStatus = order.PaymentStatusName,
+					paymentStatusId = order.PaymentStatusId,
+					transactionId = order.TransactionId,
+					paidAt = order.PaidAt,
+					orderStatus = order.OrderStatusName,
+					createdAt = order.CreatedAt,
+					isPaid = order.PaymentStatusId == 2
+					// 2 = 已付款 (是資料庫的paymentStatus 裡面定義的id 2 代表 已付款)
+				}; 
+                return Ok(result);
+			}
+            catch (Exception ex) 
+            {
+				Console.WriteLine($"查詢訂單付款狀態錯誤: {ex.Message}");
+				return StatusCode(500, new { success = false, message = "查詢失敗，請稍後再試" });
+			}
+        
+        }
+
+		/// <summary>
+		/// 將資料庫的付款方式名稱對應到綠界的 ChoosePayment 參數
+		/// </summary>
+		private string GetEcpayChoosePayment(string paymentMethodName)
+        {
+            // 根據您資料庫中的付款方式名稱來對應綠界的參數
+            return paymentMethodName?.ToLower() switch
+            {
+                "信用卡付款" => "Credit",           // 只顯示信用卡
+                "信用卡" => "Credit",              // 只顯示信用卡
+                "atm轉帳" => "ATM",               // 只顯示 ATM
+                "atm付款" => "ATM",               // 只顯示 ATM  
+                "網路atm" => "ATM",               // 只顯示 ATM
+                "超商代碼繳費" => "CVS",            // 只顯示超商代碼
+                "超商條碼繳費" => "BARCODE",        // 只顯示超商條碼
+                "行動支付" => "AndroidPay",        // 行動支付相關
+                _ => "ALL"                        // 預設顯示所有付款方式
+            };
         }
 
         /// <summary>
@@ -277,7 +410,8 @@ namespace Team1.VitalBridge.Frontend.Controllers
             // 5. SHA256加密
             using (var sha256 = SHA256.Create())
             {
-                var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(stringToHash));
+				// 這是綠界檢查碼資料https://developers.ecpay.com.tw/?p=2902
+				var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(stringToHash));
                 return BitConverter.ToString(hash).Replace("-", "").ToUpper();
             }
         }
@@ -377,5 +511,86 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
         }
+
+
+        /// <summary>
+        /// 取得訂單詳細資訊
+        /// </summary>
+        [HttpGet("{orderId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetOrderDetails(int orderId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .Where(o => o.Id == orderId && o.CustomerId == userId)
+                .Include(o => o.OrderItems)
+                .Include(o => o.OrderRecipent)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.Ship)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.City)
+                .Include(o => o.OrderShipMethod)
+                    .ThenInclude(osm => osm.Township)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.PayMethod)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.StatusNavigation)
+                .Include(o => o.OrderStatuses)
+                    .ThenInclude(os => os.OrderStatusItem)
+                .Select(o => new
+                {
+                    // 基本資訊
+                    o.Id,
+                    o.OrderNumber,
+                    o.TotalAmount,
+                    o.SubtotalAmount,
+                    o.ShippingFee,
+                    o.CouponDiscount,
+                    o.CreatedAt,
+                    o.Note,
+
+                    // 收件人資訊
+                    RecipientName = o.OrderRecipent.RecipentName,
+                    RecipientPhone = o.OrderRecipent.RecipentPhone,
+
+                    // 配送資訊
+                    ShippingMethod = o.OrderShipMethod.Ship.ShipMethodName,
+                    ShippingAddress = $"{o.OrderShipMethod.City.Name}{o.OrderShipMethod.Township.Name}{o.OrderShipMethod.DetailAddress}",
+                    TrackingCode = o.OrderShipMethod.HomeTrackingCode ?? o.OrderShipMethod.StoreTrackingCode,
+
+                    // 付款資訊
+                    PaymentMethod = o.Payment.PayMethod.Name,
+                    PaymentStatus = o.Payment.StatusNavigation.Name,
+                    PaymentStatusId = o.Payment.Status,
+
+                    // 目前訂單狀態
+                    CurrentStatus = o.OrderStatuses
+                        .OrderByDescending(os => os.CreatedAt)
+                        .First().OrderStatusItem.Name,
+                    CurrentStatusId = o.OrderStatuses
+                        .OrderByDescending(os => os.CreatedAt)
+                        .First().OrderStatusItemId,
+
+                    // 商品明細
+                    OrderItems = o.OrderItems.Select(oi => new
+                    {
+                        oi.ProductId,
+                        oi.ProductName,
+                        oi.UnitPrice,
+                        oi.Quantity,
+                        oi.Subtotal
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+                return NotFound(new { success = false, message = "訂單不存在" });
+
+            return Ok(new { success = true, data = order });
+        }
+
     }
 }

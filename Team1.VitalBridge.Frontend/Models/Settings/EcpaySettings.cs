@@ -7,7 +7,9 @@
         public string HashIV { get; set; } = string.Empty;
         public string PaymentUrl { get; set; } = string.Empty;
         public string ReturnUrl { get; set; } = string.Empty;
-        public string NotifyUrl { get; set; } = string.Empty;
+        public string ClientBackUrl { get; set; } = string.Empty;
 
-    }
+		public string OrderResultUrl { get; set; } = string.Empty;
+
+	}
 }
