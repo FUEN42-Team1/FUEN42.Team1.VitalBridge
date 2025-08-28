@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using Team1.VitalBridge.Frontend.Interfaces;
+using Team1.VitalBridge.Frontend.Models.DTOs.ECShop;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Settings;
 using static Team1.VitalBridge.Frontend.Models.DTOs.ECShop.CheckoutDtos;
@@ -268,9 +269,42 @@ namespace Team1.VitalBridge.Frontend.Controllers
             };
 
         }
+		[HttpPost("ecpay-order-result")]
+		[AllowAnonymous] // 允許綠界訪問
+		public async Task<IActionResult> EcpayOrderResult([FromForm] EcpayReturnDto returnData)
+		{
+			try
+			{
+				// 接收綠界的 OrderResultURL POST 回傳
+				var orderNumber = returnData.MerchantTradeNo;
+				var rtnCode = returnData.RtnCode;
+
+				// 不需要更新資料庫（ReturnURL 已經處理了）
+				// 只負責重導向到前端頁面
+
+				if (rtnCode == "1")
+				{
+					// 成功：重導向到付款成功頁面，並帶上訂單編號
+					return Redirect($"https://localhost:7184/VitalBridge/ECshop/payment-success.html?orderNumber={orderNumber}");
+				}
+				else
+				{
+					// 失敗：重導向到付款失敗頁面
+					return Redirect($"/ECshop/payment-failed.html?error={returnData.RtnMsg}");
+				}
+			}
+			catch (Exception ex)
+			{
+				return Redirect("/ECshop/payment-failed.html?error=系統錯誤");
+			}
+		}
+
+
+
 		/// <summary>
 		/// 查詢訂單付款狀態 - 供前端付款結果頁面使用
 		/// </summary>
+		/// 
 
 		[Authorize] // 需要登入
 		[HttpGet("payment-status/{orderNumber}")]
