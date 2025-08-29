@@ -558,7 +558,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                     {
                         return NotFound();
                     }
-
+                    var FileId = _context.FileStreams.FirstOrDefault(f => f.FileName == viewModel.PhotoUrl).Id;
                     // 更新基本資料
                     organization.Name = viewModel.Name;
                     organization.PhotoUrl = viewModel.PhotoUrl;
@@ -570,7 +570,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                     organization.AgeLimits = viewModel.AgeLimits;
                     organization.Description = viewModel.Description;
                     organization.MapUrl = viewModel.MapUrl;
-                    organization.FileId = viewModel.FileId;
+                    organization.FileId = FileId;
 
                     // 更新多對多關係 - 補助資訊
                     _context.OrganizationSubsidyInfos.RemoveRange(organization.OrganizationSubsidyInfos);
