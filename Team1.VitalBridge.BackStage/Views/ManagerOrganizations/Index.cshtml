@@ -85,6 +85,17 @@
                 min-height: 60px;
             }
         }
+
+        /* 載入中的樣式 */
+        .loading-content {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
     </style>
 }
 
@@ -169,9 +180,9 @@
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
                                         <i class="fas fa-edit"></i> 編輯
                                     </a>
-                                    <button type="button" class="btn btn-info btn-sm"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#detailsModal_@item.Id">
+                                    <button type="button" class="btn btn-info btn-sm details-btn"
+                                            data-organization-id="@item.Id"
+                                            data-organization-name="@item.Name">
                                         <i class="fas fa-info-circle"></i> 詳情
                                     </button>
                                 </div>
@@ -224,168 +235,221 @@
     </div>
 </div>
 
-@foreach (var item in Model.Items)
-{
-    var organizationDetails = (ViewBag.DetailsViewModels as List<ManagerOrganizationDetailsViewModel>)
-        .FirstOrDefault(d => d.Id == item.Id);
-
-    if (organizationDetails != null)
-    {
-        <div class="modal fade" id="detailsModal_@item.Id" tabindex="-1" aria-labelledby="detailsModalLabel_@item.Id" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detailsModalLabel_@item.Id">機構詳情 - @organizationDetails.Name</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- 動態載入的詳情模態視窗 -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">機構詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detailsModalBody">
+                <div class="loading-content text-center">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">載入中...</span>
                     </div>
-                    <div class="modal-body">
-                        <div class="container-fluid">
-                            @if (!string.IsNullOrEmpty(organizationDetails.PhotoUrl))
-                            {
-                                <div class="mb-3 text-center">
-                                    <img src="/api/UploadFile/GetFile?fileName=@organizationDetails.PhotoUrl" class="img-fluid rounded" alt="機構照片" style="max-height: 300px; object-fit: cover;">
-                                </div>
-                            }
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <p><strong>名稱:</strong> @organizationDetails.Name</p>
-                                    @* <p><strong>所屬機構名稱:</strong> @organizationDetails.InstitutionName</p> *@
-                                    <p><strong>機構類別名稱:</strong> @organizationDetails.TypeName</p>
-                                    <p><strong>地址:</strong> @organizationDetails.CityName @organizationDetails.DistrictName @organizationDetails.Address</p>
-                                    <p><strong>床位數:</strong> @organizationDetails.BedCount</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>收容年齡限制:</strong> @organizationDetails.AgeLimits</p>
-                                    <p><strong>Google 地圖連結:</strong> <a href="@organizationDetails.MapUrl" target="_blank">點擊前往</a></p>
-                                    <p><strong>是否啟用:</strong> @(organizationDetails.IsActive ? "是" : "否")</p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>機構簡述:</strong> @organizationDetails.Description</p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>政府補助資訊:</strong> @string.Join(", ", organizationDetails.SubsidyInfoDescription)</p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>特色服務:</strong></p>
-                                    @if (organizationDetails.FeatureServices != null && organizationDetails.FeatureServices.Any())
-                                    {
-                                        <div class="row">
-                                            @foreach (var featureService in organizationDetails.FeatureServices)
-                                            {
-                                                <div class="col-md-3 col-sm-4 col-6 mb-3">
-                                                    <div class="card h-100 feature-service-detail-card">
-                                                        <div class="card-body text-center p-2">
-                                                            @if (!string.IsNullOrEmpty(featureService.ImageUrl))
-                                                            {
-                                                                <img src="/api/UploadFile/GetFile?fileName=@featureService.ImageUrl" 
-                                                                     alt="@featureService.Name" 
-                                                                     class="rounded mb-2" 
-                                                                     style="width: 40px; height: 40px; object-fit: cover;" />
-                                                            }
-                                                            else
-                                                            {
-                                                                <div class="d-flex align-items-center justify-content-center bg-light border rounded mb-2 mx-auto" 
-                                                                     style="width: 40px; height: 40px; color: #6c757d;">
-                                                                    <i class="fas fa-image"></i>
-                                                                </div>
-                                                            }
-                                                            <small class="text-muted d-block">@featureService.Name</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">無特色服務</span>
-                                    }
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>服務對象:</strong> @string.Join(", ", organizationDetails.ServiceTargetNames)</p>
-                                </div>
-                            </div>
-                            <hr />
-
-                            <h5>房型資訊</h5>
-                            @if (organizationDetails.Rooms.Any())
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>房型名稱</th>
-                                                <th>每月費用</th>
-                                                <th>房間數量</th>
-                                                <th>是否需要押金</th>
-                                                <th>押金金額</th>
-                                                <th>押金月數</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var room in organizationDetails.Rooms)
-                                            {
-                                                <tr>
-                                                    <td>@Html.DisplayFor(modelItem => room.RoomTypeName)</td>
-                                                    <td>@room.MonthlyPrice?.ToString("C0")</td>
-                                                    <td>@Html.DisplayFor(modelItem => room.RoomQuantity)</td>
-                                                    <td>
-                                                        @if (room.HasDeposit.GetValueOrDefault())
-                                                        {
-                                                            <i class="bi bi-check-circle-fill text-success"></i>
-                                                        }
-                                                        else
-                                                        {
-                                                            <i class="bi bi-x-circle-fill text-danger"></i>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (room.HasDeposit.GetValueOrDefault())
-                                                        {
-                                                            @room.DepositAmount?.ToString("C0")
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>-</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                        @if (room.HasDeposit.GetValueOrDefault())
-                                                        {
-                                                            @Html.DisplayFor(modelItem => room.DepositMonths)
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>-</span>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <p>無房型資訊。</p>
-                            }
-
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                    </div>
+                    <p class="mt-2 mb-0">載入詳細資料中...</p>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
         </div>
-    }
-}
+    </div>
+</div>
 
 @section Scripts {
     <script src="~/sb-admin/vendor/jquery/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
+            // 詳情按鈕點擊事件 - 按需載入
+            $('.details-btn').on('click', function () {
+                const organizationId = $(this).data('organization-id');
+                const organizationName = $(this).data('organization-name');
+                
+                // 設定模態視窗標題
+                $('#detailsModalLabel').text(`機構詳情 - ${organizationName}`);
+                
+                // 重置模態視窗內容為載入中狀態
+                $('#detailsModalBody').html(`
+                    <div class="loading-content text-center">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                        <p class="mt-2 mb-0">載入詳細資料中...</p>
+                    </div>
+                `);
+                
+                // 顯示模態視窗
+                const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                modal.show();
+                
+                // AJAX 載入詳細資料
+                $.ajax({
+                    url: `/api/ManagerOrganizations/details/${organizationId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        renderOrganizationDetails(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('載入詳細資料失敗:', {xhr, status, error});
+                        
+                        let errorMessage = '載入詳細資料時發生錯誤，請稍後再試。';
+                        if (xhr.status === 404) {
+                            errorMessage = '找不到指定的機構資料。';
+                        } else if (xhr.status === 500) {
+                            errorMessage = '伺服器內部錯誤，請聯絡系統管理員。';
+                        }
+                        
+                        $('#detailsModalBody').html(`
+                            <div class="alert alert-danger text-center" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${errorMessage}
+                            </div>
+                        `);
+                    }
+                });
+            });
+            
+            // 渲染機構詳細資料
+            function renderOrganizationDetails(data) {
+                let html = '<div class="container-fluid">';
+                
+                // 機構照片
+                if (data.photoUrl) {
+                    html += `
+                        <div class="mb-3 text-center">
+                            <img src="/api/UploadFile/GetFile?fileName=${data.photoUrl}" 
+                                 class="img-fluid rounded" alt="機構照片" 
+                                 style="max-height: 300px; object-fit: cover;">
+                        </div>
+                    `;
+                }
+                
+                // 基本資訊
+                html += `
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p><strong>名稱:</strong> ${data.name || ''}</p>
+                            <p><strong>機構類別名稱:</strong> ${data.typeName || ''}</p>
+                            <p><strong>地址:</strong> ${data.cityName || ''} ${data.districtName || ''} ${data.address || ''}</p>
+                            <p><strong>床位數:</strong> ${data.bedCount || 0}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>收容年齡限制:</strong> ${data.ageLimits || '無限制'}</p>
+                            <p><strong>Google 地圖連結:</strong> ${data.mapUrl ? `<a href="${data.mapUrl}" target="_blank">點擊前往</a>` : '無'}</p>
+                            <p><strong>是否啟用:</strong> ${data.isActive ? '是' : '否'}</p>
+                        </div>
+                        <div class="col-12">
+                            <p><strong>機構簡述:</strong> ${data.description || '無'}</p>
+                        </div>
+                        <div class="col-12">
+                            <p><strong>政府補助資訊:</strong> ${data.subsidyInfoDescription && data.subsidyInfoDescription.length > 0 ? data.subsidyInfoDescription.join(', ') : '無'}</p>
+                        </div>
+                        <div class="col-12">
+                            <p><strong>特色服務:</strong></p>
+                `;
+                
+                // 特色服務
+                if (data.featureServices && data.featureServices.length > 0) {
+                    html += '<div class="row">';
+                    data.featureServices.forEach(function(service) {
+                        html += `
+                            <div class="col-md-3 col-sm-4 col-6 mb-3">
+                                <div class="card h-100 feature-service-detail-card">
+                                    <div class="card-body text-center p-2">
+                        `;
+                        
+                        if (service.imageUrl) {
+                            html += `
+                                <img src="/api/UploadFile/GetFile?fileName=${service.imageUrl}" 
+                                     alt="${service.name}" 
+                                     class="rounded mb-2" 
+                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                            `;
+                        } else {
+                            html += `
+                                <div class="d-flex align-items-center justify-content-center bg-light border rounded mb-2 mx-auto" 
+                                     style="width: 40px; height: 40px; color: #6c757d;">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            `;
+                        }
+                        
+                        html += `
+                                        <small class="text-muted d-block">${service.name}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<span class="text-muted">無特色服務</span>';
+                }
+                
+                html += `
+                        </div>
+                        <div class="col-12">
+                            <p><strong>服務對象:</strong> ${data.serviceTargetNames && data.serviceTargetNames.length > 0 ? data.serviceTargetNames.join(', ') : '無'}</p>
+                        </div>
+                    </div>
+                    <hr />
+                    <h5>房型資訊</h5>
+                `;
+                
+                // 房型資訊
+                if (data.rooms && data.rooms.length > 0) {
+                    html += `
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>房型名稱</th>
+                                        <th>每月費用</th>
+                                        <th>房間數量</th>
+                                        <th>是否需要押金</th>
+                                        <th>押金金額</th>
+                                        <th>押金月數</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    data.rooms.forEach(function(room) {
+                        const depositIcon = room.hasDeposit ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>';
+                        const depositAmount = room.hasDeposit && room.depositAmount ? `NT$ ${room.depositAmount.toLocaleString()}` : '-';
+                        const depositMonths = room.hasDeposit && room.depositMonths ? room.depositMonths : '-';
+                        const monthlyPrice = room.monthlyPrice ? `NT$ ${room.monthlyPrice.toLocaleString()}` : '-';
+                        
+                        html += `
+                            <tr>
+                                <td>${room.roomTypeName || ''}</td>
+                                <td>${monthlyPrice}</td>
+                                <td>${room.roomQuantity || 0}</td>
+                                <td>${depositIcon}</td>
+                                <td>${depositAmount}</td>
+                                <td>${depositMonths}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    html += '<p>無房型資訊。</p>';
+                }
+                
+                html += '</div>';
+                
+                // 更新模態視窗內容
+                $('#detailsModalBody').html(html);
+            }
+
             // 監聽每頁筆數變更
             $('#pageSize').on('change', function () {
                 const newPageSize = $(this).val();
@@ -428,7 +492,7 @@
                 $('#pageSize').val(pageSize);
             }
 
-            // 啟用/停用切換開關的邏輯 (使用 jQuery AJAX)
+            // 啟用/停用切換開關的邏輯
             $('.toggle-active-switch').on('change', function () {
                 const organizationId = $(this).data('id');
                 const organizationName = $(this).data('organization-name');

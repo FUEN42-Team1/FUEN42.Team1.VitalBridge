@@ -291,6 +291,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 .ToListAsync();
         }
 
+        // 只優化 Index 載入速度，其他功能完全不動
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string keyword = "")
         {
             var query = _context.Organizations
@@ -308,7 +309,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             var totalCount = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            // 獲取分頁後的項目列表
+            // 只載入基本資料，大幅提升載入速度
             var items = await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -322,67 +323,6 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
                 })
                 .ToListAsync();
 
-            // 為了能在 Index 頁面中直接生成模態視窗，我們需要預先載入所有詳細資訊
-            var organizationIds = items.Select(i => i.Id).ToList();
-            var detailsList = await _context.Organizations
-                .AsNoTracking()
-                .Include(o => o.City)
-                .Include(o => o.District)
-                .Include(o => o.Type)
-                //.Include(o => o.Institution) // 新增的資料表的欄位
-                .Include(o => o.OrganizationFeatureServices)
-                .ThenInclude(ofs => ofs.FeatureService)
-                .ThenInclude(fs => fs.File) // 包含特色服務的圖片檔案
-                .Include(o => o.OrganizationServiceTargets)
-                .ThenInclude(ost => ost.ServiceTarget)
-                .Include(o => o.OrganizationSubsidyInfos)
-                .ThenInclude(osi => osi.SubsidyInfo)
-                .Include(o => o.OrganizationRooms)
-                .ThenInclude(or => or.RoomType)
-                .Where(o => organizationIds.Contains(o.Id)) // 只查詢當前頁面上的機構
-                .Select(organization => new ManagerOrganizationDetailsViewModel
-                {
-                    Id = organization.Id,
-                    Name = organization.Name,
-                    PhotoUrl = organization.PhotoUrl,
-                    CityId = organization.CityId,
-                    CityName = organization.City.Name,
-                    DistrictId = organization.DistrictId,
-                    DistrictName = organization.District.Name,
-                    Address = organization.Address,
-                    TypeId = organization.TypeId,
-                    TypeName = organization.Type.Name,
-                    BedCount = organization.BedCount,
-                    AgeLimits = organization.AgeLimits,
-                    Description = organization.Description,
-                    MapUrl = organization.MapUrl,
-                    //InstitutionName = organization.Institution.Name, // 新增的資料表的欄位
-                    IsActive = organization.IsActive,
-                    IsDeleted = organization.IsDeleted,
-                    SubsidyInfoDescription = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfo.Description).ToList(),
-                    FeatureServiceNames = organization.OrganizationFeatureServices.Select(ofs => ofs.FeatureService.Name).ToList(),
-                    FeatureServices = organization.OrganizationFeatureServices.Select(ofs => new FeatureServiceDetailViewModel
-                    {
-                        Id = ofs.FeatureService.Id,
-                        Name = ofs.FeatureService.Name,
-                        ImageUrl = ofs.FeatureService.File != null ? ofs.FeatureService.File.FileName : null
-                    }).ToList(),
-                    ServiceTargetNames = organization.OrganizationServiceTargets.Select(ost => ost.ServiceTarget.Name).ToList(),
-                    Rooms = organization.OrganizationRooms.Select(r => new OrganizationRoomViewModel
-                    {
-                        Id = r.Id,
-                        OrganizationId = r.OrganizationId,
-                        RoomTypeId = r.RoomTypeId,
-                        RoomTypeName = r.RoomType.Name,
-                        MonthlyPrice = r.MonthlyPrice,
-                        RoomQuantity = r.RoomQuantity,
-                        HasDeposit = r.HasDeposit,
-                        DepositAmount = r.DepositAmount,
-                        DepositMonths = r.DepositMonths
-                    }).ToList()
-                })
-                .ToListAsync();
-
             var result = new PaginatedResult<ManagerOrganizationsViewModel>
             {
                 Items = items,
@@ -393,70 +333,86 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             };
 
             ViewBag.Keyword = keyword;
-            ViewBag.DetailsViewModels = detailsList; // 將詳細資訊列表傳遞給 View
+            // 移除詳細資訊的預載入，改為按需載入
 
             return View(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ToggleActive(int id)
+        // 新增按需載入詳細資料的 API
+        [HttpGet]
+        [Route("api/ManagerOrganizations/details/{id}")]
+        public async Task<IActionResult> GetOrganizationDetails(int id)
         {
             try
             {
-                var organization = await _context.Organizations.FindAsync(id);
-                if (organization == null)
+                var details = await _context.Organizations
+                    .AsNoTracking()
+                    .Include(o => o.City)
+                    .Include(o => o.District)
+                    .Include(o => o.Type)
+                    .Include(o => o.OrganizationFeatureServices)
+                    .ThenInclude(ofs => ofs.FeatureService)
+                    .ThenInclude(fs => fs.File)
+                    .Include(o => o.OrganizationServiceTargets)
+                    .ThenInclude(ost => ost.ServiceTarget)
+                    .Include(o => o.OrganizationSubsidyInfos)
+                    .ThenInclude(osi => osi.SubsidyInfo)
+                    .Include(o => o.OrganizationRooms)
+                    .ThenInclude(or => or.RoomType)
+                    .Where(o => o.Id == id && !o.IsDeleted)
+                    .Select(organization => new ManagerOrganizationDetailsViewModel
+                    {
+                        Id = organization.Id,
+                        Name = organization.Name,
+                        PhotoUrl = organization.PhotoUrl,
+                        CityId = organization.CityId,
+                        CityName = organization.City.Name,
+                        DistrictId = organization.DistrictId,
+                        DistrictName = organization.District.Name,
+                        Address = organization.Address,
+                        TypeId = organization.TypeId,
+                        TypeName = organization.Type.Name,
+                        BedCount = organization.BedCount,
+                        AgeLimits = organization.AgeLimits,
+                        Description = organization.Description,
+                        MapUrl = organization.MapUrl,
+                        IsActive = organization.IsActive,
+                        IsDeleted = organization.IsDeleted,
+                        SubsidyInfoDescription = organization.OrganizationSubsidyInfos.Select(osi => osi.SubsidyInfo.Description).ToList(),
+                        FeatureServiceNames = organization.OrganizationFeatureServices.Select(ofs => ofs.FeatureService.Name).ToList(),
+                        FeatureServices = organization.OrganizationFeatureServices.Select(ofs => new FeatureServiceDetailViewModel
+                        {
+                            Id = ofs.FeatureService.Id,
+                            Name = ofs.FeatureService.Name,
+                            ImageUrl = ofs.FeatureService.File != null ? ofs.FeatureService.File.FileName : null
+                        }).ToList(),
+                        ServiceTargetNames = organization.OrganizationServiceTargets.Select(ost => ost.ServiceTarget.Name).ToList(),
+                        Rooms = organization.OrganizationRooms.Select(r => new OrganizationRoomViewModel
+                        {
+                            Id = r.Id,
+                            OrganizationId = r.OrganizationId,
+                            RoomTypeId = r.RoomTypeId,
+                            RoomTypeName = r.RoomType.Name,
+                            MonthlyPrice = r.MonthlyPrice,
+                            RoomQuantity = r.RoomQuantity,
+                            HasDeposit = r.HasDeposit,
+                            DepositAmount = r.DepositAmount,
+                            DepositMonths = r.DepositMonths
+                        }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (details == null)
                 {
-                    _logger.LogWarning("嘗試切換不存在的機構狀態，機構 ID: {Id}", id);
-                    return Json(new { success = false, message = "找不到此機構。" });
+                    return NotFound(new { message = "找不到指定的機構" });
                 }
 
-                var oldStatus = organization.IsActive;
-                organization.IsActive = !organization.IsActive;
-                
-                // 記錄詳細的變更資訊
-                _logger.LogInformation("🔄 正在切換機構 '{Name}' (ID: {Id}) 的狀態：{OldStatus} → {NewStatus}", 
-                    organization.Name, organization.Id, oldStatus, organization.IsActive);
-                
-                // 明確標記實體已修改
-                _context.Entry(organization).State = EntityState.Modified;
-                
-                var result = await _context.SaveChangesAsync();
-                
-                if (result > 0)
-                {
-                    _logger.LogInformation("✅ 機構 '{Name}' (ID: {Id}) 狀態切換成功：{Status} (影響 {Rows} 筆資料)", 
-                        organization.Name, organization.Id, organization.IsActive ? "啟用" : "停用", result);
-                    
-                    // 驗證更新後的狀態 (重新查詢以確認)
-                    var verifyOrg = await _context.Organizations
-                        .AsNoTracking()
-                        .Where(o => o.Id == id)
-                        .Select(o => new { o.IsActive, o.IsDeleted })
-                        .FirstOrDefaultAsync();
-                    
-                    _logger.LogInformation("🔍 驗證機構 ID: {Id} 當前狀態：IsActive={IsActive}, IsDeleted={IsDeleted}", 
-                        id, verifyOrg?.IsActive, verifyOrg?.IsDeleted);
-                    
-                    var statusText = organization.IsActive ? "啟用" : "停用";
-                    return Json(new { 
-                        success = true, 
-                        organizationName = organization.Name, 
-                        newIsActive = organization.IsActive,
-                        message = $"機構 '{organization.Name}' 已{statusText}",
-                        verifiedStatus = verifyOrg?.IsActive // 回傳驗證後的狀態
-                    });
-                }
-                else
-                {
-                    _logger.LogWarning("⚠️ 機構 '{Name}' (ID: {Id}) 狀態切換失敗：SaveChanges 回傳 0", 
-                        organization.Name, organization.Id);
-                    return Json(new { success = false, message = "資料庫更新失敗，請稍後再試。" });
-                }
+                return Ok(details);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ 切換機構狀態時發生錯誤，機構 ID: {Id}", id);
-                return Json(new { success = false, message = "操作失敗，請稍後再試。" });
+                _logger.LogError(ex, "載入機構詳細資訊時發生錯誤，機構 ID: {Id}", id);
+                return BadRequest(new { message = "載入詳細資訊時發生錯誤" });
             }
         }
 
@@ -661,6 +617,69 @@ namespace Team1.VitalBridge.BackStage.Controllers.Orgs
             }
 
             return View(viewModel);
+        }
+
+        // POST: ManagerOrganizations/Edit/5
+        [HttpPost]
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            try
+            {
+                var organization = await _context.Organizations.FindAsync(id);
+                if (organization == null)
+                {
+                    _logger.LogWarning("嘗試切換不存在的機構狀態，機構 ID: {Id}", id);
+                    return Json(new { success = false, message = "找不到此機構。" });
+                }
+
+                var oldStatus = organization.IsActive;
+                organization.IsActive = !organization.IsActive;
+                
+                // 記錄詳細的變更資訊
+                _logger.LogInformation("🔄 正在切換機構 '{Name}' (ID: {Id}) 的狀態：{OldStatus} → {NewStatus}", 
+                    organization.Name, organization.Id, oldStatus, organization.IsActive);
+                
+                // 明確標記實體已修改
+                _context.Entry(organization).State = EntityState.Modified;
+                
+                var result = await _context.SaveChangesAsync();
+                
+                if (result > 0)
+                {
+                    _logger.LogInformation("✅ 機構 '{Name}' (ID: {Id}) 狀態切換成功：{Status} (影響 {Rows} 筆資料)", 
+                        organization.Name, organization.Id, organization.IsActive ? "啟用" : "停用", result);
+                    
+                    // 驗證更新後的狀態 (重新查詢以確認)
+                    var verifyOrg = await _context.Organizations
+                        .AsNoTracking()
+                        .Where(o => o.Id == id)
+                        .Select(o => new { o.IsActive, o.IsDeleted })
+                        .FirstOrDefaultAsync();
+                    
+                    _logger.LogInformation("🔍 驗證機構 ID: {Id} 當前狀態：IsActive={IsActive}, IsDeleted={IsDeleted}", 
+                        id, verifyOrg?.IsActive, verifyOrg?.IsDeleted);
+                    
+                    var statusText = organization.IsActive ? "啟用" : "停用";
+                    return Json(new { 
+                        success = true, 
+                        organizationName = organization.Name, 
+                        newIsActive = organization.IsActive,
+                        message = $"機構 '{organization.Name}' 已{statusText}",
+                        verifiedStatus = verifyOrg?.IsActive // 回傳驗證後的狀態
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ 機構 '{Name}' (ID: {Id}) 狀態切換失敗：SaveChanges 回傳 0", 
+                        organization.Name, organization.Id);
+                    return Json(new { success = false, message = "資料庫更新失敗，請稍後再試。" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ 切換機構狀態時發生錯誤，機構 ID: {Id}", id);
+                return Json(new { success = false, message = "操作失敗，請稍後再試。" });
+            }
         }
 
         private bool OrganizationExists(int id)
