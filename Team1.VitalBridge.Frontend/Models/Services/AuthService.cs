@@ -8,6 +8,8 @@ using Team1.VitalBridge.Frontend.Models.EFModels;
 using Microsoft.AspNetCore.Mvc;
 using Google.Apis.Auth;
 using Team1.VitalBridge.Frontend.Models.DTOs.Auth;
+using Microsoft.Data.SqlClient;
+using Team1.VitalBridge.Frontend.Interfaces.Security;
 
 namespace Team1.VitalBridge.Frontend.Models.Services
 {
@@ -18,10 +20,11 @@ namespace Team1.VitalBridge.Frontend.Models.Services
         private readonly IJwtService _jwt;
         private readonly IConfiguration _cfg;
         private readonly IHttpContextAccessor _http;
+        private readonly IRecaptchaVerifier _recaptcha;
 
-        public AuthService(AppDbContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http)
+        public AuthService(AppDbContext db, IJwtService jwt, IConfiguration cfg, IHttpContextAccessor http, IRecaptchaVerifier recaptcha)
         {
-            _db = db; _jwt = jwt; _cfg = cfg; _http = http;
+            _db = db; _jwt = jwt; _cfg = cfg; _http = http; _recaptcha = recaptcha;
         }
 
         // ==== Public APIs ====
@@ -57,7 +60,7 @@ namespace Team1.VitalBridge.Frontend.Models.Services
                 AccountType = "Member",
                 Status = "unverified",
                 ConfirmCode = ConfirmCodeToken, // 產生確認碼
-                ConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1), // 確認碼有效期為1小時
+                ConfirmCodeExpiresAt = DateTime.UtcNow.AddMinutes(30), // 確認碼有效期為30分鐘
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -96,27 +99,36 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             //輸出到debug控制台
             //Console.WriteLine($"發送驗證郵件到 {dto.Email}，驗證連結：{verifyLink}");
 
+            string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】帳號驗證信',
+    @body = @Body,
+    @body_format = 'HTML';";
 
-            string sql = $@"
-                EXEC msdb.dbo.sp_send_dbmail
-                @profile_name = 'VitalBridge',
-                @recipients = '{dto.Email}', 
-                @subject = '【VitalBridge】帳號驗證信',
-                @body = '
-            親愛的 {dto.Name} 您好：
+            string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {dto.Name} 您好：</p>
+    <p>感謝您註冊 VitalBridge 平台。<br/>
+       請點擊以下按鈕完成帳號驗證：</p>
+    <p>
+      <a href=""{verifyLink}""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        完成驗證
+      </a>
+    </p>
+    <p>如果您沒有註冊過 VitalBridge，請忽略此封信件。</p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
 
-            感謝您註冊 VitalBridge 平台。
-            請點擊以下連結完成帳號驗證：
-
-            {verifyLink}
-
-            如果您沒有註冊過 VitalBridge，請忽略此封信件。
-
-            -- VitalBridge 系統通知
-            ',
-                @body_format = 'TEXT';";
-
-            _db.Database.ExecuteSqlRaw(sql);
+            _db.Database.ExecuteSqlRaw(sql,
+                new SqlParameter("@Email", dto.Email),
+                new SqlParameter("@Body", body));
 
 
         }
@@ -177,51 +189,83 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             return true;
         }
 
-
+        private const int CAPTCHA_AFTER_FAILS = 2;        // 已錯兩次→本次要驗
+        private const int LOCK_AFTER_FAILS = 3;        // 你原本的鎖定門檻
+        private static readonly TimeSpan LOCK_DURATION = TimeSpan.FromMinutes(15);
         public async Task<TokenRes> LoginAsync(LoginDto dto)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
             if (user == null) throw new UnauthorizedAccessException("帳號或密碼錯誤");
-            if (!HashUtility.VerifyPassword(dto.Password, user.Password))
-                throw new UnauthorizedAccessException("帳號或密碼錯誤");
-            if (user.Status == "banned")
-                throw new UnauthorizedAccessException("帳號已停權");
+
+
             if (DateTime.UtcNow < user.LockedUntil)
             {
                 var remaining = user.LockedUntil - DateTime.UtcNow;
 
-                string msg;
-                if (remaining.Value.TotalMinutes < 60)
+                string msg = remaining!.Value.TotalMinutes < 60
+                    ? $"帳號已鎖定，請 {(int)Math.Ceiling(remaining.Value.TotalMinutes)} 分鐘後再試"
+                    : $"帳號已鎖定，請 {(int)remaining.Value.TotalHours} 小時 {remaining.Value.Minutes} 分鐘後再試";
+                throw new UnauthorizedAccessException(msg);
+            }
+
+            if (string.IsNullOrEmpty(user.Password))
+                throw new UnauthorizedAccessException("此帳號為第三方註冊，請用第三方登入");
+
+
+            // === Step-Up：兩次錯誤後，本次（第3次）先做人機驗證 ===
+            var fails = user.FailedLoginCount ?? 0;           // 以前的錯誤次數
+            var needCaptcha = fails >= CAPTCHA_AFTER_FAILS;   // 已錯2次→需要
+
+            if (needCaptcha)
+            {
+                if (string.IsNullOrWhiteSpace(dto.RecaptchaToken))
+                    throw new UnauthorizedAccessException("需要人機驗證");
+
+                var captchaOk = await _recaptcha.VerifyAsync(dto.RecaptchaToken /*, HttpContext IP 若需要 */);
+                if (!captchaOk)
+                    throw new UnauthorizedAccessException("人機驗證未通過，請重試");
+            }
+            // === Step-Up 到此 ===
+
+            // 密碼錯誤處理
+            if (!HashUtility.VerifyPassword(dto.Password, user.Password))
+            {
+                fails++;
+                if (fails >= LOCK_AFTER_FAILS)
                 {
-                    // 只顯示分鐘
-                    var minutes = (int)Math.Ceiling(remaining.Value.TotalMinutes);
-                    msg = $"帳號已鎖定，請 {minutes} 分鐘後再試";
+                    user.LockedUntil = DateTime.UtcNow.Add(LOCK_DURATION);
+                    user.FailedLoginCount = 0; // 鎖定後歸零
+                    await _db.SaveChangesAsync();
+                    throw new UnauthorizedAccessException($"帳號已鎖定，請 {(int)LOCK_DURATION.TotalMinutes} 分鐘後再試");
                 }
                 else
                 {
-                    // 顯示 小時 + 分鐘
-                    int hours = (int)remaining.Value.TotalHours;
-                    int minutes = remaining.Value.Minutes;
-                    msg = $"帳號已鎖定，請 {hours} 小時 {minutes} 分鐘後再試";
+                    user.FailedLoginCount = fails;
+                    await _db.SaveChangesAsync();
+                    throw new UnauthorizedAccessException("帳號或密碼錯誤");
                 }
-
-                throw new UnauthorizedAccessException(msg);
             }
+
+            
+            if (user.Status == "banned")
+                throw new UnauthorizedAccessException("帳號已停權");
             if (user.Status == "unverified")
                 throw new UnauthorizedAccessException("帳號尚未驗證，請先驗證後再登入");
             if (user.Status == "frozen")
                 throw new UnauthorizedAccessException("帳號已凍結，請聯繫管理員");
 
-            //最後登入時間
+
+
+            //最後登入時間、重置失敗次數與鎖定
+            user.FailedLoginCount = 0;
+            user.LockedUntil = null;
             user.LastLoginAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
 
             // TODO: 你的角色取得邏輯
             var roles = await GetUserRolesAsync(user.Id);
-
             var access = _jwt.CreateAccessToken(user, roles);
             var refresh = CreateRefreshJwt(user); // 無表：簽一顆 Refresh-JWT
-
             SetRefreshCookie(refresh, DateTime.UtcNow.AddDays(_jwt.RefreshDays));
             IssueXsrfCookie(_jwt.RefreshDays);
 
@@ -406,6 +450,45 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
                 _db.AddRange(user, MemberProfile, userRole, externalLogin);
                 await _db.SaveChangesAsync();
+
+                string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】歡迎加入',
+    @body = @Body,
+    @body_format = 'HTML';";
+
+                string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {name} 您好：</p>
+    <p>感謝您透過 <strong>Google 帳號</strong> 註冊 VitalBridge 平台！🎉</p>
+    <p>
+      從現在起，您可以直接使用 Google 登入，無需額外驗證。<br/>
+      為了幫助您更快上手，我們建議您：
+    </p>
+    <ul>
+      <li>補充會員資料，讓服務更貼近需求</li>
+      <li>探索我們的功能與資源</li>
+      <li>訂閱最新公告，掌握最新資訊</li>
+    </ul>
+    <p>
+      <a href=""https://localhost:7184/VitalBridge/member/memberCenter.html""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        前往會員中心
+      </a>
+    </p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
+
+                _db.Database.ExecuteSqlRaw(sql,
+                    new SqlParameter("@Email", email),
+                    new SqlParameter("@Body", body));
+
             }
             else
             {
@@ -455,21 +538,63 @@ namespace Team1.VitalBridge.Frontend.Models.Services
 
         public async Task SendPasswordResetEmailAsync(string email)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _db.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == email.Trim().ToLower());
             if (user == null) return; // 不洩漏帳號存在與否
+
+            // 防止短時間重複寄送（假設有 LastPasswordResetEmailSentAt 欄位）
+            var now = DateTime.UtcNow;
+            var minInterval = TimeSpan.FromMinutes(5);
+            if (user.LastPasswordResetEmailAt != null && now - user.LastPasswordResetEmailAt < minInterval)
+            {
+                // 可選：丟出例外或直接 return
+                throw new InvalidOperationException("請勿頻繁申請重設密碼，請稍後再試。");
+            }
 
             // 產生 token
             var token = Guid.NewGuid().ToString("N");
             user.ResetPasswordConfirmCode = token;
             user.ResetPasswordConfirmCodeExpiresAt = DateTime.UtcNow.AddHours(1);
+            user.LastPasswordResetEmailAt = now; // 更新寄送時間
 
             await _db.SaveChangesAsync();
 
             // 建立重設密碼連結
-            var resetLink = $"https://localhost:5500/reset-password?email={email}&token={token}";
+            var resetLink = $"https://localhost:7184/VitalBridge/reset-password.html?email={email}&token={token}";
             Console.WriteLine($"發送重設密碼郵件到 {email}，連結：{resetLink}");
 
-            // TODO: 實際寄信
+            string body = $@"
+<html>
+  <body style=""font-family:Arial,Helvetica,sans-serif; line-height:1.6;"">
+    <p>親愛的 {user.Name} 您好：</p>
+    <p>您剛剛提出了重設密碼的請求。<br/>
+       請點擊以下按鈕來設定新的登入密碼：</p>
+    <p>
+      <a href=""{resetLink}""
+         style=""display:inline-block;padding:10px 18px;
+                background:#3B82F6;color:#fff;text-decoration:none;
+                border-radius:6px;font-weight:bold;"">
+        前往重設密碼頁面
+      </a>
+    </p>
+    <p>此連結將於 1 小時後失效，請及早完成設定。<br/>
+       如果您並未提出重設密碼的申請，請忽略此封信件，您的帳號資訊不會受到影響。</p>
+    <p style=""color:#6b7280;font-size:12px;"">-- VitalBridge 系統通知</p>
+  </body>
+</html>";
+
+            string sql = @"
+EXEC msdb.dbo.sp_send_dbmail
+    @profile_name = 'VitalBridge',
+    @recipients = @Email, 
+    @subject = N'【VitalBridge】重設您的密碼',
+    @body = @Body,
+    @body_format = 'HTML';";
+
+            _db.Database.ExecuteSqlRaw(sql,
+                new SqlParameter("@Email", user.Email),
+                new SqlParameter("@Body", body));
+
+
         }
 
         public async Task<bool> ResetPasswordAsync(string token, string newPassword)
@@ -483,11 +608,37 @@ namespace Team1.VitalBridge.Frontend.Models.Services
             user.Password = HashUtility.HashPassword(newPassword);
             user.ResetPasswordConfirmCode = null;
             user.ResetPasswordConfirmCodeExpiresAt = null;
+            user.LastPasswordResetEmailAt = null;
             user.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            var user = await _db.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            // 驗證舊密碼
+            if (!HashUtility.VerifyPassword(oldPassword, user.Password))
+                throw new InvalidOperationException("舊密碼錯誤");
+
+            // 可加：新密碼格式檢查
+            // if (!IsValidPassword(newPassword)) throw new InvalidOperationException("新密碼格式不符");
+
+            user.Password = HashUtility.HashPassword(newPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+
+
+
+
+
+
 
         // ==== Helpers（服務內部） ====
 

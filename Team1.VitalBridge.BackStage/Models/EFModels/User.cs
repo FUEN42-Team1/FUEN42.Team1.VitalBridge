@@ -87,6 +87,9 @@ public partial class User
     [Column("lockedUntil", TypeName = "datetime")]
     public DateTime? LockedUntil { get; set; }
 
+    [Column("lastPasswordResetEmailAt", TypeName = "datetime")]
+    public DateTime? LastPasswordResetEmailAt { get; set; }
+
     [InverseProperty("User")]
     public virtual AdminProfile AdminProfile { get; set; }
 

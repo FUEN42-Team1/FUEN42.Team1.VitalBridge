@@ -266,32 +266,6 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         //重設密碼
         //指定管理員使用者後，啟動重設密碼流程
         //先是寄送重設密碼的郵件，然後使用者點擊郵件中的連結來重設密碼
@@ -386,6 +360,9 @@ namespace Team1.VitalBridge.BackStage.Controllers
                 return RedirectToAction("Details", new { AdminUserId = userId });
             }
 
+            if (user.Status == "frozen") { 
+                user.Status = "active";
+            }
             user.FailedLoginCount = 0;
             user.LockedUntil = null;
             user.UpdatedAt = DateTime.UtcNow;

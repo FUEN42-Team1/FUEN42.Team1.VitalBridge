@@ -14,7 +14,7 @@
 }
 
 @section Styles {
-    <!-- DataTables 样式（若你全站已有，這段可保留不衝突） -->
+    <!-- DataTables 樣式 -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <style>
         .td-truncate {
@@ -28,10 +28,10 @@
             white-space: nowrap !important;
         }
 
+        /* 隱藏 DataTables 內建搜尋列，我們使用自訂篩選區 */
         .dt-search, .dataTables_filter {
             display: none;
         }
-        /* 我們用自己的外部搜尋與篩選 */
     </style>
 }
 
@@ -43,10 +43,9 @@
         <div class="row g-3">
             <div class="col-sm-6 col-md-3">
                 <label class="form-label">狀態</label>
-                <!-- 與 badge 文字一致，直接用中文值便於比對 -->
                 <select class="form-select" id="statusSelect">
                     <option value="">全部</option>
-                    <option value="活躍">正常</option>
+                    <option value="正常">正常</option>
                     <option value="凍結">凍結</option>
                     <option value="未開通">未開通</option>
                     <option value="停權">停權</option>
@@ -56,23 +55,12 @@
                 <label class="form-label">縣市</label>
                 <select class="form-select" id="citySelect">
                     <option value="">全部</option>
-                    <!-- 這裡先放常見範例；若你有完整清單可改為伺服器產出 -->
-                    <option value="台北市">台北市</option>
-                    <option value="新北市">新北市</option>
-                    <option value="台中市">台中市</option>
-                    <option value="台南市">台南市</option>
-                    <option value="高雄市">高雄市</option>
                 </select>
             </div>
             <div class="col-sm-6 col-md-3">
                 <label class="form-label">鄉鎮</label>
                 <select class="form-select" id="townSelect">
                     <option value="">全部</option>
-                    <!-- 可依你 API 動態載入；這裡先給常見範例 -->
-                    <option value="信義區">信義區</option>
-                    <option value="中正區">中正區</option>
-                    <option value="中山區">中山區</option>
-                    <option value="安平區">安平區</option>
                 </select>
             </div>
             <div class="col-sm-6 col-md-3">
@@ -118,7 +106,7 @@
                 <th>縣市</th>
                 <th>鄉鎮</th>
                 <th>詳細地址</th>
-                <th>註冊時間</th>
+                @* <th>註冊時間</th> *@
                 <th>最後登入</th>
                 <th>操作</th>
             </tr>
@@ -128,26 +116,24 @@
             {
                 var (badgeCss, statusText) = user.Status switch
                 {
-                    "active" => ("success", "活躍"),
+                    "active" => ("success", "正常"),
                     "frozen" => ("secondary", "凍結"),
                     "unverified" => ("warning text-dark", "未開通"),
                     "banned" => ("danger", "停權"),
                     _ => ("secondary", user.Status ?? "—")
                 };
-                <tr>
+                <tr data-city-id="@(user.CityId?.ToString() ?? "")" data-town-id="@(user.TownshipId?.ToString() ?? "")">
                     <td>@user.Name</td>
                     <td>@user.Email</td>
                     <td>@user.Phone</td>
-                    <td>@string.Join(", ", user.RoleDisplay)</td>
+                    <td>@string.Join(", ", user.RoleDisplay ?? Enumerable.Empty<string>())</td>
                     <td><span class="badge bg-@badgeCss">@statusText</span></td>
                     <td>@user.CityName</td>
                     <td>@user.TownshipName</td>
                     <td class="td-truncate" title="@user.Address">@user.Address</td>
-                    <td data-order="@user.CreatedAt.Ticks">@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    @* <td data-order="@user.CreatedAt.Ticks">@user.CreatedAt.ToString("yyyy/MM/dd")</td> *@
                     <td data-order="@(user.LastLoginAt?.Ticks ?? 0)">
-                        @(
-                            user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "-"
-                            )
+                        @(user.LastLoginAt?.ToString("yyyy/MM/dd HH:mm") ?? "-")
                     </td>
                     <td class="text-center text-nowrap">
                         <button class="btn btn-sm btn-info me-1" onclick="showUserDetail('@user.UserId')">詳細</button>
@@ -190,11 +176,12 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- DataTables Core -->
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
     <script>
         // ===== DataTables 初始化 =====
         const dt = $('#membersTable').DataTable({
             ordering: true,
-            searching: true,     // 我們仍開啟，並用 ext.search 加強外部條件
+            searching: true,     // 保持開啟，並用 ext.search 加上外部條件
             pageLength: 10,
             lengthChange: false, // 用自訂的「每頁筆數」下拉
             language: { url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/zh-HANT.json" },
@@ -211,33 +198,47 @@
         const $keyword = $('#keywordInput');
         const $pageLen = $('#pageLenSelect');
 
-        // 客製過濾器：狀態/縣市/鄉鎮/身分 + 關鍵字
+        // 客製過濾器：狀態/縣市ID/鄉鎮ID/身分 + 關鍵字
         $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-            // 依欄位順序取得資料
+            // 只作用於此表，避免影響其他頁面 DataTables
+            if (settings.nTable && settings.nTable.id !== 'membersTable') return true;
+
+            // 依欄位順序取得資料（僅供關鍵字匹配使用）
             const name    = data[0] || '';
             const email   = data[1] || '';
             const phone   = data[2] || '';
             const roles   = data[3] || '';
-            const city    = data[5] || '';
-            const town    = data[6] || '';
+            const cityTxt = data[5] || ''; // 顯示名稱（for 關鍵字）
+            const townTxt = data[6] || '';
             const address = data[7] || '';
 
-            // 狀態用 badge 內容取得，避免受到隱藏標記影響
-            const statusText = $(dt.row(dataIndex).node()).find('td:eq(4) .badge').text().trim();
+            // 從當列的 DOM dataset 讀出 City/Town 的「ID」
+            const rowNode = dt.row(dataIndex).node();
+            const cityIdOnRow = (rowNode?.dataset?.cityId ?? '').toString();
+            const townIdOnRow = (rowNode?.dataset?.townId ?? '').toString();
 
-            const s  = ($status.val()  || '').toLowerCase();
-            const c  = ($city.val()    || '').toLowerCase();
-            const t  = ($town.val()    || '').toLowerCase();
-            const r  = ($role.val()    || '').toLowerCase();
-            const kw = ($keyword.val() || '').toLowerCase();
+            // 狀態用 badge 文字取得
+            const statusText = $(rowNode).find('td:eq(4) .badge').text().trim();
 
+            const s  = ($status.val()  || '').toString().toLowerCase();
+            const c  = ($city.val()    || '').toString(); // 這是 ID
+            const t  = ($town.val()    || '').toString(); // 這是 ID
+            const r  = ($role.val()    || '').toString().toLowerCase();
+            const kw = ($keyword.val() || '').toString().toLowerCase();
+
+            // 狀態（中文包含）
             if (s && !statusText.toLowerCase().includes(s)) return false;
-            if (c && !city.toLowerCase().includes(c)) return false;
-            if (t && !town.toLowerCase().includes(t)) return false;
+
+            // 縣市/鄉鎮用 ID「等於」比對
+            if (c && cityIdOnRow !== c) return false;
+            if (t && townIdOnRow !== t) return false;
+
+            // 身分（字串包含）
             if (r && !roles.toLowerCase().includes(r)) return false;
 
+            // 關鍵字搜尋（名稱/Email/電話/身分/顯示用地名/地址）
             if (kw) {
-                const haystack = (name + ' ' + email + ' ' + phone + ' ' + roles + ' ' + city + ' ' + town + ' ' + address).toLowerCase();
+                const haystack = (name + ' ' + email + ' ' + phone + ' ' + roles + ' ' + cityTxt + ' ' + townTxt + ' ' + address).toLowerCase();
                 if (!haystack.includes(kw)) return false;
             }
             return true;
@@ -253,7 +254,10 @@
         $('#resetBtn').on('click', function(){
             $status.val('');
             $city.val('');
-            $town.val('');
+
+            // 清空鄉鎮下拉回「全部」
+            $town.empty().append('<option value="">全部</option>').val('');
+
             $role.val('');
             $keyword.val('');
             $pageLen.val('10').trigger('change');
@@ -266,7 +270,7 @@
             dt.page.len(parseInt(this.value || '10', 10)).draw();
         });
 
-        // 即時關鍵字（想改為按下套用才搜尋，註解這行）
+        // 即時關鍵字（若改為按下「套用」才搜尋，註解這行）
         $keyword.on('input', function(){ dt.draw(); });
 
         // ===== 你的原本 Modal + AJAX（保持不動） =====
@@ -382,6 +386,62 @@
                     alert('儲存失敗，請稍後再試');
                 }
             });
+        });
+    </script>
+
+    <script>
+        // ===== 外部篩選下拉：載入城市/鄉鎮（ID 為 value） =====
+        $(function () {
+            // 載入所有縣市
+            function loadCitiesForFilter(selectedCityId) {
+                const $city = $('#citySelect');
+                $city.empty().append('<option value="">全部</option>');
+                $.getJSON('/api/locations/cities')
+                    .done(function (data) {
+                        data.forEach(function (c) {
+                            const opt = $('<option>', { value: c.id, text: c.name });
+                            if (selectedCityId && String(selectedCityId) === String(c.id)) {
+                                opt.prop('selected', true);
+                            }
+                            $city.append(opt);
+                        });
+                    })
+                    .fail(function () {
+                        $city.html('<option value="">載入失敗</option>');
+                    });
+            }
+
+            // 根據選定縣市載入鄉鎮
+            function loadTownshipsForFilter(cityId, selectedTownshipId) {
+                const $town = $('#townSelect');
+                $town.empty().append('<option value="">全部</option>');
+                if (!cityId) return;
+                $.getJSON(`/api/locations/cities/${cityId}/townships`)
+                    .done(function (data) {
+                        data.forEach(function (t) {
+                            const opt = $('<option>', { value: t.id, text: t.name });
+                            if (selectedTownshipId && String(selectedTownshipId) === String(t.id)) {
+                                opt.prop('selected', true);
+                            }
+                            $town.append(opt);
+                        });
+                    })
+                    .fail(function () {
+                        $town.html('<option value="">載入失敗</option>');
+                    });
+            }
+
+            // 初始化縣市
+            loadCitiesForFilter();
+
+            // 當縣市改變時，載入對應鄉鎮
+            $('#citySelect').on('change', function () {
+                const cityId = $(this).val();
+                loadTownshipsForFilter(cityId, null);
+            });
+
+            // 若有預設值可在這裡載入
+            // loadTownshipsForFilter($('#citySelect').val(), null);
         });
     </script>
 }

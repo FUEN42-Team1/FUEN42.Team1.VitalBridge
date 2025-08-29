@@ -10,5 +10,6 @@ namespace Team1.VitalBridge.Frontend.Models.DTOs.Auth
 
         [Required]
         public string Password { get; set; } = string.Empty;
+        public string? RecaptchaToken { get; set; } // 前端需要時才會帶
     }
 }

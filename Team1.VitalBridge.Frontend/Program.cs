@@ -8,8 +8,10 @@ using System.Security.Claims;
 using System.Text;
 using Team1.VitalBridge.Frontend.Hubs;
 using Team1.VitalBridge.Frontend.Interfaces;
+using Team1.VitalBridge.Frontend.Interfaces.Security;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
+using Team1.VitalBridge.Frontend.Models.Services.Security;
 using Team1.VitalBridge.Frontend.Models.Settings;
 using static Team1.VitalBridge.Frontend.Models.Services.PaymentMethodMappingService;
 
@@ -134,6 +136,7 @@ namespace Team1.VitalBridge.Frontend
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IMemberService, MemberService>();
             builder.Services.AddScoped<ILocationService, LocationService>();
+            builder.Services.AddHttpClient<IRecaptchaVerifier, RecaptchaVerifier>();
 
 
             builder.Services.AddHttpContextAccessor();
