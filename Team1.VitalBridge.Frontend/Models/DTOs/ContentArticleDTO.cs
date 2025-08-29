@@ -38,6 +38,13 @@
         public DateTime Date { get; set; }
     }
 
+    public class ContentArticleBannerDisplayDTO
+    {
+        public string Title { get; set; }
+        public string subtitle { get; set; }
+        public string purchaseLink { get; set; }
+        public string? ImageUrl { get; set; }
+    }
 
 
 }

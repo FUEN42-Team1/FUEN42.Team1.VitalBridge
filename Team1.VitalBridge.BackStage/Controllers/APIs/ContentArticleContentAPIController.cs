@@ -101,9 +101,9 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 MemberName = c.Member.Name,
                 Status = c.Status.ToString(),
                 Views = c.ViewCount,
-                CreatedAt = c.CreatedAt,
-                UpdatedAt = c.UpdatedAt
-            }
+                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd"),
+                UpdatedAt = c.UpdatedAt.ToString("yyyy-MM-dd")
+                }
             )
             .ToList();
 
