@@ -11,6 +11,8 @@ using Team1.VitalBridge.Frontend.Interfaces;
 using Team1.VitalBridge.Frontend.Models.EFModels;
 using Team1.VitalBridge.Frontend.Models.Services;
 using Team1.VitalBridge.Frontend.Models.Settings;
+using static Team1.VitalBridge.Frontend.Models.Services.PaymentMethodMappingService;
+
 
 namespace Team1.VitalBridge.Frontend
 {
@@ -62,7 +64,7 @@ namespace Team1.VitalBridge.Frontend
             //    });
 
 
-
+            builder.Services.AddScoped<IPaymentMethodMappingService, PaymentMethodMappingService>();
             builder.Services
             .AddAuthentication(options =>
             {

@@ -1,0 +1,608 @@
+﻿@using Team1.VitalBridge.BackStage.Models.ViewModels
+@model OrderDetailsViewModel
+@{
+    ViewData["Title"] = $"訂單詳情 - {Model.OrderNumber}";
+}
+@section Styles {
+    <style>
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35em 0.65em;
+            border-radius: 0.375rem;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb3;
+        }
+
+        .status-success {
+            background-color: #edfdf6;
+            color: #15a362;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-info {
+            background-color: #cff4fc;
+            color: #0c5460;
+            border: 1px solid #9eeaf9;
+        }
+
+        .status-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #5d6778;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            color: #252930;
+            margin-bottom: 1.5rem;
+        }
+
+        .shipping-form {
+            background-color: #fafbff;
+            border: 1px solid #e7e9ed;
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .readonly-field {
+            background-color: #f5f6fe;
+            border: 1px solid #e7e9ed;
+            color: #5d6778;
+            cursor: not-allowed;
+        }
+
+        .order-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #252930;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #15a362;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+            .table th, .table td {
+                vertical-align: middle;
+            }
+
+        .info-divider {
+            border-top: 1px solid #e9ecef;
+            margin: 1.5rem 0;
+            padding-top: 1.5rem;
+        }
+
+        .card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .shipping-management {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        /* 商品明細表格優化 */
+        .product-detail-table {
+            font-size: 0.95rem;
+        }
+
+            .product-detail-table thead th {
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                background-color: #343a40 !important;
+                color: white !important;
+                border: none;
+                padding: 1rem 0.75rem;
+            }
+
+            .product-detail-table tbody td {
+                padding: 1rem 0.75rem;
+                vertical-align: middle;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+        .product-row:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.2s ease;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .price-cell, .subtotal-cell {
+            font-family: 'Segoe UI', system-ui, monospace;
+        }
+
+        .price-amount {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .quantity-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.65rem;
+            font-weight: 600;
+            background-color: #ffffff !important;
+            color: #495057 !important;
+            border: 1px solid #adb5bd !important;
+
+        }
+            /* 加入這個規則 */
+            .quantity-badge small {
+                color: #495057 !important;
+            }
+
+        .subtotal-amount {
+            font-size: 1.05rem;
+        }
+
+        .summary-row {
+            background-color: #f8f9fa !important;
+        }
+
+            .summary-row td {
+                padding: 1.2rem 0.75rem;
+                border-top: 2px solid #dee2e6 !important;
+                font-size: 1.1rem;
+            }
+
+        .border-top-2 {
+            border-top: 2px solid #dee2e6 !important;
+        }
+
+        
+       
+        /* 響應式優化 */
+        @@media (max-width: 768px) {
+            .product-detail-table{
+            font-size: 0.85rem;
+            }
+
+            .product-detail-table thead th,
+            .product-detail-table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .subtotal-amount {
+                font-size: 0.95rem;
+            }
+
+        }
+    </style>
+
+}
+
+<div class="container-fluid">
+    <!-- 頁面標題 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1">訂單詳情</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="@Url.Action("Index")">訂單列表</a></li>
+                            <li class="breadcrumb-item active">@Model.OrderNumber</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>返回列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- 左側：主要資訊區 -->
+        <div class="col-lg-8">
+
+            <!-- 1. 訂單基本資訊 -->
+            <div class="card shadow-sm order-section">
+                <div class="card-header">
+                    <div>
+                        <h5 class="mb-0">訂單編號：@Model.OrderNumber</h5>
+                    </div>
+                    <div>
+                        <span class="status-badge @GetOrderStatusClass(Model.CurrentOrderStatus)">
+                            @Model.CurrentOrderStatus
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="detail-label">成立時間</div>
+                            <div class="detail-value mb-0">@Model.CreatedAt.ToString("yyyy年MM月dd日 HH:mm")</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">訂單總金額</div>
+                            <div class="detail-value mb-0 text-success fw-bold">NT$ @Model.TotalAmount.ToString("N0")</div>
+                        </div>
+                    </div>
+
+                    <!-- 訂單備註編輯 -->
+                    <form asp-action="UpdateNote" method="post" class="mt-3">
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                        <div class="mb-3">
+                            <label class="detail-label">訂單備註</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="請輸入訂單備註...">@Model.Note</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save me-1"></i>儲存備註
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2. 會員 & 收件人資訊 -->
+            <div class="card shadow-sm order-section">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>會員 & 收件人資訊
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- 會員資訊 -->
+                    <div class="mb-0">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-user me-2"></i>會員資訊
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="detail-label">會員名稱</div>
+                                <div class="detail-value mb-3">@Model.CustomerName</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">電子郵件</div>
+                                <div class="detail-value mb-3">@Model.CustomerEmail</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">聯絡電話</div>
+                                <div class="detail-value mb-3">@Model.CustomerPhone</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分隔線 -->
+                    <div class="info-divider"></div>
+
+                    <!-- 收件人資訊 -->
+                    <div class="mb-0">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>收件人資訊
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="detail-label">收件人姓名</div>
+                                <div class="detail-value mb-3">@Model.RecipientName</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="detail-label">收件人電話</div>
+                                <div class="detail-value mb-3">@Model.RecipientPhone</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="detail-label">收件地址</div>
+                                <div class="detail-value mb-0">@Model.ShippingAddress</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 訂購商品明細 -->
+            <div class="card shadow-sm order-section">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box me-2"></i>訂購商品明細
+                    </h5>
+                    <small class="text-muted">共 @Model.OrderItems.Count 項商品</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 product-detail-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col" style="width: 45%;">
+                                        <i class="fas fa-tag me-2"></i>商品名稱
+                                    </th>
+                                    <th scope="col" class="text-center" style="width: 18%;">
+                                        <i class="fas fa-dollar-sign me-1"></i>單價
+                                    </th>
+                                    <th scope="col" class="text-center" style="width: 12%;">
+                                        <i class="fas fa-sort-numeric-up me-1"></i>數量
+                                    </th>
+                                    <th scope="col" class="text-end" style="width: 25%;">
+                                        <i class="fas fa-calculator me-1"></i>小計
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr class="product-row">
+                                        <td class="product-name">
+                                            <div class="fw-medium text-dark">@item.ProductName</div>
+                                        </td>
+                                        <td class="text-center price-cell">
+                                            <span class="price-amount">NT$ @item.UnitPrice.ToString("N0")</span>
+                                        </td>
+                                        <td class="text-center quantity-cell">
+                                            <span class="badge  border quantity-badge">
+                                                @item.Quantity <span class="text-black">件</span>
+                                            </span>
+                                        </td>
+                                        <td class="text-end subtotal-cell">
+                                            <span class="fw-bold text-success subtotal-amount">
+                                                NT$ @item.Subtotal.ToString("N0")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light border-top-2">
+                                <tr class="summary-row">
+                                    <td colspan="3" class="text-end fw-bold">
+                                        <span class="text-muted">商品總計：</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="fw-bold fs-5 text-success">
+                                            NT$ @Model.SubtotalAmount.ToString("N0")
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 付款資訊 -->
+            <div class="card shadow-sm order-section">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>付款資訊
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="detail-label">付款方式</div>
+                            <div class="detail-value mb-0">@Model.PaymentMethodName</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-label">付款狀態</div>
+                            <div class="detail-value mb-0">
+                                <span class="status-badge @GetPaymentStatusClass(Model.PaymentStatusName)">
+                                    @Model.PaymentStatusName
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-label">付款金額</div>
+                            <div class="detail-value mb-0 text-success fw-bold">NT$ @Model.PaymentAmount.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 結帳資訊 -->
+            <div class="card shadow-sm order-section">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>結帳資訊
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>商品小計</span>
+                        <span>NT$ @Model.SubtotalAmount.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>運費</span>
+                        <span>NT$ @Model.ShippingFee.ToString("N0")</span>
+                    </div>
+                    @if (Model.CouponDiscount.HasValue && Model.CouponDiscount.Value > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>折價券折抵</span>
+                            <span>-NT$ @Model.CouponDiscount.Value.ToString("N0")</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold text-success fs-5">
+                        <span>訂單總計</span>
+                        <span>NT$ @Model.TotalAmount.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 右側：物流管理區 -->
+        <div class="col-lg-4">
+            <div class="shipping-management">
+                <h5 class="mb-4">
+                    <i class="fas fa-truck me-2"></i>物流管理
+                </h5>
+
+                <!-- 基本物流資訊 -->
+                <div class="mb-4">
+                    <div class="detail-label">配送方式</div>
+                    <div class="detail-value">@Model.ShippingMethodName</div>
+
+                    <div class="detail-label">物流狀態</div>
+                    <div class="detail-value">
+                        <span class="status-badge @GetShippingStatusClass(Model.ShippingStatus)">
+                            @Model.ShippingStatus
+                        </span>
+                    </div>
+
+                    <div class="detail-label">收件地址</div>
+                    <div class="detail-value">@Model.ShippingAddress</div>
+                </div>
+
+                @if (Model.CanEditShipping)
+                {
+                    <!-- 物流狀態編輯表單 -->
+                    <div class="shipping-form">
+                        <h6 class="mb-3">
+                            <i class="fas fa-edit me-2"></i>更新物流狀態
+                        </h6>
+                        <form asp-action="UpdateShippingStatus" method="post">
+                            <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+                            <div class="mb-3">
+                                <label class="form-label">物流狀態</label>
+                                <select name="shippingStatus" class="form-select" required>
+                                    <option value="">請選擇狀態</option>
+                                    <option value="未配送" selected="@(Model.ShippingStatus == "未配送")">未配送</option>
+                                    <option value="已配送" selected="@(Model.ShippingStatus == "已配送")">已配送</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    @(Model.IsHomeDelivery ? "宅配追蹤碼" : "超商取貨碼")
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="trackingCode" class="form-control"
+                                       value="@Model.TrackingCode"
+                                       placeholder="請輸入追蹤碼（僅英文和數字）"
+                                       pattern="[A-Za-z0-9]+"
+                                       title="僅能輸入英文字母和數字"
+                                       required />
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    追蹤碼僅能包含英文字母和數字
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-paper-plane me-1"></i>更新物流狀態
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <!-- 唯讀追蹤碼顯示 -->
+                    <div class="mb-4">
+                        <div class="detail-label">
+                            @(Model.IsHomeDelivery ? "宅配追蹤碼" : "超商取貨碼")
+                        </div>
+                        <div class="detail-value">
+                            @if (!string.IsNullOrEmpty(Model.TrackingCode))
+                            {
+                                <span class="fw-bold text-primary fs-5">@Model.TrackingCode</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">尚未設定</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.CanApplyReturn)
+                    {
+                        <!-- 申請退貨按鈕 -->
+                        <div class="mt-4">
+                            <form asp-action="ApplyReturn" method="post"
+                                  onsubmit="return confirm('確定要申請退貨嗎？此操作無法復原。')">
+                                <input type="hidden" name="orderId" value="@Model.OrderId" />
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-undo me-1"></i>申請退貨
+                                </button>
+                            </form>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+
+@functions {
+    private string GetOrderStatusClass(string status)
+    {
+        return status switch
+        {
+            "待付款" => "status-pending",
+            "待出貨" => "status-info",
+            "已出貨" => "status-success",
+            "已完成" => "status-success",
+            "退貨中" => "status-pending",
+            "已退貨" => "status-info",
+            "已取消" => "status-danger",
+            _ => "status-info"
+        };
+    }
+
+    private string GetPaymentStatusClass(string status)
+    {
+        return status switch
+        {
+            "待付款" => "status-pending",
+            "已付款" => "status-success",
+            "付款失敗" => "status-danger",
+            "已取消" => "status-danger",
+            "已退款" => "status-info",
+            _ => "status-info"
+        };
+    }
+
+    private string GetShippingStatusClass(string status)
+    {
+        return status switch
+        {
+            "未配送" => "status-pending",
+            "已配送" => "status-success",
+            "退貨中" => "status-pending",
+            _ => "status-info"
+        };
+    }
+}
