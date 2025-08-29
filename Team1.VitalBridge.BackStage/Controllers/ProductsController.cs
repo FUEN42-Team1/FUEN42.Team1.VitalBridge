@@ -19,11 +19,25 @@ namespace Team1.VitalBridge.BackStage.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
 		{
-			var data = await _context.Products
-				.AsNoTracking()
-				.Select(p => p.ToIndexVm())
-				.ToListAsync();
-			return View(data);
+			// 使用預設搜尋參數載入第一頁資料
+			var defaultSearch = new ProductSearchViewModel
+			{
+				Keyword = "",
+				Status = "all",
+				Page = 1,
+				PageSize = 10
+			};
+
+
+			// 取得初始資料
+			var initialData = await SearchProductsAsync(defaultSearch);
+			// 將分頁資訊透過 ViewBag 傳遞給前端
+			ViewBag.InitialData = initialData;
+
+			// 回傳原本的 View，但現在會包含分頁資訊
+			return View();
+
+
 		}
 
 		// 新增產品
@@ -610,7 +624,7 @@ namespace Team1.VitalBridge.BackStage.Controllers
 
 		private async Task UpdateProductImages(int id, EditProductViewModel vm)
 		{
-			// 刪除現有的商品圖片關聯
+			
 			// 先抓取現有的商品圖片關聯
 			var existingImages = await _context.ProductImages
 				.Where(pi => pi.ProductId == id)
@@ -744,30 +758,119 @@ namespace Team1.VitalBridge.BackStage.Controllers
         }
 
 
-
-
-
-		/* 改批量查詢用不到
-		 
-		 // 從FileName 取得圖片Id
-        public async Task<int?> GetFileIdByFileNameAsync(string fileName)
+		/// <summary>
+		/// AJAX 搜尋商品 API
+		/// 接收搜尋參數，回傳分頁結果的 JSON
+		/// </summary>
+		/// <param name="searchModel">搜尋參數</param>
+		/// <returns>分頁商品資料的 JSON 結果</returns>
+		[HttpPost]
+		public async Task<JsonResult> SearchProducts(ProductSearchViewModel searchModel)
 		{
+			try {
+				// 呼叫搜尋方法取得分頁資料
+				var result = await SearchProductsAsync(searchModel);
+				// 回傳 JSON 結果
+				return Json(new
+				{
+					success = true,
+					data = result
+				});
+			}
+			catch (Exception ex) 
+			{
+				// 發生錯誤時回傳錯誤訊息
+				return Json(new
+				{
+					success = false,
+					message = "搜尋商品時發生錯誤，請重新整理再嘗試。"
+				});
+			}
+		}
 
-            // 如果 FileName 為空 則返回 null
+		/// <summary>
+		/// 搜尋商品的核心邏輯方法
+		/// 處理關鍵字搜尋、狀態篩選和分頁
+		/// </summary>
+		/// <param name="searchModel">搜尋參數</param>
+		/// <returns>分頁商品資料</returns>
+		/// 
+		private async Task<PagedResultViewModel<ProductListViewModel>> SearchProductsAsync(ProductSearchViewModel searchModel)
+		{
+			// 建立基礎查詢，包含必要的關聯資料
+			var query = _context.Products
+				.Include(p => p.ProductImages)
+					.ThenInclude(pi => pi.File) // 包含圖片檔案資訊
+				.AsNoTracking(); // 提升查詢效能
 
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                return null;
-            }
-            // 從 FileStreams 中查找對應的 FileId，這邊直接取的FileId
 
-            return await _context.FileStreams
-				.AsNoTracking() // 使用 AsNoTracking() 來避免 EF Core 的追蹤功能，這樣可以提高查詢性能
-				.Where(f => f.FileName == fileName)
-                .Select(f => f.Id) //選擇需要的欄位（SELECT 子句）
-                .FirstOrDefaultAsync();
-        }
-		*/
+			// 1. 關鍵字搜尋（模糊搜尋商品名稱和貨號）
+			if (!string.IsNullOrWhiteSpace(searchModel.Keyword))
+			{
+				var keyword = searchModel.Keyword.Trim();
+				query = query.Where(p =>
+					p.Name.Contains(keyword) ||
+					p.ItemNumber.Contains(keyword)
+				);
+			}
+			// 2. 狀態篩選
+			if (!string.IsNullOrEmpty(searchModel.Status) && searchModel.Status != "all")
+			{
+				switch (searchModel.Status.ToLower()) 
+				{
+					case "active":
+						query = query.Where(p => p.IsActive == true);
+						break;
+					case "inactive":
+						query = query.Where(p => p.IsActive == false);
+						break;
+						// "all" 不需要額外篩選條件
+				}
+			}
+			// 3. 取得符合條件的總筆數（在分頁之前）
+			var totalItems = await query.CountAsync();
+			// 4. 套用分頁邏輯
+			var skip = (searchModel.Page - 1) * searchModel.PageSize;
+			var products = await query
+				.OrderBy(p => p.Name) // 按商品名稱排序
+				.Skip(skip)
+				.Take(searchModel.PageSize)
+				.ToListAsync();
+			// 5. 轉換為 ViewModel
+			var productViewModels = products.Select(p => p.ToIndexVm()).ToList();
+
+			// 6. 建立並回傳分頁結果
+			return new PagedResultViewModel<ProductListViewModel>(
+				items: productViewModels,
+				totalItems: totalItems,
+				currentPage: searchModel.Page,
+				pageSize: searchModel.PageSize
+			);
+		}
+
+
+
+			/* 改批量查詢用不到
+
+			 // 從FileName 取得圖片Id
+			public async Task<int?> GetFileIdByFileNameAsync(string fileName)
+			{
+
+				// 如果 FileName 為空 則返回 null
+
+				if (string.IsNullOrWhiteSpace(fileName))
+				{
+					return null;
+				}
+				// 從 FileStreams 中查找對應的 FileId，這邊直接取的FileId
+
+				return await _context.FileStreams
+					.AsNoTracking() // 使用 AsNoTracking() 來避免 EF Core 的追蹤功能，這樣可以提高查詢性能
+					.Where(f => f.FileName == fileName)
+					.Select(f => f.Id) //選擇需要的欄位（SELECT 子句）
+					.FirstOrDefaultAsync();
+			}
+			*/
 
 	}
 }

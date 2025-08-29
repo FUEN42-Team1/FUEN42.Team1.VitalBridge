@@ -1,0 +1,241 @@
+﻿/**
+ * 商品搜尋頁面專用樣式
+ */
+
+/* 訊息提示樣式優化 */
+#messageContainer .alert {
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 10px;
+}
+
+/* 搜尋區域樣式 */
+.search-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* 表格樣式優化 */
+.table th {
+    background-color: #495057 !important;
+    color: white !important;
+    font-weight: 600;
+    border: none;
+    padding: 15px 10px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 12px 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* 商品圖片樣式 */
+.product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease;
+}
+
+    .product-image:hover {
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+/* 狀態開關樣式 */
+.form-switch .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+    .form-switch .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .form-switch .form-check-input:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+/* 操作按鈕樣式 */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+/* 分頁樣式 */
+.pagination {
+    margin: 0;
+}
+
+    .pagination .page-link {
+        border: 1px solid #dee2e6;
+        color: #495057;
+        padding: 8px 12px;
+        margin: 0 2px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+            transform: translateY(-1px);
+        }
+
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        font-weight: 600;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: transparent;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+
+/* 資料資訊顯示樣式 */
+#dataInfo {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* 無資料提示樣式 */
+.no-data-message {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+    .no-data-message i {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+/* 載入中樣式 */
+.loading-row td {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* 搜尋表單樣式優化 */
+.search-controls {
+    gap: 15px;
+}
+
+    .search-controls .form-control,
+    .search-controls .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .search-controls .form-control:focus,
+        .search-controls .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        }
+
+/* 搜尋按鈕樣式 */
+#searchBtn {
+    padding: 8px 20px;
+    font-weight: 600;
+    border-radius: 0 6px 6px 0;
+    transition: all 0.2s ease;
+}
+
+    #searchBtn:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+    }
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .product-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 0.875rem;
+    }
+
+    .search-controls {
+        flex-direction: column;
+    }
+
+        .search-controls .col-md-4,
+        .search-controls .col-md-8 {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+}
+
+/* 動畫效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table tbody tr {
+    animation: fadeIn 0.3s ease;
+}
+
+/* 卡片陰影效果 */
+.card {
+    transition: box-shadow 0.3s ease;
+}
+
+    .card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
