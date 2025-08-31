@@ -467,7 +467,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
         /// </summary>
         [HttpGet("user")]
         [Authorize]
-        public async Task<IActionResult> GetUserOrders([FromQuery] int? statusId = null)
+        public async Task<IActionResult> GetUserOrders([FromQuery] int? statusId = null, [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string search = null)
         {
             try
             {
@@ -475,10 +477,16 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 if (!int.TryParse(userIdStr, out var userId))
                     return Unauthorized();
 
+                // 參數驗證
+                if (page < 1) page = 1;
+                if (pageSize < 1 || pageSize > 200) pageSize = 10; // 最大200筆
+
                 var query = _context.Orders
                     .Where(o => o.CustomerId == userId)
                     .Include(o => o.OrderStatuses.OrderByDescending(os => os.CreatedAt))
                     .ThenInclude(os => os.OrderStatusItem)
+                    .Include(o => o.OrderItems) // 用於搜尋商品名稱
+                    .Include(o => o.OrderRecipent) // 用於搜尋收件人
                     .AsQueryable();
                 // 根據狀態篩選
                 if (statusId.HasValue)
@@ -486,8 +494,25 @@ namespace Team1.VitalBridge.Frontend.Controllers
                     query = query.Where(o => o.OrderStatuses.First().OrderStatusItemId == statusId.Value);
                 }
 
+
+                // 搜尋功能 - 搜尋訂單號、商品名稱、收件人姓名
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var searchTerm = search.Trim();
+                    query = query.Where(o =>
+                        o.OrderNumber.Contains(searchTerm) ||
+                        o.OrderItems.Any(oi => oi.ProductName.Contains(searchTerm)) ||
+                        o.OrderRecipent.RecipentName.Contains(searchTerm)
+                    );
+                }
+                var totalCount = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+
                 var orders = await query
                     .OrderByDescending(o => o.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .Select(o => new
                     {
                         o.Id,
@@ -495,11 +520,26 @@ namespace Team1.VitalBridge.Frontend.Controllers
                         o.TotalAmount,
                         o.CreatedAt,
                         Status = o.OrderStatuses.First().OrderStatusItem.Name,
-                        StatusId = o.OrderStatuses.First().OrderStatusItemId
+                        StatusId = o.OrderStatuses.First().OrderStatusItemId,
+                        ItemCount = o.OrderItems.Count() // 商品數量
                     })
                     .ToListAsync();
 
-                return Ok(orders);
+                return Ok(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        orders = orders,
+                        pagination = new
+                        {
+                            currentPage = page,
+                            pageSize = pageSize,
+                            totalCount = totalCount,
+                            totalPages = totalPages
+                        }
+                    }
+                });
 
             }
             catch (Exception ex)
@@ -510,6 +550,103 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
 
 
+        }
+
+        /// <summary>
+        /// 根據訂單編號取得訂單詳細資訊
+        /// </summary>
+        [HttpGet("by-number/{orderNumber}")]
+        [Authorize]
+        public async Task<IActionResult> GetOrderDetailsByNumber(string orderNumber)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            try
+            {
+                var order = await _context.Orders
+                    .Where(o => o.OrderNumber == orderNumber && o.CustomerId == userId)
+                    .Include(o => o.OrderItems)
+                    .Include(o => o.OrderRecipent)
+                    .Include(o => o.OrderShipMethod)
+                        .ThenInclude(osm => osm.Ship)
+                    .Include(o => o.OrderShipMethod)
+                        .ThenInclude(osm => osm.City)
+                    .Include(o => o.OrderShipMethod)
+                        .ThenInclude(osm => osm.Township)
+                    .Include(o => o.Payment)
+                        .ThenInclude(p => p.PayMethod)
+                    .Include(o => o.Payment)
+                        .ThenInclude(p => p.StatusNavigation)
+                    .Include(o => o.OrderStatuses)
+                        .ThenInclude(os => os.OrderStatusItem)
+                    .Select(o => new
+                    {
+                        // 基本資訊
+                        o.Id,
+                        o.OrderNumber,
+                        o.TotalAmount,
+                        o.SubtotalAmount,
+                        o.ShippingFee,
+                        o.CouponDiscount,
+                        o.CreatedAt,
+                        o.Note,
+
+                        // 收件人資訊
+                        RecipientName = o.OrderRecipent.RecipentName,
+                        RecipientPhone = o.OrderRecipent.RecipentPhone,
+
+                        // 配送資訊
+                        ShippingMethod = o.OrderShipMethod.Ship.ShipMethodName,
+                        ShippingAddress = $"{o.OrderShipMethod.City.Name}{o.OrderShipMethod.Township.Name}{o.OrderShipMethod.DetailAddress}",
+                        TrackingCode = o.OrderShipMethod.HomeTrackingCode ?? o.OrderShipMethod.StoreTrackingCode,
+
+                        // 付款資訊
+                        PaymentMethod = o.Payment.PayMethod.Name,
+                        PaymentStatus = o.Payment.StatusNavigation.Name,
+                        PaymentStatusId = o.Payment.Status,
+                        PaidAt = o.Payment.PaidAt,
+
+                        // 目前訂單狀態
+                        CurrentStatus = o.OrderStatuses
+                            .OrderByDescending(os => os.CreatedAt)
+                            .First().OrderStatusItem.Name,
+                        CurrentStatusId = o.OrderStatuses
+                            .OrderByDescending(os => os.CreatedAt)
+                            .First().OrderStatusItemId,
+
+                        // 狀態歷程時間軸
+                        StatusHistory = o.OrderStatuses
+                            .OrderBy(os => os.CreatedAt)
+                            .Select(os => new {
+                                StatusName = os.OrderStatusItem.Name,
+                                StatusId = os.OrderStatusItemId,
+                                CreatedAt = os.CreatedAt
+                            }).ToList(),
+
+                        // 商品明細
+                        OrderItems = o.OrderItems.Select(oi => new
+                        {
+                            oi.ProductId,
+                            oi.ProductName,
+                            oi.UnitPrice,
+                            oi.Quantity,
+                            oi.Subtotal
+                        }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "訂單不存在" });
+
+                return Ok(new { success = true, data = order });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"查詢訂單詳情錯誤: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "查詢失敗，請稍後再試" });
+            }
         }
 
 
@@ -591,6 +728,7 @@ namespace Team1.VitalBridge.Frontend.Controllers
 
             return Ok(new { success = true, data = order });
         }
+
 
     }
 }
