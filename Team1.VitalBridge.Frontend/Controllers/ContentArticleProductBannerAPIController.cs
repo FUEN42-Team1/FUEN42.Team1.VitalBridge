@@ -31,12 +31,13 @@ namespace Team1.VitalBridge.Frontend.Controllers
                 Title = product.Name,
                 subtitle = product.Keypoint,
                 purchaseLink = $"https://localhost:7184/VitalBridge/ECshop/product-detail.html?id={product.Id}",
-                ImageUrl = "https://localhost:7104/api/UploadFile/GetFile?fileName=" +
+                ImageUrl = 
                     (product.ProductImages
                         .Where(pi => pi.File != null)
                         .OrderBy(pi => pi.SortOrder)
                         .Select(pi => pi.File.FileName)
                         .FirstOrDefault() ?? "")
+                        //"https://localhost:7104/api/UploadFile/GetFile?fileName=" +
             };
 
 

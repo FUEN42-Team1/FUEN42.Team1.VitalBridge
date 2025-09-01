@@ -18,7 +18,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-        private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        private const string FileTableUNCPath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
         private const string FileTableUser = "prjTeam1";
         private const string FileTablePassword = "VitalBridge123";
         private const string FileTableDomain = "prjTeam1";
@@ -35,8 +35,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         {
             try
             {
-                using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
-                {
+                //using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
+                //{
                     var fileTablePath = FileTableUNCPath;
 
                     if (upload == null || upload.Length == 0)
@@ -66,7 +66,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                         uploaded = true,
                         url = $"/api/MediasAPI/{FileId}"
                     });
-                }
+                //}
             }
             catch (Exception ex)
             {
@@ -84,8 +84,8 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         [HttpGet("{fileId}")]
         public IActionResult GetFile(int fileId)
         {
-            using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
-            {
+            //using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
+            //{
                 var fileName = _context.FileStreams
                 .Where(f => f.Id == fileId)
                 .Select(f => f.FileName)
@@ -102,7 +102,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
                 var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
                 var fileBytes = System.IO.File.ReadAllBytes(filePath);
                 return File(fileBytes, contentType, fileName);
-            }
+            //}
         }
         private string GetContentType(string path)
         {
