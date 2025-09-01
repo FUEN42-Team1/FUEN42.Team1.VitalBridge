@@ -15,7 +15,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         private readonly IWebHostEnvironment _env;
 
         //localhost版
-        private const string fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        private const string fileTablePath = @"\\L502-S09\mssqlserver\VitalBridgeDB\MyFileTableDir";
 
         // VM版
         //private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";

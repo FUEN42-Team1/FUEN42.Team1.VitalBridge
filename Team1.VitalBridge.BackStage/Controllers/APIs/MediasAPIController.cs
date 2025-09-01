@@ -18,7 +18,7 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-        private const string FileTableUNCPath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        private const string FileTableUNCPath = @"\\L502-S09\mssqlserver\VitalBridgeDB\MyFileTableDir";
         private const string FileTableUser = "prjTeam1";
         private const string FileTablePassword = "VitalBridge123";
         private const string FileTableDomain = "prjTeam1";
