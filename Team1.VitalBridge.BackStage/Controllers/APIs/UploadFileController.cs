@@ -13,10 +13,15 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
     public class UploadFileController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;
-        private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
-        private const string FileTableUser = "prjTeam1";
-        private const string FileTablePassword = "VitalBridge123";
-        private const string FileTableDomain = "prjTeam1";
+
+        //localhost版
+        private const string fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+
+        // VM版
+        //private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        //private const string FileTableUser = "prjTeam1";
+        //private const string FileTablePassword = "VitalBridge123";
+        //private const string FileTableDomain = "prjTeam1";
 
         public UploadFileController(IWebHostEnvironment env)
         {
@@ -30,65 +35,66 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
             if (file == null || file.Length == 0)
                 return BadRequest("請選擇要上傳的檔案。");
 
-            using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
-            {
-                var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, FileTableUNCPath);
 
-                if (savedFileInfo.Length == 0 || savedFileInfo.FilePath == null)
-                    return BadRequest(savedFileInfo.FileName);
-
-                return Ok(new
-                {
-                    savedFileInfo.FileName,
-                    savedFileInfo.Length,
-                    FilePath = Url.Action("GetFile", "UploadFile/" + savedFileInfo.FileName)
-                });
-            }
-
-
-            //var fileTablePath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
-            //var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, fileTablePath);
-
-            //if (savedFileInfo.Length==0 || savedFileInfo.FilePath ==null)
-            //    return BadRequest(savedFileInfo.FileName);
-            //return Ok(new
+            //VM版
+            //using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
             //{
-            //    savedFileInfo.FileName,
-            //    savedFileInfo.Length,
-            //    FilePath = Url.Action("GetFile", "UploadFile", new { fileName = savedFileInfo.FileName })
-            //});
+            //    var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, FileTableUNCPath);
+
+            //    if (savedFileInfo.Length == 0 || savedFileInfo.FilePath == null)
+            //        return BadRequest(savedFileInfo.FileName);
+
+            //    return Ok(new
+            //    {
+            //        savedFileInfo.FileName,
+            //        savedFileInfo.Length,
+            //        FilePath = Url.Action("GetFile", "UploadFile/" + savedFileInfo.FileName)
+            //    });
+            //}
+
+            //localhost版
+            var savedFileInfo = await UploadFileHelper.SaveUploadedFile(file, fileTablePath);
+
+            if (savedFileInfo.Length == 0 || savedFileInfo.FilePath == null)
+                return BadRequest(savedFileInfo.FileName);
+            return Ok(new
+            {
+                savedFileInfo.FileName,
+                savedFileInfo.Length,
+                FilePath = Url.Action("GetFile", "UploadFile", new { fileName = savedFileInfo.FileName })
+            });
         }
         [HttpGet("GetFile/{fileName}")]
         public IActionResult GetFile2(string fileName)
         {
             var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越
 
-            using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
-            {
-                var filePath = Path.Combine(FileTableUNCPath, safeFileName);
+            //VM版
+            //using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
+            //{
+            //    var filePath = Path.Combine(FileTableUNCPath, safeFileName);
 
-                if (!System.IO.File.Exists(filePath))
-                    return NotFound();
+            //    if (!System.IO.File.Exists(filePath))
+            //        return NotFound();
 
-                var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
-                var fileBytes = System.IO.File.ReadAllBytes(filePath);
-
-
-                Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
-
-                return File(fileBytes, contentType);
-            }
+            //    var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+            //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
 
 
-            //var fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
-            //var filePath = Path.Combine(fileTablePath, safeFileName);
+            //    Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
 
-            //if (!System.IO.File.Exists(filePath))
-            //    return NotFound();
+            //    return File(fileBytes, contentType);
+            //}
 
-            //var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
-            //var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            //return File(fileBytes, contentType);
+            //localhost版
+            var filePath = Path.Combine(fileTablePath, safeFileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, contentType);
         }
 
         [HttpGet("GetFile")]
@@ -96,32 +102,34 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         {
             var safeFileName = Path.GetFileName(fileName); // 防止路徑穿越
 
-            using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
-            {
-                var filePath = Path.Combine(FileTableUNCPath, safeFileName);
 
-                if (!System.IO.File.Exists(filePath))
-                    return NotFound();
+            //VM版
+            //using (new NetworkConnection(FileTableUNCPath, new NetworkCredential(FileTableUser, FileTablePassword, FileTableDomain)))
+            //{
+            //    var filePath = Path.Combine(FileTableUNCPath, safeFileName);
 
-                var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
-                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            //    if (!System.IO.File.Exists(filePath))
+            //        return NotFound();
 
-
-                Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
-
-                return File(fileBytes, contentType);
-            }
+            //    var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+            //    var fileBytes = System.IO.File.ReadAllBytes(filePath);
 
 
-            //var fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
-            //var filePath = Path.Combine(fileTablePath, safeFileName);
+            //    Response.Headers["Cache-Control"] = "public,max-age=604800"; // 快取一週
 
-            //if (!System.IO.File.Exists(filePath))
-            //    return NotFound();
+            //    return File(fileBytes, contentType);
+            //}
 
-            //var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
-            //var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            //return File(fileBytes, contentType);
+
+            //localhost版
+            var filePath = Path.Combine(fileTablePath, safeFileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var contentType = GetContentType(filePath); // ✅ 正確 MIME 類型
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+            return File(fileBytes, contentType);
         }
         private string GetContentType(string path)
         {

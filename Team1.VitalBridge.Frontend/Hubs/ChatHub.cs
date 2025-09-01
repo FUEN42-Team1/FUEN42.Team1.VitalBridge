@@ -70,7 +70,7 @@ namespace Team1.VitalBridge.Frontend.Hubs
             var haveNotReadNotify = _context.NotifyUsers.Where(u => u.UserId.ToString() == user && u.IsRead == false)
                 .Include(u => u.Notify)
                 .Any(u => u.Notify.SendDate <= DateTime.Now && (u.Notify.ValidityDate == null || u.Notify.ValidityDate > DateTime.Now));
-            if (haveNotReadNotify) await Clients.Client(id).SendAsync("newNotify", message);
+            if (haveNotReadNotify) await Clients.Client(id).SendAsync("haveNotReadNotify", message);
 
         }
 
