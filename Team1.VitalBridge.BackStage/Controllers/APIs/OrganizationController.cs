@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Team1.VitalBridge.BackStage.Models.EFModels;
 using static OrderController;
+using Microsoft.EntityFrameworkCore;
 
 namespace Team1.VitalBridge.BackStage.Controllers.APIs
 {
@@ -29,7 +30,9 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         public IActionResult GetOrganization([FromBody] OrganizationRequest request)
         {
             var Organizations = context.Organizations
-                .Where(o =>o.IsActive==true && o.Address.Contains(request.City)).Select(o => new OrganizationDTO
+                .Include(o => o.City)
+                .Include(o => o.District)
+                .Where(o =>o.IsActive==true && o.City.Name.Contains(request.City)).Select(o => new OrganizationDTO
                 {
                     Name = o.Name,
                     Address = o.Address,

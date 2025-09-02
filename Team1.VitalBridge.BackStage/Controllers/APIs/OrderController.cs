@@ -49,7 +49,7 @@ public class OrderController : ControllerBase
                         : "未付款",
             ShippingMethod = o.OrderShipMethod != null && o.OrderShipMethod.Ship != null
                         ? o.OrderShipMethod.Ship.ShipMethodName : "未設定",
-        }).ToList();
+        }).Take(10).ToList();
 
         return Ok(response);
     }
