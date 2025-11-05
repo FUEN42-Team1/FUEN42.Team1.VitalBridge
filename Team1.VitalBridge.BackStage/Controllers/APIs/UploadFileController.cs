@@ -13,7 +13,9 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
     public class UploadFileController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;
-        private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        //private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        private const string FileTableUNCPath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+
         private const string FileTableUser = "prjTeam1";
         private const string FileTablePassword = "VitalBridge123";
         private const string FileTableDomain = "prjTeam1";
