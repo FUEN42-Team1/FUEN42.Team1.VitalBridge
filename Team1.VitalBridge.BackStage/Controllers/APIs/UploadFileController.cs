@@ -15,15 +15,15 @@ namespace Team1.VitalBridge.BackStage.Controllers.APIs
         private readonly IWebHostEnvironment _env;
 
         //localhost版
-        private const string fileTablePath = @"\\L502-S09\mssqlserver\VitalBridgeDB\MyFileTableDir";
+        //private const string fileTablePath = @"\\L502-S09\mssqlserver\VitalBridgeDB\MyFileTableDir";
+		private const string fileTablePath = @"\\localhost\mssqlserver\VitalBridgeDB\MyFileTableDir";
+		// VM版
+		//private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
+		//private const string FileTableUser = "prjTeam1";
+		//private const string FileTablePassword = "VitalBridge123";
+		//private const string FileTableDomain = "prjTeam1";
 
-        // VM版
-        //private const string FileTableUNCPath = @"\\40.76.107.125\mssqlserver\VitalBridgeDB\MyFileTableDir";
-        //private const string FileTableUser = "prjTeam1";
-        //private const string FileTablePassword = "VitalBridge123";
-        //private const string FileTableDomain = "prjTeam1";
-
-        public UploadFileController(IWebHostEnvironment env)
+		public UploadFileController(IWebHostEnvironment env)
         {
             _env = env;
         }
