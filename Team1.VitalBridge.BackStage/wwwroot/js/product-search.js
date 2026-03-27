@@ -140,7 +140,7 @@ function loadProducts() {
     // 發送 AJAX 請求
     $.ajax({
         url: '/Products/SearchProducts',
-        type: 'POST',
+        type: 'GET',
         data: currentSearchParams,
         success: function (response) {
             console.log('AJAX 請求成功', response);

@@ -38,8 +38,9 @@ namespace Team1.VitalBridge.Frontend.Controllers
             {
                 var response = new HomepageProductsResponseDto();
 
-                // 1. 取得銀髮食品 (大分類 ID=5 的子分類商品)
-                response.SilverFood = await GetProductsByParentCategoryId(5, 4);
+				// 1. 取得銀髮食品 (大分類 ID=5 的子分類商品)
+				// 說明 await GetProductsByParentCategoryId(5, 4); 5代表類別，4代表要傳入多少商品
+				response.SilverFood = await GetProductsByParentCategoryId(5, 4);
 
                 // 2. 取得保健食品 (大分類 ID=6 的子分類商品)  
                 response.HealthFood = await GetProductsByParentCategoryId(6, 4);
